@@ -24,7 +24,7 @@ npx prisma generate
 5. Buat & terapkan migration (development):
 
 ```powershell
-npx prisma migrate dev --name <nama>
+npx prisma migrate dev --name <nama_file_migrasi>
 ```
 
 6. Terapkan migration di production/CI:

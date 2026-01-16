@@ -10,7 +10,7 @@ module.exports = async function seed() {
   const client = new Client({ connectionString: url });
   await client.connect();
   try {
-    console.log('003: Inserting test row via pg...');
+    console.log('003: Inserting test row process started...');
     await client.query('INSERT INTO "Test" (name) VALUES ($1)', ['Seed 003']);
     console.log('003: Inserted test row.');
   } catch (e) {

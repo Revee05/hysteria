@@ -4,9 +4,10 @@
 // and easy to review in PRs.
 
 const seeds = [
-  require('./001-create-test-pg.js'),
-  require('./002-test-pg.js'),
-  require('./003-create-more-test-pg.js'),
+  // require('./001-create-test-pg.js'),
+  // require('./002-test-pg.js'),
+  // require('./003-create-more-test-pg.js'),
+  require('./004-seed-roles.js'),
 ];
 
 async function main() {
