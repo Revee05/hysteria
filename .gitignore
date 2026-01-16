@@ -42,4 +42,10 @@ next-env.d.ts
 
 # prisma
 /prisma/generated
+
+#dev folder
 /EXP
+
+#test
+/test
+
