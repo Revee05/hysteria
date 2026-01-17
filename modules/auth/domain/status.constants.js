@@ -1,0 +1,6 @@
+export const STATUS_KEYS = {
+	BANNED: 'BANNED',
+	SUSPEND: 'SUSPEND',
+	RESIGN: 'RESIGN',
+	ACTIVE: 'ACTIVE',
+}

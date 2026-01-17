@@ -46,6 +46,7 @@ next-env.d.ts
 #dev folder
 /EXP
 
-#test
+#test dll
 /test
+/logs
 

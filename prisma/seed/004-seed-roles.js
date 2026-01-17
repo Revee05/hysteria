@@ -1,4 +1,5 @@
 const { Client } = require('pg')
+const logger = require('../../lib/logger')
 
 const roles = [
   { key: 'SUPERADMIN', name: 'Super Admin' },
@@ -12,14 +13,14 @@ const roles = [
 module.exports = async function seed() {
   const url = process.env.DATABASE_URL
   if (!url) {
-    console.warn('DATABASE_URL not set; skipping 004-seed-roles')
+    logger.warn('DATABASE_URL not set; skipping 004-seed-roles')
     return
   }
 
   const client = new Client({ connectionString: url })
   await client.connect()
   try {
-    console.log('004: Seeding roles process started...')
+    logger.info('004: Seeding roles process started...')
     for (const r of roles) {
       // Upsert by key
       await client.query(
@@ -28,9 +29,9 @@ module.exports = async function seed() {
         [r.key, r.name]
       )
     }
-    console.log('004: Seed roles done')
+    logger.info('004: Seed roles done')
   } catch (e) {
-    console.error('004 pg seeder error:', e.message)
+    logger.error('004 pg seeder error:', { error: e.message })
     throw e
   } finally {
     await client.end()
