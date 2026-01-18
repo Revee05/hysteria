@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,6 +17,32 @@ const schema = z.object({
 export default function LoginPage() {
 	const router = useRouter();
 	const [csrfToken, setCsrfToken] = useState("");
+	const [authLoading, setAuthLoading] = useState(true);
+
+	useEffect(() => {
+		async function loadCsrf() {
+			try {
+				// Read cookie first to avoid network call if present
+				if (typeof document !== 'undefined') {
+					const match = document.cookie.match(new RegExp('(?:^|; )' + encodeURIComponent('csrfToken') + '=([^;]*)'))
+					if (match) {
+						setCsrfToken(decodeURIComponent(match[1]))
+						return
+					}
+				}
+				const res = await fetch("/api/auth/csrf", { cache: "no-store" });
+				const json = await res.json();
+				if (json?.data?.csrfToken) {
+					setCsrfToken(json.data.csrfToken);
+				}
+			} catch (e) {
+				console.error('Failed to load csrf token', e);
+			} finally {
+				setAuthLoading(false);
+			}
+		}
+		loadCsrf();
+	}, []);
 	const [error, setError] = useState("");
 
 	const {
@@ -24,17 +50,6 @@ export default function LoginPage() {
 		handleSubmit,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(schema) });
-
-	useEffect(() => {
-		async function loadCsrf() {
-			const res = await fetch("/api/auth/csrf", { cache: "no-store" });
-			const json = await res.json();
-			if (json?.data?.csrfToken) {
-				setCsrfToken(json.data.csrfToken);
-			}
-		}
-		loadCsrf();
-	}, []);
 
 	const onSubmit = async (values) => {
 		setError("");
@@ -45,6 +60,7 @@ export default function LoginPage() {
 					"Content-Type": "application/json",
 					"x-csrf-token": csrfToken,
 				},
+				credentials: "include", 
 				body: JSON.stringify(values),
 			});
 
@@ -61,6 +77,8 @@ export default function LoginPage() {
 				return;
 			}
 
+			// Login berhasil - redirect ke admin
+			// Auth context akan otomatis detect authenticated state dari cookie
 			router.push("/admin");
 		} catch (err) {
 			setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
@@ -86,7 +104,7 @@ export default function LoginPage() {
 
 						<button
 							type="submit"
-							disabled={isSubmitting || !csrfToken}
+							disabled={isSubmitting || !csrfToken || authLoading}
 							className="w-full rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							{isSubmitting ? "Memproses..." : "Masuk"}

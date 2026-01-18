@@ -1,19 +1,23 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { verifyAccessToken } from "../../lib/jwt.js";
-import { COOKIE_NAMES } from "../../config/cookie.config.js";
+import { COOKIE_NAMES, COOKIE_OPTIONS } from "../../config/cookie.config.js";
 import { ROLE_KEYS } from "../../modules/auth/domain/role.constants.js";
 import { STATUS_KEYS } from "../../modules/auth/domain/status.constants.js";
+import { rotateRefreshToken } from "../../modules/auth/services/refresh-token.service.js";
+import { createAccessToken } from "../../modules/auth/services/token.service.js";
 import logger from "../../lib/logger.js";
-import AdminShell from "./partial/AdminShell.jsx";
+import AdminShell from "./_partial/AdminShell.jsx";
 
 export default async function AdminLayout({ children }) {
 	// `cookies()` can be async in some Next versions / runtimes
 	const cookieStore = await cookies();
-	const token = cookieStore.get(COOKIE_NAMES.access)?.value;
+	let token = cookieStore.get(COOKIE_NAMES.access)?.value;
+
+	// Try verify access token; if missing/expired, attempt server-side refresh using refresh token
 	if (!token) {
-		logger.warn('AdminLayout: missing access token, redirecting to login')
-		redirect("/auth/login");
+		logger.warn('AdminLayout: missing access token, redirecting to server refresh')
+		return redirect('/auth/refresh');
 	}
 
 	try {
@@ -32,6 +36,8 @@ export default async function AdminLayout({ children }) {
 	}
 
 	return (
-		<AdminShell>{children}</AdminShell>
+		<AdminShell>
+			{children}
+		</AdminShell>
 	);
 }

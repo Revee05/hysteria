@@ -3,38 +3,31 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Toast from "../../components/ui/Toast";
+import { useAuth } from "../../lib/context/auth-context";
 
 export default function AdminPage() {
 	const router = useRouter();
-	const [csrfToken, setCsrfToken] = useState("");
+	// use csrfToken from AuthProvider
 	const [toastVisible, setToastVisible] = useState(false);
 	const [toastMessage, setToastMessage] = useState("");
 	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		async function loadCsrf() {
-			const res = await fetch("/api/auth/csrf", { cache: "no-store" });
-			const json = await res.json();
-			if (json?.data?.csrfToken) {
-				setCsrfToken(json.data.csrfToken);
+	const { csrfToken: authCsrf, isLoading: authLoading, apiCall } = useAuth();
 
-				// show welcome toast once CSRF loaded (page mounted)
+	useEffect(() => {
+		if (authCsrf) {
+			const t = setTimeout(() => {
 				setToastMessage("Selamat datang di area admin.");
 				setToastVisible(true);
-			}
+			}, 0);
+			return () => clearTimeout(t);
 		}
-		loadCsrf();
-	}, []);
+	}, [authCsrf]);
 
 	const handleLogout = async () => {
-		if (!csrfToken) return;
+		if (!authCsrf) return;
 		setLoading(true);
-		await fetch("/api/auth/logout", {
-			method: "POST",
-			headers: {
-				"x-csrf-token": csrfToken,
-			},
-		});
+		await apiCall('/api/auth/logout', { method: 'POST' })
 		setLoading(false);
 		router.push("/auth/login");
 	};
@@ -49,7 +42,7 @@ export default function AdminPage() {
 				</div>
 				<button
 					onClick={handleLogout}
-					disabled={loading || !csrfToken}
+					disabled={loading || !authCsrf}
 					className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
 				>
 					{loading ? "Keluar..." : "Keluar"}

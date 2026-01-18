@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, IconMenu } from "../../../components/adminUI/icon";
+import SearchField from "../../../components/ui/SearchField";
 
 export default function AdminTopbar({ onOpenSidebar }) {
   return (
@@ -13,14 +14,9 @@ export default function AdminTopbar({ onOpenSidebar }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative">
-          <input
-            type="search"
-            placeholder="Cari..."
-            className="hidden sm:inline-block w-64 rounded-md border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-300"
-          />
+        <div className="hidden sm:inline-block w-64 rounded-md">
+          <SearchField placeholder="Cari..." />
         </div>
-
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 rounded-full bg-zinc-50 px-3 py-1 text-sm hover:bg-zinc-100">
             <Avatar className="h-8 w-8" />

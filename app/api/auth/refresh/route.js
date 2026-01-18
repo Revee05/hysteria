@@ -4,7 +4,7 @@ import { createAccessToken } from '../../../../modules/auth/services/token.servi
 import { rotateRefreshToken } from '../../../../modules/auth/services/refresh-token.service.js'
 import { setAuthCookies, getCookie } from '../../../../lib/cookies.js'
 import { COOKIE_NAMES } from '../../../../config/cookie.config.js'
-import { requireCsrf } from '../../../../middleware/auth.middleware.js'
+import { requireCsrf } from '../../../../lib/auth.helper.js'
 import { STATUS_KEYS } from '../../../../modules/auth/domain/status.constants.js'
 import logger from '../../../../lib/logger.js'
 

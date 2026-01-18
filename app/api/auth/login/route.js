@@ -3,7 +3,7 @@ import { loginSchema } from '../../../../modules/auth/validators/login.validator
 import { loginWithEmailPassword } from '../../../../modules/auth/services/auth.service.js'
 import { respondError } from '../../../../lib/response.js'
 import { setAuthCookies } from '../../../../lib/cookies.js'
-import { requireCsrf } from '../../../../middleware/auth.middleware.js'
+import { requireCsrf } from '../../../../lib/auth.helper.js'
 import logger from '../../../../lib/logger.js'
 
 export async function POST(request) {

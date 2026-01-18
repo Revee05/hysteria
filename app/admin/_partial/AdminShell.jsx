@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminTopbar from "./AdminTopbar.jsx";
 import AdminSidebar from "./AdminSidebar.jsx";
+import { AuthProvider } from "../../../lib/context/auth-context.jsx";
 
 export default function AdminShell({ children }) {
   const [open, setOpen] = useState(false);
@@ -17,6 +18,7 @@ export default function AdminShell({ children }) {
   }, []);
 
   return (
+    <AuthProvider>
     <div className="min-h-screen bg-zinc-50">
       <div className="lg:flex lg:items-start lg:justify-start">
         <aside className={`hidden lg:block lg:flex-shrink-0 border-r border-zinc-200 bg-white transition-width duration-200 ${collapsed ? "w-20" : "w-64"} h-screen`}>
@@ -43,5 +45,6 @@ export default function AdminShell({ children }) {
         )}
       </div>
     </div>
+    </AuthProvider>
   );
 }
