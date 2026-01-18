@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { Logo, IconDashboard, IconUsers, IconSettings } from "../../../components/adminUI/icon";
 
-export default function AdminSidebar({ open, collapsed, onClose, onToggleCollapse }) {
+export default function AdminSidebar({ open, collapsed, onClose, onToggleCollapse, onNavigate, currentView }) {
   const menus = [
-    { key: 'dashboard', label: 'Dashboard', href: '/admin', icon: IconDashboard, enabled: true },
-    { key: 'users', label: 'Users', href: '/admin/users', icon: IconUsers, enabled: false },
-    { key: 'settings', label: 'Settings', href: '/admin/settings', icon: IconSettings, enabled: false },
+    { key: 'dashboard', label: 'Dashboard', view: 'dashboard', icon: IconDashboard, enabled: true },
+    { key: 'users', label: 'Users', view: 'users', icon: IconUsers, enabled: true},
+    { key: 'settings', label: 'Settings', view: 'settings', icon: IconSettings, enabled: false },
   ];
 
   return (
@@ -37,19 +36,23 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
           {menus.map((item) => {
             const Icon = item.icon;
             const enabled = !!item.enabled;
+            const isActive = currentView === item.view;
             const baseClass = `group relative flex items-center gap-3 rounded-md text-sm font-medium ${collapsed ? "justify-center px-0 py-3" : "px-3 py-2"}`;
-            const enabledClass = `text-zinc-700 hover:bg-zinc-50`;
+            const enabledClass = isActive 
+              ? `bg-blue-50 text-blue-700` 
+              : `text-zinc-700 hover:bg-zinc-50`;
             const disabledClass = `text-zinc-400 cursor-not-allowed`;
 
             return (
               <li key={item.key}>
-                <Link
-                  href={item.href}
+                <button
+                  onClick={() => enabled && onNavigate(item.view)}
                   title={item.label}
-                  onClick={(e) => !enabled && e.preventDefault()}
+                  disabled={!enabled}
                   aria-disabled={!enabled}
+                  aria-current={isActive ? 'page' : undefined}
                   tabIndex={enabled ? 0 : -1}
-                  className={`${baseClass} ${enabled ? enabledClass : disabledClass}`}
+                  className={`${baseClass} ${enabled ? enabledClass : disabledClass} w-full`}
                   aria-label={item.label}
                 >
                   <Icon />
@@ -61,7 +64,7 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
                       )}
                     </>
                   )}
-                </Link>
+                </button>
               </li>
             );
           })}

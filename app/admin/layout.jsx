@@ -4,8 +4,6 @@ import { verifyAccessToken } from "../../lib/jwt.js";
 import { COOKIE_NAMES, COOKIE_OPTIONS } from "../../config/cookie.config.js";
 import { ROLE_KEYS } from "../../modules/auth/domain/role.constants.js";
 import { STATUS_KEYS } from "../../modules/auth/domain/status.constants.js";
-import { rotateRefreshToken } from "../../modules/auth/services/refresh-token.service.js";
-import { createAccessToken } from "../../modules/auth/services/token.service.js";
 import logger from "../../lib/logger.js";
 import AdminShell from "./_partial/AdminShell.jsx";
 
