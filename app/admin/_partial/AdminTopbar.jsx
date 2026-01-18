@@ -1,9 +1,11 @@
 "use client";
 
 import { Avatar, IconMenu } from "../../../components/adminUI/icon";
-import SearchField from "../../../components/ui/SearchField";
+import { useState } from "react";
+import ProfileSheet from "./_components/profile";
 
 export default function AdminTopbar({ onOpenSidebar }) {
+  const [openProfile, setOpenProfile] = useState(false);
   return (
     <div className="flex w-full items-center justify-between px-6 py-4">
       <div className="flex items-center gap-4">
@@ -13,14 +15,11 @@ export default function AdminTopbar({ onOpenSidebar }) {
         <h1 className="text-lg font-semibold text-zinc-900">Admin Area</h1>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 rounded-full bg-zinc-50 px-3 py-1 text-sm hover:bg-zinc-100">
-            <Avatar className="h-8 w-8" />
-            <span className="hidden sm:inline text-zinc-700">Admin</span>
-          </button>
-        </div>
-      </div>
+      <button aria-label="User menu" onClick={() => setOpenProfile(true)} className="flex items-center justify-center rounded-full bg-zinc-50 h-10 w-10 hover:bg-zinc-100">
+        <Avatar className="h-8 w-8" />
+      </button>
+
+      <ProfileSheet open={openProfile} onClose={() => setOpenProfile(false)} />
     </div>
   );
 }

@@ -29,7 +29,7 @@ export default function RolePermissionsTab() {
   useEffect(() => {
     async function loadRoles() {
       try {
-        const res = await apiCall('/api/admin/roles?perPage=100')
+        const res = await apiCall('/api/admin/roles?perPage=25')
         if (!res.ok) throw new Error('Failed to fetch roles')
         const json = await res.json()
         setRoles(json.data.roles || [])

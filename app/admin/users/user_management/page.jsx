@@ -271,6 +271,15 @@ export default function UserManagement() {
       )
     },
     {
+      field: 'lastLoginAt',
+      headerName: 'Last Login',
+      render: (r) => (
+        <span className="text-sm text-zinc-700">
+          {r.lastLoginAt ? new Date(r.lastLoginAt).toLocaleString() : '-'}
+        </span>
+      ),
+    },
+    {
       field: 'roles',
       headerName: 'Roles',
       render: (r) => (
