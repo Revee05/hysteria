@@ -34,6 +34,9 @@ export function AuthProvider({ children }) {
         const json = await res.json();
         if (json?.data?.csrfToken) {
           setCsrfToken(json.data.csrfToken);
+          // Check if we have access token
+          const hasAccessToken = document.cookie.includes('accessToken=')
+          setIsAuthenticated(hasAccessToken)
         }
       } catch (error) {
         console.error("Failed to load CSRF token:", error);
