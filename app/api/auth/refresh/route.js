@@ -7,6 +7,7 @@ import { COOKIE_NAMES } from '../../../../config/cookie.config.js'
 import { requireCsrf } from '../../../../lib/helper/auth.helper.js'
 import { STATUS_KEYS } from '../../../../modules/auth/domain/status.constants.js'
 import logger from '../../../../lib/logger.js'
+import { parseAccessToken } from '../../../../modules/auth/services/token.service.js'
 
 export async function POST(request) {
   try {
@@ -31,6 +32,15 @@ export async function POST(request) {
       status: rotated.user.status?.key,
     })
 
+    // include access token expiry (exp) in response so client can schedule refresh
+    let accessTokenPayload = null
+    try {
+      accessTokenPayload = parseAccessToken(accessToken)
+    } catch (e) {
+      // parsing shouldn't fail for a freshly created token, but ignore if it does
+      accessTokenPayload = null
+    }
+
     const response = NextResponse.json({
       success: true,
       data: {
@@ -41,6 +51,7 @@ export async function POST(request) {
           roles,
           status: rotated.user.status?.key,
         },
+        accessTokenExpiry: accessTokenPayload?.exp || null, // unix seconds
       },
     })
 

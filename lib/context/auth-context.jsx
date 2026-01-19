@@ -4,11 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import { apiFetch } from "../api-client";
 
 const AuthContext = createContext(null);
-
-// Refresh 1 menit sebelum expired 
-const ACCESS_TOKEN_LIFETIME = 60 * 1; // 1 menit (sesuai config)
 const REFRESH_BEFORE_EXPIRY = 10; // Refresh 10 detik sebelum expired
-const REFRESH_INTERVAL = (ACCESS_TOKEN_LIFETIME - REFRESH_BEFORE_EXPIRY) * 1000;
 
 export function AuthProvider({ children }) {
   const [csrfToken, setCsrfToken] = useState("");
@@ -16,6 +12,7 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const refreshTimerRef = useRef(null);
   const isRefreshingRef = useRef(false);
+  const tokenExpiryRef = useRef(null); // unix seconds
 
   // Load CSRF token saat aplikasi dimulai
   useEffect(() => {
@@ -73,9 +70,15 @@ export function AuthProvider({ children }) {
         });
 
         if (res.ok) {
+          const json = await res.json().catch(() => null);
+          // If server returns accessTokenExpiry (unix seconds), use it
+          const expiry = json?.data?.accessTokenExpiry || null;
+          if (expiry) {
+            tokenExpiryRef.current = expiry;
+          }
           console.log("Token refreshed successfully");
           // Schedule next refresh
-          scheduleNextRefresh();
+          scheduleNextRefresh(tokenExpiryRef.current);
         } else {
           console.error("Token refresh failed:", res.status);
           setIsAuthenticated(false);
@@ -90,21 +93,30 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Schedule next token refresh
-    const scheduleNextRefresh = () => {
+    // Schedule next token refresh. If `expiryUnixSec` provided, schedule relative to that.
+    const scheduleNextRefresh = (expiryUnixSec) => {
       // Clear existing timer
       if (refreshTimerRef.current) {
         clearTimeout(refreshTimerRef.current);
       }
 
-      // Set new timer
-      refreshTimerRef.current = setTimeout(() => {
-        refreshAccessToken();
-      }, REFRESH_INTERVAL);
+      // If we have expiry from server, schedule relative to it. Otherwise use short fallback.
+      if (expiryUnixSec) {
+        const nowSec = Math.floor(Date.now() / 1000);
+        const ms = (expiryUnixSec - REFRESH_BEFORE_EXPIRY - nowSec) * 1000;
+        const interval = Math.max(ms, 5000); // at least 5s
+        refreshTimerRef.current = setTimeout(() => refreshAccessToken(), interval);
+      } else {
+        // fallback: try again shortly to obtain expiry
+        refreshTimerRef.current = setTimeout(() => refreshAccessToken(), 5000);
+      }
     };
 
-    // Start the refresh cycle
-    scheduleNextRefresh();
+    // Start the refresh cycle: immediately attempt to get current expiry
+    // This will also schedule the next refresh based on server-provided expiry.
+    (async () => {
+      await refreshAccessToken();
+    })();
 
     // Cleanup on unmount
     return () => {
