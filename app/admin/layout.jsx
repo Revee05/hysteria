@@ -38,21 +38,7 @@ export default async function AdminLayout({ children }) {
 				permissions: permissions.length,
 				status 
 			})
-			// Set a short-lived, client-readable flash cookie so the login page can show a message
-			try {
-				cookieStore.set({
-					name: 'flash_error',
-					value: 'Anda tidak memiliki akses',
-					httpOnly: false,
-					path: '/',
-					maxAge: 10, // seconds
-				})
-			} catch (e) {
-				// ignore cookie set failures
-				logger.warn('AdminLayout: failed to set flash cookie', { error: e?.message })
-			}
-			// Redirect to login (query param kept as fallback)
-			redirect(`/auth/login?error=${encodeURIComponent('Anda tidak memiliki akses')}`);
+			redirect("/auth/login");
 		}
 	} catch (error) {
 		logger.error('AdminLayout: token verification failed', { error: error.message })

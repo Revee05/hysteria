@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PasswordField from "../../../components/ui/PasswordField";
 import EmailField from "../../../components/ui/EmailField";
 import Toast from "../../../components/ui/Toast";
@@ -16,7 +16,6 @@ const schema = z.object({
 
 export default function LoginPage() {
 	const router = useRouter();
-	const searchParams = useSearchParams();
 	const [csrfToken, setCsrfToken] = useState("");
 	const [authLoading, setAuthLoading] = useState(true);
 
@@ -45,35 +44,6 @@ export default function LoginPage() {
 		loadCsrf();
 	}, []);
 	const [error, setError] = useState("");
-
-	// If redirected here with an error query param, show it to user
-	useEffect(() => {
-		try {
-			// Try reading via Next's useSearchParams first
-			let msg = searchParams?.get('error');
-			// Fallback: read window.location.search for initial page load
-			if (!msg && typeof window !== 'undefined') {
-				const params = new URLSearchParams(window.location.search);
-				msg = params.get('error');
-			}
-			if (msg) setError(msg);
-		} catch (e) {
-			// ignore
-		}
-		// Also check flash_error cookie (set by server redirects) and clear it
-		try {
-			if (typeof document !== 'undefined') {
-				const match = document.cookie.match(new RegExp('(?:^|; )' + encodeURIComponent('flash_error') + '=([^;]*)'))
-				if (match) {
-					setError(decodeURIComponent(match[1]));
-					// delete cookie
-					document.cookie = 'flash_error=; Max-Age=0; path=/';
-				}
-			}
-		} catch (e) {
-			// ignore
-		}
-	}, [searchParams]);
 
 	const {
 		register,
