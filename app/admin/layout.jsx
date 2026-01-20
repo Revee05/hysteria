@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }) {
 	// Try verify access token; if missing/expired, attempt server-side refresh using refresh token
 	if (!token) {
 		logger.warn('AdminLayout: missing access token, redirecting to server refresh')
-		return redirect('/auth/login');
+		return redirect('/auth/refresh?next=/admin');
 	}
 
 	try {
@@ -42,7 +42,8 @@ export default async function AdminLayout({ children }) {
 		}
 	} catch (error) {
 		logger.error('AdminLayout: token verification failed', { error: error.message })
-		redirect("/auth/login");
+		// Try server-side refresh when verification fails (likely expired)
+		redirect('/auth/refresh?next=/admin');
 	}
 
 	return (

@@ -11,6 +11,7 @@ export default function ProfileSheet({ open, onClose }) {
   const { apiCall, csrfToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     function onKey(e) {
@@ -28,6 +29,36 @@ export default function ProfileSheet({ open, onClose }) {
       document.body.style.overflow = "";
     };
   }, [open, onClose]);
+
+  // Fetch current user profile when the sheet opens
+  useEffect(() => {
+    if (!open) return;
+    let mounted = true;
+    const controller = new AbortController();
+
+    async function fetchUser() {
+      try {
+        setLoading(true);
+        const res = await apiCall('/api/auth/me', { method: 'GET', signal: controller.signal });
+        const json = await res.json().catch(() => null);
+        if (!mounted) return;
+        if (json?.success && json.data?.user) {
+          setUser(json.data.user);
+        }
+      } catch (e) {
+        // ignore errors (user will see placeholders)
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    fetchUser();
+
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
+  }, [open, apiCall]);
 
   return (
     <>
@@ -61,20 +92,39 @@ export default function ProfileSheet({ open, onClose }) {
         <div className="p-4">
           <div className="flex flex-col items-center gap-2">
             <Avatar className="h-16 w-16" />
-            <div className="text-sm font-semibold">Admin User</div>
-            <div className="text-xs text-zinc-500">admin@example.com</div>
+            <div className="text-sm font-semibold">{user?.name ?? (loading ? 'Memuat...' : 'Pengguna')}</div>
+            <div className="text-xs text-zinc-500">{user?.email ?? ''}</div>
           </div>
 
-          <div className="mt-4 space-y-2">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-3 border rounded-md">
-                <div>
-                  <div className="text-sm font-medium">Placeholder Item</div>
-                  <div className="text-xs text-zinc-500">Detail placeholder</div>
-                </div>
-                <button className="text-sm text-zinc-500 hover:text-zinc-700">Open</button>
+          <div className="mt-4">
+            {user ? (
+              <>
+                {user.roles?.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-xs text-zinc-500 mb-1">Roles</div>
+                    <div className="flex flex-wrap gap-2">
+                      {user.roles.map((r) => (
+                        <span key={r} className="text-sm bg-zinc-100 px-2 py-1 rounded-full text-zinc-700">{r}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* permissions intentionally omitted from UI */}
+              </>
+            ) : (
+              <div className="mt-4 space-y-2">
+                {[...Array(2)].map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 border rounded-md">
+                    <div>
+                      <div className="text-sm font-medium">Placeholder Item</div>
+                      <div className="text-xs text-zinc-500">Detail placeholder</div>
+                    </div>
+                    <button className="text-sm text-zinc-500 hover:text-zinc-700">Open</button>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
           <div className="mt-6 border-t pt-4">
