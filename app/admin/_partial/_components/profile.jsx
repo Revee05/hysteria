@@ -30,11 +30,14 @@ export default function ProfileSheet({ open, onClose }) {
     };
   }, [open, onClose]);
 
-  // Refresh user profile when sheet opens
+  // Refresh user profile when sheet opens — only if we don't already have `user`
   useEffect(() => {
     if (!open) return;
+    // If user data is already present in context, no need to refresh
+    if (user) return;
     let mounted = true;
-    (async () => {
+
+    async function load() {
       try {
         setLoading(true);
         await refreshUser();
@@ -43,13 +46,17 @@ export default function ProfileSheet({ open, onClose }) {
       } finally {
         if (mounted) setLoading(false);
       }
-    })();
-    return () => { mounted = false; };
-  }, [open, refreshUser]);
+    }
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, [open, refreshUser, user]);
 
   return (
-    <>
-      <Sheet open={open} onClose={onClose}>
+    <Sheet open={open} onClose={onClose}>
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold text-zinc-900">Profile</h2>
           <button
@@ -152,6 +159,5 @@ export default function ProfileSheet({ open, onClose }) {
           </div>
         </div>
       </Sheet>
-    </>
   );
 }

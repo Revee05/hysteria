@@ -49,7 +49,7 @@ export default function AdminPage() {
 				</button>
 			</div>
 			</div>
-			<Toast message={toastMessage} type="info" visible={toastVisible} onClose={() => setToastVisible(false)} />
+			{/* <Toast message={toastMessage} type="info" visible={toastVisible} onClose={() => setToastVisible(false)} /> */}
 		</>
 	);
 }

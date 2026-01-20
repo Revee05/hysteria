@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../../lib/context/auth-context";
 import PasswordField from "../../../components/ui/PasswordField";
 import EmailField from "../../../components/ui/EmailField";
 import Toast from "../../../components/ui/Toast";
@@ -16,8 +17,10 @@ const schema = z.object({
 
 export default function LoginPage() {
 	const router = useRouter();
+	const { setAuthenticated, refreshUser } = useAuth();
 	const [csrfToken, setCsrfToken] = useState("");
 	const [authLoading, setAuthLoading] = useState(true);
+	const [error, setError] = useState("");
 
 	useEffect(() => {
 		async function loadCsrf() {
@@ -43,7 +46,19 @@ export default function LoginPage() {
 		}
 		loadCsrf();
 	}, []);
-	const [error, setError] = useState("");
+
+	// Check untuk pesan logout dari sessionStorage
+	useEffect(() => {
+		try {
+			const logoutMessage = sessionStorage.getItem('auth:logoutMessage');
+			if (logoutMessage) {
+				setError(logoutMessage);
+				sessionStorage.removeItem('auth:logoutMessage');
+			}
+		} catch (e) {
+			// Ignore storage errors
+		}
+	}, []);
 
 	const {
 		register,
@@ -77,8 +92,8 @@ export default function LoginPage() {
 				return;
 			}
 
-			// Login berhasil - redirect ke admin
-			// Auth context akan otomatis detect authenticated state dari cookie
+			// Login berhasil - update auth context then redirect
+			setAuthenticated(true);
 			router.push("/admin");
 		} catch (err) {
 			setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
