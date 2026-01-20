@@ -14,8 +14,13 @@ export default async function AdminLayout({ children }) {
 
 	// Try verify access token; if missing/expired, attempt server-side refresh using refresh token
 	if (!token) {
-		logger.warn('AdminLayout: missing access token, redirecting to server refresh')
-		return redirect('/auth/refresh?next=/admin');
+		logger.warn('AdminLayout: missing access token, attempting server-side refresh if refresh token present')
+		const hasRefresh = !!cookieStore.get(COOKIE_NAMES.refresh)?.value;
+		if (hasRefresh) {
+			return redirect('/auth/refresh?next=/admin');
+		}
+		logger.warn('AdminLayout: no refresh token, redirecting to login')
+		return redirect('/auth/login');
 	}
 
 	try {
@@ -25,9 +30,9 @@ export default async function AdminLayout({ children }) {
 		const permissions = payload.permissions || [];
 		
 		// Allow access if:
-		// 1. User is SUPERADMIN or ADMIN (full access), OR
+		// 1. User is SUPERADMIN (full access), OR
 		// 2. User has at least one permission (limited access based on permissions)
-		const hasAdminRole = roles.includes(ROLE_KEYS.SUPERADMIN) || roles.includes(ROLE_KEYS.ADMIN);
+		const hasAdminRole = roles.includes(ROLE_KEYS.SUPERADMIN);
 		const hasAnyPermission = permissions.length > 0;
 		const canAccessAdmin = hasAdminRole || hasAnyPermission;
 
@@ -43,7 +48,11 @@ export default async function AdminLayout({ children }) {
 	} catch (error) {
 		logger.error('AdminLayout: token verification failed', { error: error.message })
 		// Try server-side refresh when verification fails (likely expired)
-		redirect('/auth/refresh?next=/admin');
+		const hasRefreshOnError = !!cookieStore.get(COOKIE_NAMES.refresh)?.value;
+		if (hasRefreshOnError) {
+			return redirect('/auth/refresh?next=/admin');
+		}
+		return redirect('/auth/login');
 	}
 
 	return (

@@ -32,7 +32,7 @@ export default function RolePermissionsTab() {
         const res = await apiCall('/api/admin/roles?perPage=25')
         if (!res.ok) throw new Error('Failed to fetch roles')
         const json = await res.json()
-        setRoles(json.data.roles || [])
+        setRoles((json.data.roles || []).filter(r => r && r.key !== 'SUPERADMIN'))
       } catch (err) {
         console.error(err)
         setToast({ message: 'Failed to load roles', type: 'error', visible: true })

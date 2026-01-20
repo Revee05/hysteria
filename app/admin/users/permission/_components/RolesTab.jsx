@@ -39,8 +39,9 @@ export default function RolesTab() {
       if (!res.ok) throw new Error('Failed to fetch roles');
       const json = await res.json();
       const items = (json.data && (json.data.roles || json.data)) || [];
-      setRoles(items);
-      setTotal(items.length);
+      const filtered = items.filter(r => r && r.key !== 'SUPERADMIN');
+      setRoles(filtered);
+      setTotal(filtered.length);
     } catch (err) {
       console.error(err);
       setToast({ message: err.message || 'Failed to load roles', type: 'error', visible: true });
@@ -62,7 +63,11 @@ export default function RolesTab() {
       const res = await apiCall('/api/admin/roles', { method: 'POST', body: JSON.stringify({ key: newKey, name: newName, description: newDescription }) });
       if (!res.ok) throw new Error('Failed to create role');
       const json = await res.json();
-      setRoles(prev => [json.data, ...prev]);
+      if (!json.data || json.data.key === 'SUPERADMIN') {
+        // Do not display SUPERADMIN in the UI
+      } else {
+        setRoles(prev => [json.data, ...prev]);
+      }
       setNewKey(''); setNewName(''); setNewDescription('');
       setCreateOpen(false);
       setToast({ message: 'Role created', type: 'info', visible: true });
@@ -96,7 +101,7 @@ export default function RolesTab() {
       const res = await apiCall('/api/admin/roles', { method: 'PUT', body: JSON.stringify(editing) });
       if (!res.ok) throw new Error('Failed to update');
       const json = await res.json();
-      setRoles(prev => prev.map(r => (r.id === json.data.id ? json.data : r)));
+      setRoles(prev => prev.map(r => (r.id === json.data.id ? json.data : r)).filter(r => r.key !== 'SUPERADMIN'));
       setEditing(null);
       setToast({ message: 'Role updated', type: 'info', visible: true });
     } catch (err) {
