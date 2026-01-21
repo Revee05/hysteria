@@ -43,7 +43,14 @@ export async function GET(request) {
       },
     })
   } catch (error) {
+    // Don't log 401 errors as error (expected for unauthenticated users)
+    if (error.status === 401 || error.code === 'UNAUTHORIZED') {
+      // Just return the error response without logging
+      return respondError(error)
+    }
+    
+    // Log other errors
     logger.error('Error in /api/auth/me', { error: error.message, stack: error.stack })
-    return respondError({ status: 500, code: 'INTERNAL_ERROR', message: 'Internal server error' })
+    return respondError(error)
   }
 }

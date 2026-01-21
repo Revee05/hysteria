@@ -17,48 +17,21 @@ const schema = z.object({
 
 export default function LoginPage() {
 	const router = useRouter();
-	const { setAuthenticated, refreshUser } = useAuth();
-	const [csrfToken, setCsrfToken] = useState("");
-	const [authLoading, setAuthLoading] = useState(true);
-	const [error, setError] = useState("");
-
-	useEffect(() => {
-		async function loadCsrf() {
-			try {
-				// Read cookie first to avoid network call if present
-				if (typeof document !== 'undefined') {
-					const match = document.cookie.match(new RegExp('(?:^|; )' + encodeURIComponent('csrfToken') + '=([^;]*)'))
-					if (match) {
-						setCsrfToken(decodeURIComponent(match[1]))
-						return
-					}
-				}
-				const res = await fetch("/api/auth/csrf", { cache: "no-store" });
-				const json = await res.json();
-				if (json?.data?.csrfToken) {
-					setCsrfToken(json.data.csrfToken);
-				}
-			} catch (e) {
-				console.error('Failed to load csrf token', e);
-			} finally {
-				setAuthLoading(false);
-			}
-		}
-		loadCsrf();
-	}, []);
-
-	// Check untuk pesan logout dari sessionStorage
-	useEffect(() => {
+	const { setAuthenticated, refreshUser, csrfToken, isLoading: authLoading } = useAuth();
+	const [error, setError] = useState(() => {
 		try {
 			const logoutMessage = sessionStorage.getItem('auth:logoutMessage');
 			if (logoutMessage) {
-				setError(logoutMessage);
 				sessionStorage.removeItem('auth:logoutMessage');
+				return logoutMessage;
 			}
 		} catch (e) {
 			// Ignore storage errors
 		}
-	}, []);
+		return "";
+	});
+
+	// initial error handled via useState initializer (reads sessionStorage)
 
 	const {
 		register,
@@ -68,6 +41,12 @@ export default function LoginPage() {
 
 	const onSubmit = async (values) => {
 		setError("");
+		
+		if (!csrfToken) {
+			setError("CSRF token belum tersedia. Silakan refresh halaman.");
+			return;
+		}
+		
 		try {
 			const res = await fetch("/api/auth/login", {
 				method: "POST",
@@ -91,11 +70,16 @@ export default function LoginPage() {
 				setError(msg);
 				return;
 			}
-
-			// Login berhasil - update auth context then redirect
+			
+			// Login berhasil - update auth context with user data then redirect
 			setAuthenticated(true);
+			
+			// Refresh user data to populate context
+			await refreshUser();
+			
 			router.push("/admin");
 		} catch (err) {
+			console.error('Login error:', err);
 			setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
 		}
 	};
