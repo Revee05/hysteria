@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import EmailField from "../ui/EmailField.jsx";
+import PasswordField from "../ui/PasswordField.jsx";
+import TextField from '@mui/material/TextField';
 
 export default function UserModal({ open, mode = 'create', formData, setFormData, onClose, onSubmit, loading }) {
   if (!open) return null;
@@ -14,37 +17,32 @@ export default function UserModal({ open, mode = 'create', formData, setFormData
         <h3 className="text-lg font-medium mb-4 text-zinc-900">{title}</h3>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-sm text-zinc-700 block mb-1">Email *</label>
-            <input
-              type="email"
+            <EmailField
+              label="Email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md bg-white text-zinc-900 placeholder:text-zinc-400"
               required
             />
           </div>
 
           <div>
-            <label className="text-sm text-zinc-700 block mb-1">
-              Password {mode === 'create' ? '*' : '(leave empty to keep current)'}
-            </label>
-            <input
-              type="password"
+            <PasswordField
+              label={`Password ${mode === 'create' ? '*' : '(leave empty to keep current)'}`}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md bg-white text-zinc-900 placeholder:text-zinc-400"
               placeholder={mode === 'create' ? '' : 'Leave empty to keep current password'}
-              {...(mode === 'create' ? { required: true } : {})}
+              required={mode === 'create'}
             />
           </div>
 
           <div>
-            <label className="text-sm text-zinc-700 block mb-1">Name *</label>
-            <input
-              type="text"
+            <TextField
+              label="Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border rounded-md bg-white text-zinc-900 placeholder:text-zinc-400"
+              fullWidth
+              variant="outlined"
+              size="small"
               required
             />
           </div>
