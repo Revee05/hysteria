@@ -17,18 +17,25 @@ export default function PermissionPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900">Permissions Management</h1>
-        <p className="text-sm text-zinc-600 mt-1">Manage permissions and role permissions</p>
+    <div className="p-4 sm:p-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900">Permissions Management</h1>
+        <p className="text-xs sm:text-sm text-zinc-600 mt-1">Manage permissions and role permissions</p>
       </div>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="permission tabs">
-          <Tab label="Permissions" id="tab-0" aria-controls="tabpanel-0" />
-          <Tab label="Roles" id="tab-1" aria-controls="tabpanel-1" />
-          <Tab label="Role Permissions" id="tab-2" aria-controls="tabpanel-2" />
-          <Tab label="Permission Groups" id="tab-3" aria-controls="tabpanel-3" />
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          aria-label="permission tabs"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
+          <Tab label="Permissions" id="tab-0" aria-controls="tabpanel-0" sx={{ minWidth: 'auto', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} />
+          <Tab label="Roles" id="tab-1" aria-controls="tabpanel-1" sx={{ minWidth: 'auto', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} />
+          <Tab label="Role Permissions" id="tab-2" aria-controls="tabpanel-2" sx={{ minWidth: 'auto', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} />
+          <Tab label="Permission Groups" id="tab-3" aria-controls="tabpanel-3" sx={{ minWidth: 'auto', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} />
         </Tabs>
       </Box>
       <div role="tabpanel" hidden={activeTab !== 0} id="tabpanel-0" aria-labelledby="tab-0">

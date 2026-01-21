@@ -127,21 +127,23 @@ export default function RolesTab() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <form onSubmit={(e) => { e.preventDefault(); }} className="flex-1">
-          <div className="flex gap-2 items-center">
-            <SearchField value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search roles..." showAdornment={false} endAdornment={(
-              <IconButton type="button" size="small" color="primary" className="bg-blue-600 text-white rounded-md" aria-label="search"><SearchIcon fontSize="small" /></IconButton>
-            )} />
+      <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4">
+        <form onSubmit={(e) => { e.preventDefault(); }} className="w-full">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex-1">
+              <SearchField value={searchInput} onChange={(e) => setSearchInput(e.target.value)} placeholder="Search roles..." showAdornment={false} endAdornment={(
+                <IconButton type="button" size="small" color="primary" className="bg-blue-600 text-white rounded-md" aria-label="search"><SearchIcon fontSize="small" /></IconButton>
+              )} />
+            </div>
 
-            <div className="ml-2">
+            <div className="flex items-center">
               <PageFilter perPage={perPage} onChange={(n) => setPerPage(n)} />
             </div>
           </div>
         </form>
 
-        <div className="w-full sm:w-auto flex items-center">
-          <button type="button" onClick={() => setCreateOpen(true)} className="px-4 py-2 bg-green-600 text-white rounded-md">Create Role</button>
+        <div className="w-full sm:w-auto">
+          <button type="button" onClick={() => setCreateOpen(true)} className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md text-sm sm:text-base">Create Role</button>
         </div>
       </div>
 
@@ -150,8 +152,8 @@ export default function RolesTab() {
       <DataTable columns={columns} rows={roles} loading={loading} />
 
       {editing && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-md w-full max-w-md">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-md w-full max-w-md">
             <h3 className="text-lg font-medium mb-4 text-zinc-900">Edit Role</h3>
             <div className="flex flex-col gap-2">
               <label className="text-sm text-zinc-700">Key</label>
@@ -170,8 +172,8 @@ export default function RolesTab() {
       )}
 
       {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-md w-full max-w-md shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-md w-full max-w-md shadow-lg">
             <h3 className="text-lg font-medium mb-4 text-zinc-900">Create Role</h3>
             <form onSubmit={handleCreateSubmit} className="flex flex-col gap-3">
               <div>

@@ -22,7 +22,7 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
   const toggleOpen = (key) => setOpenKeys(prev => ({ ...prev, [key]: !prev[key] }));
 
   return (
-    <div className="h-screen overflow-y-auto bg-white">
+    <div className="h-full overflow-y-auto bg-white flex flex-col">
       {/* Logo dan tombol tutup */}
       <div className={`px-4 py-4 flex items-center border-b border-zinc-100 ${collapsed ? "justify-center" : "justify-between"}`}>
         <div className={`flex items-center gap-3 ${collapsed ? "w-full justify-center" : ""}`}>

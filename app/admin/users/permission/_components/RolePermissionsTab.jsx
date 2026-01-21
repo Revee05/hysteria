@@ -137,8 +137,8 @@ export default function RolePermissionsTab() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex-1 max-w-md flex items-center gap-3">
+      <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <div className="flex-1">
             <FormControl fullWidth size="small">
               <InputLabel id="role-select-label">Select Role</InputLabel>
@@ -161,18 +161,17 @@ export default function RolePermissionsTab() {
             </FormControl>
           </div>
 
-          <div className="w-56">
+          <div className="w-full sm:w-56">
             <SelectField
               value={groupFilter}
               onChange={(v) => setGroupFilter(v)}
               options={groups}
               emptyOptionLabel="All groups"
-              // label="Group"
-              minWidth={160}
+              className="w-full"
             />
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <FormControlLabel
             control={(
               <Checkbox
@@ -183,9 +182,16 @@ export default function RolePermissionsTab() {
                 size="small"
               />
             )}
-            label={<span className="text-sm text-zinc-700 font-medium">Select all</span>}
+            label={<span className="text-xs sm:text-sm text-zinc-700 font-medium">Select all</span>}
           />
-          <Button variant="contained" color="primary" onClick={save} disabled={loading || !roleId}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={save} 
+            disabled={loading || !roleId}
+            fullWidth
+            className="sm:w-auto"
+          >
             Save
           </Button>
         </div>

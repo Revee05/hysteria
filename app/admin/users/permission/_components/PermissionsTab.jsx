@@ -212,45 +212,47 @@ export default function PermissionsTab() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <form onSubmit={handleSearch} className="flex-1">
-          <div className="flex gap-2 items-center">
-            <SearchField 
-              value={searchInput} 
-              onChange={(e) => setSearchInput(e.target.value)} 
-              placeholder="Search permissions..." 
-              showAdornment={false}
-              endAdornment={(
-                <IconButton
-                  type="submit"
-                  size="small"
-                  color="primary"
-                  className="bg-blue-600 text-white rounded-md"
-                  aria-label="search"
-                > 
-                  <SearchIcon fontSize="small" />
-                </IconButton>
-              )}
-            />
+      <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4">
+        <form onSubmit={handleSearch} className="w-full">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+            <div className="flex-1">
+              <SearchField 
+                value={searchInput} 
+                onChange={(e) => setSearchInput(e.target.value)} 
+                placeholder="Search permissions..." 
+                showAdornment={false}
+                endAdornment={(
+                  <IconButton
+                    type="submit"
+                    size="small"
+                    color="primary"
+                    className="bg-blue-600 text-white rounded-md"
+                    aria-label="search"
+                  > 
+                    <SearchIcon fontSize="small" />
+                  </IconButton>
+                )}
+              />
+            </div>
 
-            <div className="ml-2 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <PageFilter perPage={perPage} onChange={handlePerPageChange} />
               <SelectField
                 value={groupFilter}
                 onChange={(v) => handleGroupFilterChange(v)}
                 options={groups}
                 emptyOptionLabel="All groups"
-                className="px-3 py-2 border rounded-md text-zinc-900"
+                className="px-2 sm:px-3 py-2 border rounded-md text-zinc-900 text-sm"
               />
             </div>
           </div>
         </form>
 
-        <div className="w-full sm:w-auto flex items-center">
+        <div className="w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-md"
+            className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md text-sm sm:text-base"
           >
             Create Permission
           </button>
@@ -268,9 +270,9 @@ export default function PermissionsTab() {
       )}
 
       {editing && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-md w-full max-w-xl">
-            <h3 className="text-lg font-medium mb-4 text-zinc-900">Edit Permission</h3>
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-md w-full max-w-xl">
+            <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 text-zinc-900">Edit Permission</h3>
             <div className="flex flex-col gap-2">
               <label className="text-sm text-zinc-700">Key</label>
               <input value={editing.key} onChange={(e) => setEditing({ ...editing, key: e.target.value })} className="w-full px-3 py-2 border rounded-md bg-white text-zinc-900 placeholder:text-zinc-400" />
@@ -294,13 +296,13 @@ export default function PermissionsTab() {
       )}
 
       {createOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-md w-full max-w-3xl shadow-lg">
-            <h3 className="text-lg font-medium mb-4 text-zinc-900">Create Permission</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-md w-full max-w-3xl shadow-lg max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4 text-zinc-900">Create Permission</h3>
             <form onSubmit={handleCreateSubmit} className="flex flex-col gap-3">
               <div className="flex flex-col gap-3">
                 {newItems.map((it, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-2 items-end">
+                  <div key={idx} className="flex flex-col sm:grid sm:grid-cols-12 gap-2 sm:items-end border-b sm:border-0 pb-3 sm:pb-0">
                     <div className="col-span-4">
                       <label className="text-sm text-zinc-700 block mb-1">Key *</label>
                       <input
@@ -347,8 +349,8 @@ export default function PermissionsTab() {
       )}
 
       {deleteConfirm.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white p-6 rounded-md w-full max-w-lg shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-md w-full max-w-lg shadow-lg">
             <h3 className="text-lg font-medium mb-4 text-zinc-900">Confirm Delete</h3>
             <p className="text-sm text-zinc-700">Are you sure you want to delete permission &quot;{deleteConfirm.name}&quot;?</p>
             <div className="mt-6 flex justify-end gap-2">

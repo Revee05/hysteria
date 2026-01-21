@@ -40,9 +40,9 @@ export default function AdminShell({ children }) {
 
   return (
     <AuthProvider>
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 via-pink-100 to-orange-100">
       <div className="lg:flex lg:items-start lg:justify-start">
-        <aside className={`hidden lg:block lg:flex-shrink-0 border-r border-zinc-200 bg-white transition-width duration-200 ${collapsed ? "w-20" : "w-64"} h-screen`}>
+        <aside className={`hidden lg:block lg:flex-shrink-0 border-r border-zinc-200 bg-white transition-width duration-200 ${collapsed ? "w-20" : "w-64"} sticky top-0 h-screen overflow-hidden`}>
           <AdminSidebar 
             collapsed={collapsed} 
             onClose={() => setOpen(false)} 
