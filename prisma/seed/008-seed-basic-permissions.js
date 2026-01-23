@@ -50,6 +50,15 @@ module.exports = async function seed() {
     );
     let roleGroupId = roleGroupResult.rows[0]?.id;
 
+    const heroGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["hero-management", "Hero Management", "Permissions related to hero section management"],
+    );
+    let heroGroupId = heroGroupResult.rows[0]?.id;
+
     // If groups not returned (already exist), fetch them
     if (!userGroupId) {
       const existing = await client.query(
@@ -71,6 +80,13 @@ module.exports = async function seed() {
         ["role-management"],
       );
       roleGroupId = existing.rows[0].id;
+    }
+    if (!heroGroupId) {
+      const existing = await client.query(
+        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
+        ["hero-management"],
+      );
+      heroGroupId = existing.rows[0].id;
     }
 
     // Define all permissions
@@ -229,6 +245,32 @@ module.exports = async function seed() {
         name: "Delete Permission Groups",
         description: "Delete permission groups",
         groupId: permGroupId,
+      },
+
+      // Hero management
+      {
+        key: "hero.read",
+        name: "Read Hero Sections",
+        description: "View hero sections",
+        groupId: heroGroupId,
+      },
+      {
+        key: "hero.create",
+        name: "Create Hero Section",
+        description: "Create new hero sections",
+        groupId: heroGroupId,
+      },
+      {
+        key: "hero.update",
+        name: "Update Hero Section",
+        description: "Update existing hero sections",
+        groupId: heroGroupId,
+      },
+      {
+        key: "hero.delete",
+        name: "Delete Hero Section",
+        description: "Delete hero sections",
+        groupId: heroGroupId,
       },
     ];
 

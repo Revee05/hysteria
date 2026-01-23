@@ -125,7 +125,7 @@ export default function DataTable({ columns = [], rows = [], loading = false, ge
                     key={col.field}
                     ref={(el) => (headerRefs.current[i] = el)}
                     align={col.headerAlign || col.align || 'left'}
-                    className={col.headerClassName || 'px-3 sm:px-6 py-2 sm:py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider'}
+                    className={col.headerClassName || 'px-3 sm:px-6 py-2 sm:py-3 text-xs font-bold text-zinc-900 uppercase tracking-wider'}
                     sx={{
                       whiteSpace: { xs: 'normal', sm: 'nowrap' },
                       overflow: 'hidden',
