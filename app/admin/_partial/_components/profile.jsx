@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../../lib/context/auth-context";
-import { Avatar } from "../../../../components/adminUI/icon";
+import { Avatar } from "../../../../components/ui/icon";
 import Sheet from "../../../../components/ui/SheetDialog";
 
 export default function ProfileSheet({ open, onClose }) {

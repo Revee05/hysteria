@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../../../lib/context/auth-context";
 import PermissionGate from '../../../../components/adminUI/PermissionGate.jsx';
-import SearchField from '../../../../components/ui/SearchField.jsx';
+import SearchField from '../../../../components/adminUI/SearchField.jsx';
 import DataTable from '../../../../components/ui/DataTable.jsx';
 import { useDialog } from '../../../../components/ui/DynamicDialogModals.jsx';
 import Toast from '../../../../components/ui/Toast.jsx';

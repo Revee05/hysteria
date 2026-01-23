@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Logo, IconDashboard, IconUsers, IconSettings, IconPlatform, IconEvent, IconPost, IconSocial } from "../../../components/adminUI/icon";
+import { Logo, IconDashboard, IconUsers, IconSettings, IconPlatform, IconEvent, IconPost, IconSocial } from "../../../components/ui/icon";
 
 export default function AdminSidebar({ open, collapsed, onClose, onToggleCollapse, onNavigate, currentView }) {
   const [openKeys, setOpenKeys] = useState({});

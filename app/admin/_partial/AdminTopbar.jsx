@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, IconMenu } from "../../../components/adminUI/icon";
+import { Avatar, IconMenu } from "../../../components/ui/icon";
 import { useState } from "react";
 import ProfileSheet from "./_components/profile";
 import { useAuth } from "../../../lib/context/auth-context";

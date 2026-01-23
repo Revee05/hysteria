@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../../../../lib/context/auth-context";
-import SearchField from '../../../../../components/ui/SearchField.jsx';
+import SearchField from '../../../../../components/adminUI/SearchField.jsx';
 import PageFilter from '../../../../../components/ui/PageFilter.jsx';
 import DataTable from '../../../../../components/ui/DataTable.jsx';
 import Toast from '../../../../../components/ui/Toast.jsx';

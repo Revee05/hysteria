@@ -86,6 +86,72 @@ export function IconSocial({ className = '', size = 20 }) {
   );
 }
 
+export function IconInstagram({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <circle cx="12" cy="12" r="4" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <circle cx="17.5" cy="6.5" r="0.9" fill="#6B7280" />
+    </svg>
+  );
+}
+
+export function IconFacebook({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <rect x="2" y="2" width="20" height="20" rx="3" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <path d="M14.5 8.5h1.9v2.2h-1.9v6H12v-6h-1.3V9.7H12V8.6c0-1.1.6-2.6 2.5-2.6h1.5v1.5h-.5c-.4 0-.9.2-.9.9v.7z" fill="#6B7280" />
+    </svg>
+  );
+}
+
+export function IconTikTok({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <path d="M9 8v6.5A3.5 3.5 0 0012.5 18 3.5 3.5 0 0016 14.5V7h2.5" stroke="#6B7280" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="12.5" cy="5" r="0.8" fill="#6B7280" />
+    </svg>
+  );
+}
+
+export function IconThreads({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <path d="M12 3c4.97 0 9 3.58 9 8 0 4.42-4.03 8-9 8s-9-3.58-9-8c0-2.76 2.24-5 5-5 .9 0 1.75.25 2.45.68" stroke="#6B7280" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="12" cy="8.5" r="1" fill="#ced0d4" />
+    </svg>
+  );
+}
+
+export function IconX({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <path d="M18.244 2H21.552L14.325 10.26L22.5 22H15.902L10.742 14.657L4.39 22H1.08L8.815 13.112L1 2H7.764L12.43 8.709L18.244 2ZM17.094 20.13H18.93L6.78 3.78H4.81L17.094 20.13Z" />
+    </svg>
+  );
+}
+
+
+export function IconLinkedIn({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <rect x="2" y="2" width="20" height="20" rx="3" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <rect x="6" y="9" width="2" height="7" fill="#6B7280" />
+      <circle cx="7" cy="6.5" r="1" fill="#6B7280" />
+      <path d="M11 9h2.2v1h.03c.31-.58 1.07-1 1.87-1 2 0 2.9 1.3 2.9 3.2V16h-2.2v-3.2c0-.76-.01-1.74-1.06-1.74-1.06 0-1.22.83-1.22 1.68V16H11V9z" fill="#6B7280" />
+    </svg>
+  );
+}
+
+export function IconYoutube({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <rect x="3" y="6" width="18" height="12" rx="3" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <path d="M10 9.5l5 2.5-5 2.5V9.5z" fill="#6B7280" />
+    </svg>
+  );
+}
+
 export function Avatar({
   className = '',
   size = 32,
@@ -162,6 +228,33 @@ export function Avatar({
           <path d="M4 20c0-2.21 3.582-4 8-4s8 1.79 8 4v1H4v-1z" fill="#6B7280" />
         </>
       )}
+    </svg>
+  );
+}
+
+export function IconTelephone({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <path d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 014.09 5.18 2 2 0 016 3h3a2 2 0 012 1.72c.12.99.38 2 .76 2.98a2 2 0 01-.45 2.11L10.91 9.09a16 16 0 006 6l1.18-1.18a2 2 0 012.11-.45c.98.38 1.99.64 2.98.76A2 2 0 0122 16.92z" stroke="#6B7280" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+export function IconMap({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <path d="M3 6l7-3 7 3 7-3v13l-7 3-7-3L3 20V6z" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M10 3v14" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17 6v14" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function IconEnvelope({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <rect x="2" y="4" width="20" height="16" rx="2" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <path d="M3 7l9 6 9-6" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }
