@@ -366,7 +366,7 @@ export default function HeroManagement() {
             let res;
             if (data.media && data.media instanceof File) {
               // validate file size (<= 3MB)
-              if (data.media.size && data.media.size > 3 * 1024 * 1024) {
+              if (data.media.size && data.media.size > 5 * 1024 * 1024) {
                 setToast({ visible: true, message: "File size must be 3 MB or less", type: "error" });
                 return false;
               }

@@ -60,17 +60,18 @@ export async function findActiveHero() {
  * @returns {Promise<Object>}
  */
 export async function createHero(data) {
-  // If setting as active, deactivate all others first
+  // If setting as active, deactivate all others first in a transaction
   if (data.isActive) {
-    await prisma.heroSection.updateMany({
-      where: { isActive: true },
-      data: { isActive: false },
+    return await prisma.$transaction(async (tx) => {
+      await tx.heroSection.updateMany({
+        where: { isActive: true },
+        data: { isActive: false },
+      });
+      return tx.heroSection.create({ data });
     });
   }
 
-  return await prisma.heroSection.create({
-    data,
-  });
+  return await prisma.heroSection.create({ data });
 }
 
 /**
@@ -80,18 +81,18 @@ export async function createHero(data) {
  * @returns {Promise<Object>}
  */
 export async function updateHero(id, data) {
-  // If setting this as active, deactivate all others first
+  // If setting this as active, deactivate all others first in a transaction
   if (data.isActive) {
-    await prisma.heroSection.updateMany({
-      where: { isActive: true, id: { not: id } },
-      data: { isActive: false },
+    return await prisma.$transaction(async (tx) => {
+      await tx.heroSection.updateMany({
+        where: { isActive: true, id: { not: id } },
+        data: { isActive: false },
+      });
+      return tx.heroSection.update({ where: { id }, data });
     });
   }
 
-  return await prisma.heroSection.update({
-    where: { id },
-    data,
-  });
+  return await prisma.heroSection.update({ where: { id }, data });
 }
 
 /**

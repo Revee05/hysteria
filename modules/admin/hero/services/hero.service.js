@@ -87,8 +87,8 @@ export async function createHero(data) {
  * @returns {Promise<Object>}
  */
 export async function updateHero(id, data) {
-  // Check if hero exists
-  await getHeroById(id);
+  // Check if hero exists and fetch current record for potential cleanup
+  const existingHero = await getHeroById(id);
 
   // Validate input
   let validatedData;
@@ -115,6 +115,38 @@ export async function updateHero(id, data) {
   try {
     const hero = await heroRepository.updateHero(id, updateData);
     logger.info('Hero updated successfully', { heroId: id, updatedFields: Object.keys(updateData) });
+
+    // If the update provides a new `source` (or empties it) and the existing `source`
+    // pointed to an uploaded file managed by our Uploads implementation, attempt
+    // to delete the previous file so stale uploads aren't left on disk/S3.
+    try {
+      const uploads = new Uploads();
+
+      const oldSource = existingHero && existingHero.source ? String(existingHero.source) : null;
+      const newSourceProvided = Object.prototype.hasOwnProperty.call(updateData, 'source');
+
+      const looksLikeManaged = (src) => {
+        if (!src) return false;
+        // Local-managed uploads are saved under '/uploads/...' or 'uploads/...'
+        if (src.startsWith('/uploads/') || src.startsWith('uploads/') || src.includes('/uploads/')) return true;
+        // S3: compare against configured public URL, or typical s3 URL patterns
+        if (process.env.S3_PUBLIC_URL && src.startsWith(process.env.S3_PUBLIC_URL.replace(/\/$/, ''))) return true;
+        if (/s3\.amazonaws\.com/.test(src) || /s3[.-]/.test(src)) return true;
+        return false;
+      };
+
+      if (newSourceProvided && oldSource && oldSource !== String(updateData.source) && looksLikeManaged(oldSource)) {
+        try {
+          await uploads.deleteFile(oldSource);
+          logger.info('Deleted previous hero upload after source update', { heroId: id, deletedSource: oldSource });
+        } catch (err) {
+          logger.warn('Failed to delete previous hero upload after source update', { heroId: id, deletedSource: oldSource, error: err && err.message });
+        }
+      }
+    } catch (err) {
+      logger.warn('Could not perform uploaded-file cleanup after hero update', { heroId: id, error: err && err.message });
+    }
+
     return hero;
   } catch (error) {
     logger.error('Error updating hero', { heroId: id, error: error.message });

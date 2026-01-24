@@ -46,7 +46,7 @@ export async function PUT(request, { params }) {
     let sourceUrl = null;
 
     // Max upload size in bytes (adjust as needed)
-    const MAX_UPLOAD_SIZE = 3 * 1024 * 1024; // 3MB
+    const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 
     // Check if multipart (has file upload)
     if (contentType.includes("multipart/form-data")) {

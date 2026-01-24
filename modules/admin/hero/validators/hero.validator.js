@@ -27,11 +27,14 @@ const mediaUrlSchema = z
       const isDirectFile = /\.(mp4|webm|ogg|jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url);
       const isImageCDN = /^https:\/\/(images\.pexels\.com|images\.unsplash\.com|.*cloudinary\.com|.*imgur\.com)/i.test(url);
 
-      return isDirectFile || isImageCDN;
+      // Also allow YouTube links (standard, short, embed, and nocookie domains)
+      const isYouTube = /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube-nocookie\.com\/embed\/)/i.test(url);
+
+      return isDirectFile || isImageCDN || isYouTube;
     },
     {
       message:
-        'URL must be a direct media file (.mp4, .jpg, etc.) or from a supported CDN. Pexels page URLs are not allowed.',
+        'URL must be a direct media file (.mp4, .jpg, etc.), from a supported CDN, or a supported YouTube URL (youtube.com / youtu.be).',
     }
   )
   .refine(
