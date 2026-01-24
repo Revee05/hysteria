@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { respondSuccess, respondError, AppError } from "../../../../lib/response";
-import * as heroService from "../../../../modules/hero/services/hero.service.js";
+import * as heroService from "../../../../modules/admin/hero/services/hero.service.js";
 
 // GET - Fetch active hero section (public endpoint)
 export async function GET(request) {

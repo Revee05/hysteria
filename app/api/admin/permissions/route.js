@@ -26,7 +26,10 @@ export async function GET(request) {
     const search = searchParams.get('search') || ''
     const groupId = searchParams.get('groupId') || null
 
+    logger.info('Permissions list request', { adminId: user.id, perPage, cursor, search, groupId })
+
     if (perPage < 1 || perPage > 200) {
+      logger.error('Invalid perPage value', { adminId: user.id, perPage })
       return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'perPage must be between 1 and 200' })
     }
 
@@ -37,7 +40,7 @@ export async function GET(request) {
 
     return NextResponse.json({ success: true, data: { permissions, pagination: { nextCursor, hasMore, total, perPage } } })
   } catch (error) {
-    logger.error('Failed to fetch permissions', { error: error.message })
+    logger.error('Failed to fetch permissions', { error: error.message, stack: error.stack })
     return respondError(error)
   }
 }
@@ -51,18 +54,24 @@ export async function POST(request) {
     const user = await requireAuthWithPermission(request, 'permissions.create')
     const body = await request.json()
 
+    logger.info('Create permission request', { adminId: user.id, body })
+
     if (!body) {
+      logger.error('Create permission failed - empty body', { adminId: user.id })
       return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Request body is required' })
     }
 
     // Bulk create when body is an array
     if (Array.isArray(body)) {
+
       if (body.length === 0) {
+        logger.error('Create permissions failed - empty array', { adminId: user.id })
         return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Request array is empty' })
       }
 
       for (const item of body) {
         if (!item || !item.key) {
+          logger.error('Create permissions failed - missing key in item', { adminId: user.id, item })
           return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Each permission must include a key' })
         }
       }
@@ -82,7 +91,9 @@ export async function POST(request) {
     }
 
     // Single create
+
     if (!body.key) {
+      logger.error('Create permission failed - missing key', { adminId: user.id, body })
       return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Permission key is required' })
     }
 
@@ -97,7 +108,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, data: created })
   } catch (error) {
-    logger.error('Failed to create permission', { error: error.message })
+    logger.error('Failed to create permission', { error: error.message, stack: error.stack })
     return respondError(error)
   }
 }
@@ -111,7 +122,10 @@ export async function PUT(request) {
     const user = await requireAuthWithPermission(request, 'permissions.update')
     const body = await request.json()
 
+    logger.info('Update permission request', { adminId: user.id, body })
+
     if (!body || !body.id) {
+      logger.error('Update permission failed - missing id', { adminId: user.id, body })
       return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Permission id is required' })
     }
 
@@ -125,7 +139,7 @@ export async function PUT(request) {
 
     return NextResponse.json({ success: true, data: updated })
   } catch (error) {
-    logger.error('Failed to update permission', { error: error.message })
+    logger.error('Failed to update permission', { error: error.message, stack: error.stack })
     return respondError(error)
   }
 }
@@ -139,9 +153,13 @@ export async function DELETE(request) {
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+
     if (!id) {
+      logger.error('Delete permission failed - missing id', { adminId: user.id })
       return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Permission id is required' })
     }
+
+    logger.info('Delete permission request', { adminId: user.id, id })
 
     const deleted = await deletePermissionById(parseInt(id))
 
