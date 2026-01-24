@@ -28,7 +28,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   input[type="search"]::-webkit-search-cancel-button { display: none; -webkit-appearance: none; }
-  /* border: 1px solid crimson; */
 }
 
 /* ensure root containers fill viewport to avoid layout offsets */
@@ -59,4 +58,86 @@ html, #__next {
   margin: 0 !important;
 }
 
+/* Modern scrollbar (scoped to `body` and `.scrollable`) */
+:root {
+  --scrollbar-width: 10px;
+  --scrollbar-track: rgba(15, 23, 42, 0.04); /* very subtle slate */
+  --scrollbar-thumb-start: rgba(148, 163, 184, 0.9); /* slate-400, calm */
+  --scrollbar-thumb-end: rgba(148, 163, 184, 0.7);   /* slightly softer */
+  --scrollbar-thumb-hover: rgba(120, 138, 158, 0.98);
+  --scrollbar-thumb-border: 2px;
+  --scrollbar-shadow: 0 1px 4px rgba(2,6,23,0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --scrollbar-track: rgba(255, 255, 255, 0.03);
+    --scrollbar-thumb-start: rgba(148, 163, 184, 0.22); /* visible but soft on dark */
+    --scrollbar-thumb-end: rgba(148, 163, 184, 0.14);
+    --scrollbar-thumb-hover: rgba(148, 163, 184, 0.34);
+    --scrollbar-shadow: 0 1px 6px rgba(0,0,0,0.4);
+  }
+}
+
+/* Apply to viewport and opt-in scrollable containers */
+html, body, #__next, .scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-start) var(--scrollbar-track);
+}
+
+/* WebKit-based browsers (viewport + opt-in containers + common MUI panels) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#__next::-webkit-scrollbar,
+.scrollable::-webkit-scrollbar,
+.MuiDrawer-root .MuiPaper-root::-webkit-scrollbar,
+.MuiModal-root::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+#__next::-webkit-scrollbar-track,
+.scrollable::-webkit-scrollbar-track,
+.MuiDrawer-root .MuiPaper-root::-webkit-scrollbar-track,
+.MuiModal-root::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, transparent, var(--scrollbar-track));
+  border-radius: 999px;
+  margin: 6px 0;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+#__next::-webkit-scrollbar-thumb,
+.scrollable::-webkit-scrollbar-thumb,
+.MuiDrawer-root .MuiPaper-root::-webkit-scrollbar-thumb,
+.MuiModal-root::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--scrollbar-thumb-start), var(--scrollbar-thumb-end));
+  border-radius: 999px;
+  border: var(--scrollbar-thumb-border) solid transparent;
+  background-clip: padding-box;
+  box-shadow: var(--scrollbar-shadow), inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+#__next::-webkit-scrollbar-thumb:hover,
+.scrollable::-webkit-scrollbar-thumb:hover,
+.MuiDrawer-root .MuiPaper-root::-webkit-scrollbar-thumb:hover,
+.MuiModal-root::-webkit-scrollbar-thumb:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.22), inset 0 2px 6px rgba(255,255,255,0.12);
+}
+
+/* Small corner / hide default arrows */
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+#__next::-webkit-scrollbar-corner,
+.scrollable::-webkit-scrollbar-corner,
+.MuiDrawer-root .MuiPaper-root::-webkit-scrollbar-corner,
+.MuiModal-root::-webkit-scrollbar-corner {
+  background: transparent;
+}
 

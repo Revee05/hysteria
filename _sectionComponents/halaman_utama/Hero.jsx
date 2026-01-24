@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { IconSpeaker } from '../../components/ui/icon.jsx';
 
 export default function Hero() {
   const [heroData, setHeroData] = useState(null);
@@ -217,14 +218,14 @@ export default function Hero() {
       </div>
 
       {(isVideo(src) || isYouTube(src)) && (
-        <button
-          onClick={() => setMuted((m) => !m)}
-          className="absolute bottom-16 md:bottom-24 right-6 z-20 bg-black/50 text-white px-3 py-2 rounded"
-          aria-pressed={!muted}
-          aria-label={muted ? 'Unmute video' : 'Mute video'}
-        >
-          {muted ? 'Unmute' : 'Mute'}
-        </button>
+        <div className="absolute bottom-16 md:bottom-24 right-6 z-20">
+          <IconSpeaker
+            size={28}
+            className="bg-black/50 text-white p-2 rounded"
+            muted={muted}
+            onChange={(nextMuted) => setMuted(nextMuted)}
+          />
+        </div>
       )}
     </section>
   );

@@ -41,11 +41,11 @@ export default function Header({ onMenuToggle }) {
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/next.svg"
+              src="/svg/Logo-hysteria.svg"
               alt="Logo"
-              width={120}
-              height={28}
-              className="dark:invert"
+              width={70}
+              height={15}
+              // className="filter invert w-[90px] h-auto"
               priority
             />
           </Link>
