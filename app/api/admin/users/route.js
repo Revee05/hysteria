@@ -30,8 +30,11 @@ export async function GET(request) {
 		const cursor = searchParams.get('cursor') ? parseInt(searchParams.get('cursor')) : null
 		const search = searchParams.get('search') || ''
 
+		logger.info('Users list request', { adminId: user.id, perPage, cursor, search })
+
 		// Validate perPage
 		if (perPage < 1 || perPage > 100) {
+			logger.error('Invalid perPage value', { adminId: user.id, perPage })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -48,11 +51,11 @@ export async function GET(request) {
 			return userWithoutPassword
 		})
 
-		logger.info('Users fetched successfully', { 
-			adminId: user.id, 
+		logger.info('Users fetched successfully', {
+			adminId: user.id,
 			count: sanitizedUsers.length,
 			search,
-			cursor
+			cursor,
 		})
 
 		return NextResponse.json({
@@ -68,7 +71,7 @@ export async function GET(request) {
 			},
 		})
 	} catch (error) {
-		logger.error('Failed to fetch users', { error: error.message })
+		logger.error('Failed to fetch users', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
@@ -86,8 +89,11 @@ export async function POST(request) {
 
 		const body = await request.json()
 
+		logger.info('Create user request', { adminId: user.id, email: body?.email, name: body?.name })
+
 		// Validate required fields
 		if (!body.email || !body.password || !body.name) {
+			logger.error('Create user failed - missing required fields', { adminId: user.id, body: { email: body?.email, name: body?.name } })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -98,6 +104,7 @@ export async function POST(request) {
 		// Validate email format
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 		if (!emailRegex.test(body.email)) {
+			logger.error('Create user failed - invalid email format', { adminId: user.id, email: body.email })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -118,6 +125,7 @@ export async function POST(request) {
 				where: { key: 'ACTIVE' },
 			})
 			if (!activeStatus) {
+				logger.error('Create user failed - ACTIVE status missing', { adminId: user.id })
 				return respondError({
 					status: 500,
 					code: 'INTERNAL_ERROR',
@@ -149,10 +157,11 @@ export async function POST(request) {
 			data: userWithoutPassword,
 		})
 	} catch (error) {
-		logger.error('Failed to create user', { error: error.message })
+		logger.error('Failed to create user', { error: error.message, stack: error.stack })
 		
 		// Handle unique constraint violation (duplicate email)
 		if (error.code === 'P2002') {
+			logger.error('Create user failed - duplicate email', { error: error.message, stack: error.stack })
 			return respondError({
 				status: 409,
 				code: 'DUPLICATE_EMAIL',
@@ -177,8 +186,11 @@ export async function PUT(request) {
 
 		const body = await request.json()
 
+		logger.info('Update user request', { adminId: user.id, userId: body?.id })
+
 		// Validate user ID
 		if (!body.id) {
+			logger.error('Update user failed - missing id', { adminId: user.id, body: { email: body?.email, name: body?.name } })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -195,6 +207,7 @@ export async function PUT(request) {
 			// Validate email format
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 			if (!emailRegex.test(body.email)) {
+				logger.error('Update user failed - invalid email format', { adminId: user.id, email: body.email })
 				return respondError({
 					status: 400,
 					code: 'VALIDATION_ERROR',
@@ -234,10 +247,11 @@ export async function PUT(request) {
 			data: userWithoutPassword,
 		})
 	} catch (error) {
-		logger.error('Failed to update user', { error: error.message })
+		logger.error('Failed to update user', { error: error.message, stack: error.stack })
 
 		// Handle unique constraint violation (duplicate email)
 		if (error.code === 'P2002') {
+			logger.error('Update user failed - duplicate email', { error: error.message, stack: error.stack })
 			return respondError({
 				status: 409,
 				code: 'DUPLICATE_EMAIL',
@@ -247,6 +261,7 @@ export async function PUT(request) {
 
 		// Handle user not found
 		if (error.code === 'P2025') {
+			logger.error('Update user failed - user not found', { error: error.message, stack: error.stack })
 			return respondError({
 				status: 404,
 				code: 'USER_NOT_FOUND',
@@ -272,6 +287,7 @@ export async function DELETE(request) {
 		const userId = searchParams.get('id')
 
 		if (!userId) {
+			logger.error('Delete user failed - missing id', { adminId: user?.id })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -281,10 +297,10 @@ export async function DELETE(request) {
 
 		const deletedUser = await deleteUserById(parseInt(userId))
 
-		logger.info('User deleted successfully', { 
-			adminId: user.id, 
+		logger.info('User deleted successfully', {
+			adminId: user.id,
 			deletedUserId: deletedUser.id,
-			deletedUserEmail: deletedUser.email
+			deletedUserEmail: deletedUser.email,
 		})
 
 		return NextResponse.json({
@@ -292,7 +308,7 @@ export async function DELETE(request) {
 			data: { message: 'User deleted successfully' },
 		})
 	} catch (error) {
-		logger.error('Failed to delete user', { error: error.message })
+		logger.error('Failed to delete user', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }

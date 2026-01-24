@@ -22,7 +22,10 @@ export async function GET(request, { params }) {
 		const resolvedParams = await params
 		const userId = parseInt(resolvedParams.id)
 
+		logger.info('List user roles request', { adminId: user.id, userId })
+
 		if (!userId || isNaN(userId)) {
+			logger.error('List user roles failed - invalid userId', { adminId: user.id, userId: resolvedParams.id })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -55,7 +58,7 @@ export async function GET(request, { params }) {
 			},
 		})
 	} catch (error) {
-		logger.error('Failed to fetch user roles', { error: error.message })
+		logger.error('Failed to fetch user roles', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
@@ -73,7 +76,10 @@ export async function POST(request, { params }) {
 		const userId = parseInt(resolvedParams.id)
 		const body = await request.json()
 
+		logger.info('Assign role to user request', { adminId: user.id, userId, body })
+
 		if (!userId || isNaN(userId)) {
+			logger.error('Assign role failed - invalid userId', { adminId: user.id, userId: resolvedParams.id })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -82,6 +88,7 @@ export async function POST(request, { params }) {
 		}
 
 		if (!body.roleId) {
+			logger.error('Assign role failed - missing roleId', { adminId: user.id, userId, body })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -115,17 +122,18 @@ export async function POST(request, { params }) {
 			data: assigned,
 		})
 	} catch (error) {
-		logger.error('Failed to assign role to user', { error: error.message })
-
+		logger.error('Failed to assign role to user', { error: error.message, stack: error.stack })
+		
 		// Handle duplicate role assignment
 		if (error.code === 'P2002') {
+			logger.error('Assign role failed - duplicate', { error: error.message, stack: error.stack })
 			return respondError({
 				status: 409,
 				code: 'ROLE_ALREADY_ASSIGNED',
 				message: 'Role already assigned to this user',
 			})
 		}
-
+		
 		return respondError(error)
 	}
 }
@@ -143,7 +151,10 @@ export async function DELETE(request, { params }) {
 		const { searchParams } = new URL(request.url)
 		const roleId = searchParams.get('roleId')
 
+		logger.info('Remove role from user request', { adminId: user.id, userId, roleId })
+
 		if (!userId || isNaN(userId)) {
+			logger.error('Remove role failed - invalid userId', { adminId: user.id, userId: resolvedParams.id })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -152,6 +163,7 @@ export async function DELETE(request, { params }) {
 		}
 
 		if (!roleId) {
+			logger.error('Remove role failed - missing roleId', { adminId: user.id, userId })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -185,7 +197,7 @@ export async function DELETE(request, { params }) {
 			data: { message: 'Role removed successfully' },
 		})
 	} catch (error) {
-		logger.error('Failed to remove role from user', { error: error.message })
+		logger.error('Failed to remove role from user', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
@@ -203,7 +215,10 @@ export async function PUT(request, { params }) {
 		const userId = parseInt(resolvedParams.id)
 		const body = await request.json()
 
+		logger.info('Replace roles for user request', { adminId: user.id, userId, body })
+
 		if (!userId || isNaN(userId)) {
+			logger.error('Replace roles failed - invalid userId', { adminId: user.id, userId: resolvedParams.id })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -212,6 +227,7 @@ export async function PUT(request, { params }) {
 		}
 
 		if (!Array.isArray(body.roleIds)) {
+			logger.error('Replace roles failed - invalid roleIds', { adminId: user.id, userId, body })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -248,7 +264,7 @@ export async function PUT(request, { params }) {
 			},
 		})
 	} catch (error) {
-		logger.error('Failed to replace user roles', { error: error.message })
+		logger.error('Failed to replace user roles', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }

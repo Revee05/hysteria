@@ -1,10 +1,10 @@
-import { AppError } from '../../../lib/response.js';
+import { AppError } from '../../../../lib/response.js';
 import * as heroRepository from '../repositories/hero.repository.js';
 import { validateHeroData, createHeroSchema, updateHeroSchema } from '../validators/hero.validator.js';
-import logger from '../../../lib/logger.js';
-import Uploads from '../../../lib/upload/uploads.js';
-import { createWithUpload, updateWithUpload } from '../../../lib/upload/transactionalUpload.js';
-import { prisma } from '../../../lib/prisma.js';
+import logger from '../../../../lib/logger.js';
+import Uploads from '../../../../lib/upload/uploads.js';
+import { createWithUpload, updateWithUpload } from '../../../../lib/upload/transactionalUpload.js';
+import { prisma } from '../../../../lib/prisma.js';
 
 /**
  * Get all hero sections with pagination

@@ -18,6 +18,8 @@ export async function GET(request) {
 	try {
 		const user = await requireAuthWithPermission(request, 'roles.read')
 
+		logger.info('Roles list request', { adminId: user.id })
+
 		const roles = await findAllRoles()
 
 		logger.info('Roles fetched', {
@@ -30,7 +32,7 @@ export async function GET(request) {
 			data: { roles },
 		})
 	} catch (error) {
-		logger.error('Failed to fetch roles', { error: error.message })
+		logger.error('Failed to fetch roles', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
@@ -44,7 +46,10 @@ export async function POST(request) {
 		const user = await requireAuthWithPermission(request, 'roles.create')
 		const body = await request.json()
 
+		logger.info('Create role request', { adminId: user.id, body })
+
 		if (!body || !body.key) {
+			logger.error('Create role failed - missing key', { adminId: user.id, body })
 			return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Role key is required' })
 		}
 
@@ -54,7 +59,7 @@ export async function POST(request) {
 
 		return NextResponse.json({ success: true, data: created })
 	} catch (error) {
-		logger.error('Failed to create role', { error: error.message })
+		logger.error('Failed to create role', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
@@ -68,7 +73,10 @@ export async function PUT(request) {
 		const user = await requireAuthWithPermission(request, 'roles.update')
 		const body = await request.json()
 
+		logger.info('Update role request', { adminId: user.id, body })
+
 		if (!body || !body.id) {
+			logger.error('Update role failed - missing id', { adminId: user.id, body })
 			return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Role id is required' })
 		}
 
@@ -82,7 +90,7 @@ export async function PUT(request) {
 
 		return NextResponse.json({ success: true, data: updated })
 	} catch (error) {
-		logger.error('Failed to update role', { error: error.message })
+		logger.error('Failed to update role', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
@@ -96,9 +104,13 @@ export async function DELETE(request) {
 
 		const { searchParams } = new URL(request.url)
 		const id = searchParams.get('id')
+
 		if (!id) {
+			logger.error('Delete role failed - missing id', { adminId: user.id })
 			return respondError({ status: 400, code: 'VALIDATION_ERROR', message: 'Role id is required' })
 		}
+
+		logger.info('Delete role request', { adminId: user.id, id })
 
 		const deleted = await deleteRoleById(parseInt(id))
 
@@ -106,7 +118,7 @@ export async function DELETE(request) {
 
 		return NextResponse.json({ success: true, data: { message: 'Role deleted' } })
 	} catch (error) {
-		logger.error('Failed to delete role', { error: error.message })
+		logger.error('Failed to delete role', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }
