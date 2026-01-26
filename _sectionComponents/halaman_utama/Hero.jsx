@@ -236,6 +236,8 @@ export default function Hero() {
           />
         </div>
       )}
+      {/* Bottom gradient to transition smoothly into the next (white) section (reduced height) */}
+      <div className="absolute bottom-0 left-0 right-0 h-8 md:h-20 z-30 pointer-events-none bg-gradient-to-b from-transparent to-white" />
     </section>
   );
 }

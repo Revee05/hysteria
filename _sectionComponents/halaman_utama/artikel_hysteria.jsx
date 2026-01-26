@@ -40,10 +40,11 @@ export default function ArtikelHysteria({ featured, list = [] }) {
   return (
     <section
       aria-labelledby="artikel-hysteria-heading"
-      className="py-4 px-6 sm:px-6 lg:px-28 mb-20 border border-zinc-900"
+      className="py-6 px-6 sm:px-6 lg:px-28 mb-20"
+      // className="py-6 px-6 sm:px-6 lg:px-28 mb-20 border border-zinc-900"
     >
       <div className="w-full max-w-[1920px] mx-auto">
-        <header className="flex justify-between items-baseline mb-8">
+        <header className="flex justify-between items-baseline mb-6">
           <h2
             id="artikel-hysteria-heading"
             className="m-0 text-xl sm:text-3xl font-bold"
@@ -55,7 +56,7 @@ export default function ArtikelHysteria({ featured, list = [] }) {
           </Link>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-[800px_350px] gap-10 items-start justify-center">
+        <div className="py-2 grid grid-cols-1 md:grid-cols-[800px_350px] gap-10 items-start justify-center">
           {/* kolom kiri */}
           <article
             aria-labelledby={`artikel-${feat.id}`}

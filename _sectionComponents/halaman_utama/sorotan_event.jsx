@@ -202,7 +202,8 @@ export default function SorotanEvent() {
 
   return (
     <section 
-    className="bg-[#FFFFFF] py-8 mb-20 mt-20 relative overflow-visible border border-zinc-900" 
+    // className="bg-[#FFFFFF] py-8 mb-20 mt-20 relative overflow-visible border border-zinc-900" 
+    className="bg-[#FFFFFF] py-8 mb-20 mt-20 relative overflow-visible" 
     aria-labelledby="sorotan-title">
       <div className="max-w-[1920px] w-full mx-auto px-2 sm:px-2">
         {/* Section Title */}

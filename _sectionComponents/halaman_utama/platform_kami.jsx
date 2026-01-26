@@ -6,7 +6,8 @@ import Image from 'next/image';
 export default function PlatformKami() {
   return (
     <section
-      className="w-full p-6 border border-zinc-900 mb-20"
+      // className="w-full p-6 mb-20 border border-zinc-900"
+      className="w-full p-6 mb-20"
       aria-labelledby="platform-kami-title"
     >
       <header className="max-w-2xl text-center mx-auto">
