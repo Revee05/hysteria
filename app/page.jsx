@@ -9,8 +9,8 @@ export default function Home() {
     <div className="flex flex-col bg-white text-zinc-900 font-sans dark:bg-white dark:text-zinc-900">
       <Hero />
       <SorotanEvent />
-      {/* <PlatformKami />
-      <ArtikelHysteria /> */}
+      <PlatformKami />
+      <ArtikelHysteria />
     </div>
   );
 }

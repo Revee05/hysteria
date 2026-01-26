@@ -118,8 +118,17 @@ export default function Hero() {
 
   if (loading) {
     return (
-      <section className="relative w-full max-w-[1920px] h-[950px] overflow-hidden mx-auto bg-zinc-900 flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
+      <section className="relative w-full max-w-[1920px] h-[950px] overflow-hidden mx-auto bg-zinc-900">
+        <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"></div>
+        <div className="relative z-10 h-full flex items-start pt-64 md:pt-72 lg:pt-[288px]">
+          <div className="w-full max-w-[700px] ml-0 sm:ml-8 md:ml-12 lg:ml-20 px-4 sm:px-0 text-left">
+            <div className="space-y-4 animate-pulse">
+              <div className="h-8 sm:h-12 md:h-16 lg:h-20 bg-white/20 rounded w-3/4"></div>
+              <div className="h-4 sm:h-5 md:h-6 bg-white/10 rounded w-2/3"></div>
+              <div className="h-3 bg-white/10 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
       </section>
     );
   }
