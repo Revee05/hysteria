@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../../lib/context/auth-context";
+import { MAX_MEDIA_SIZE, MAX_MEDIA_SIZE_MB } from "../../../modules/admin/hero/validators/hero.validator";
 import Card from "../../../components/ui/Card";
 import DataTable from "../../../components/ui/DataTable";
 import CrudModals from "../../../components/adminUI/Crud.Modals";
@@ -14,6 +15,7 @@ import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
+import { Help } from "@mui/icons-material";
 
 export default function HeroManagement() {
   const { apiCall, csrfToken } = useAuth();
@@ -131,11 +133,11 @@ export default function HeroManagement() {
           setHeroes((prev) => prev.map((h) => (h.id === hero.id ? { ...h, isActive: !h.isActive } : h)));
         }
       } else {
-        setToast({ visible: true, message: json?.error?.message || 'Failed to change status', type: 'error' });
+        setToast({ visible: true, message: json?.error?.message || 'Gagal ubah status', type: 'error' });
       }
     } catch (error) {
       console.error('Error toggling status:', error);
-      setToast({ visible: true, message: 'Failed to change status', type: 'error' });
+      setToast({ visible: true, message: 'Gagal ubah status', type: 'error' });
     }
   };
 
@@ -159,10 +161,16 @@ export default function HeroManagement() {
       const method = editingHero ? "PUT" : "POST";
 
       let res;
-      // If a file was attached use multipart/form-data
-      if (formData.media && formData.media instanceof File) {
+      // Normalize media (File | FileList | array) and use multipart when file present
+      const mediaFile = formData.media && (formData.media instanceof File ? formData.media : (formData.media[0] || null));
+      if (mediaFile) {
+        // enforce configured max size
+        if (mediaFile.size && mediaFile.size > MAX_MEDIA_SIZE) {
+          setToast({ visible: true, message: `File size must be ${MAX_MEDIA_SIZE_MB} MB or less`, type: "error" });
+          return;
+        }
         const fd = new FormData();
-        fd.append("file", formData.media);
+        fd.append("media", mediaFile);
         // append other fields
         Object.entries(formData).forEach(([k, v]) => {
           if (k === "media") return;
@@ -206,14 +214,14 @@ export default function HeroManagement() {
     if (mode === "delete") return [];
     const errs = [];
     if (!data) return ["Data is missing"];
-    if (!data.title || String(data.title).trim() === "") errs.push("title harus diisi");
-    else if (String(data.title).trim().length < 3) errs.push("title minimal 3 karakter");
+    if (!data.title || String(data.title).trim() === "") errs.push("Judul wajib");
+    else if (String(data.title).trim().length < 3) errs.push("Judul ≥3 karakter");
 
-    if (!data.description || String(data.description).trim() === "") errs.push("description harus diisi");
-    else if (String(data.description).trim().length < 5) errs.push("description minimal 5 karakter");
+    if (!data.description || String(data.description).trim() === "") errs.push("Deskripsi wajib");
+    else if (String(data.description).trim().length < 10) errs.push("Deskripsi ≥10 karakter");
 
     // Require either a source URL or an uploaded media file
-    if ((!data.source || String(data.source).trim() === "") && !data.media) errs.push("Isi URL sumber atau unggah file media");
+    if ((!data.source || String(data.source).trim() === "") && !data.media) errs.push("Masukkan URL atau unggah file");
 
     // If a media file is provided, skip URL validation (upload overrides URL)
     if (data.media) return errs;
@@ -224,13 +232,13 @@ export default function HeroManagement() {
       try {
         const u = new URL(src);
         if (![ "https:"].includes(u.protocol)) {
-          errs.push("URL sumber harus diawali https:// atau berupa path lokal yang valid");
+          errs.push("Gunakan https:// atau path lokal");
         }
       } catch (e) {
         // If URL parsing fails, permit relative/local stored paths like '/uploads/...' or paths without scheme
         const looksLikeLocal = src.startsWith("/") || src.startsWith("uploads/") || !src.includes(":");
         if (!looksLikeLocal) {
-          errs.push("URL sumber tidak valid. Gunakan http(s) URL atau path lokal (mis. /uploads/...) yang sudah tersimpan.");
+          errs.push("URL tidak valid. Gunakan https:// atau path lokal");
         }
       }
     }
@@ -295,6 +303,9 @@ export default function HeroManagement() {
             <p className="mt-1 text-sm text-zinc-500 truncate">
               Manage heroes for your homepage
             </p>
+            <p className="mt-2 text-xs text-rose-400">
+              note: hanya 1 hero yang boleh active!
+            </p>
           </div>
 
           <div className="w-full sm:w-auto">
@@ -333,8 +344,7 @@ export default function HeroManagement() {
               type: "text",
               placeholder: "https://example.com/video.mp4",
               required: false,
-              help:
-                "Masukkan URL publik (https)",
+              validation: "Masukkan video URL publik (https). (hapus URL jika ingin mengupload file)",
             },
             {
               name: "media",
@@ -343,11 +353,10 @@ export default function HeroManagement() {
               accept: "image/*,video/*",
               multiple: false,
               placeholder: "",
-              help:
-                "Unggah gambar atau video sebagai pengganti URL. Dukung: JPG, PNG (gambar); MP4 (video). Ukuran maks: 3 MB. Jika mengunggah, tidak perlu isi URL.",
+              validation: `Maks ${MAX_MEDIA_SIZE_MB} MB. Jika ada URL, tidak perlu upload.`,
             },
-          { name: "title", label: "Title", type: "text", placeholder: "Enter hero title", required: true },
-          { name: "description", label: "Short Description", type: "textarea", placeholder: "Enter hero description", required: true },
+          { name: "title", label: "Title", type: "text", placeholder: "Enter hero title", required: true, validation: 'Minimal 3 karakter.' },
+          { name: "description", label: "Short Description", type: "textarea", placeholder: "Enter hero description", required: true, validation: 'Minimal 10 karakter.' },
           { name: "isActive", label: "Active", type: "checkbox", placeholder: "Set as active hero section" },
         ]}
         initialData={formData}
@@ -364,15 +373,17 @@ export default function HeroManagement() {
             const method = editingHero ? "PUT" : "POST";
 
             let res;
-            if (data.media && data.media instanceof File) {
-              // validate file size (<= 3MB)
-              if (data.media.size && data.media.size > 5 * 1024 * 1024) {
-                setToast({ visible: true, message: "File size must be 3 MB or less", type: "error" });
+            // normalize media (File | FileList | array)
+            const mediaFile = data.media && (data.media instanceof File ? data.media : (data.media[0] || null));
+            if (mediaFile) {
+              // enforce configured max size
+              if (mediaFile.size && mediaFile.size > MAX_MEDIA_SIZE) {
+                setToast({ visible: true, message: `Maks ${MAX_MEDIA_SIZE_MB} MB`, type: "error" });
                 return false;
               }
 
               const fd = new FormData();
-              fd.append("file", data.media);
+              fd.append("media", mediaFile);
               Object.entries(data).forEach(([k, v]) => {
                 if (k === "media") return;
                 if (v === undefined || v === null) return;
@@ -409,13 +420,13 @@ export default function HeroManagement() {
             // If server responded with validation error, show it and do not close modal
             const serverMsg = json?.error?.message || json?.message || (json?.error && typeof json.error === 'string' ? json.error : null);
             if (json && !json.success) {
-              setToast({ visible: true, message: serverMsg || "Server rejected input", type: "error" });
+              setToast({ visible: true, message: serverMsg || "Server menolak input", type: "error" });
               return false;
             }
             return true;
           } catch (error) {
             console.error("Error saving hero:", error);
-            setToast({ visible: true, message: "Failed to save. Check your input and try again.", type: "error" });
+            setToast({ visible: true, message: "Gagal menyimpan. Periksa input.", type: "error" });
             return false;
           }
         }}

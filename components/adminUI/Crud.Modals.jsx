@@ -253,10 +253,9 @@ export default function CrudModals({
               )}
 
               {fld.help ? <p className="mt-1 text-xs text-zinc-500">{fld.help}</p> : null}
+              {/* Validation / requirement hint (shown in red) */}
+              {fld.validation ? <p className="mt-1 text-xs text-red-600">{fld.validation}</p> : null}
               {/* Guidance for edit mode: tell user to remove URL to enable upload, or remove upload to enable URL */}
-              {mode === 'edit' && fld.name === 'media' && form && form.source && String(form.source).trim() !== '' ? (
-                <p className="mt-1 text-xs text-yellow-700">Jika ingin mengganti dengan file upload, hapus nilai pada field <strong>Source</strong> terlebih dahulu supaya bisa upload file.</p>
-              ) : null}
             </div>
           ))}
         </div>

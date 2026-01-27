@@ -28,6 +28,6 @@ export const COOKIE_OPTIONS = {
 		secure: isProd,
 		sameSite: 'strict',
 		path: '/',
-		maxAge: 60 * 60,
+		maxAge: 90 * 60, // 90 menit
 	},
 }
