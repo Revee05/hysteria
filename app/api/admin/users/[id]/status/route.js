@@ -13,12 +13,12 @@ import {
 /**
  * PUT /api/admin/users/[id]/status
  * Change user status with reason tracking
- * Required permission: users.status.update
+ * Required permission: user.status.update
  */
 export async function PUT(request, { params }) {
   try {
-    // Require authentication and 'users.status.update' permission
-    const user = await requireAuthWithPermission(request, 'users.status.update');
+    // Require authentication and 'user.status.update' permission
+    const user = await requireAuthWithPermission(request, 'user.status.update');
 
     const resolvedParams = await params;
     const userId = parseInt(resolvedParams.id, 10);

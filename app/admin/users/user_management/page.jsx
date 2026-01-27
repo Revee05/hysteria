@@ -324,16 +324,25 @@ export default function UserManagement() {
     { field: 'id', headerName: 'ID', freeze: true },
     { field: 'name', headerName: 'Name', render: (r) => r.name || '-',freeze: true },
     { field: 'email', headerName: 'Email', freeze: true },
-    { 
-      field: 'status', 
-      headerName: 'Status', 
-      render: (r) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          r.status?.key === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-        }`}>
-          {r.status?.name || '-'}
-        </span>
-      )
+    {
+      field: 'status',
+      headerName: 'Status',
+      render: (r) => {
+        const key = r.status?.key;
+        const classes = key === 'ACTIVE'
+          ? 'bg-green-100 text-green-700'
+          : key === 'SUSPEND'
+            ? 'bg-yellow-100 text-yellow-700'
+            : key === 'BANNED'
+              ? 'bg-red-100 text-red-700'
+              : 'bg-gray-100 text-gray-700';
+
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${classes}`}>
+            {r.status?.name || '-'}
+          </span>
+        );
+      }
     },
     {
       field: 'lastLoginAt',
@@ -366,7 +375,7 @@ export default function UserManagement() {
       headerName: 'Actions',
       render: (r) => (
         <div className="grid grid-cols-2 gap-1 justify-items-center">
-          <PermissionGate requiredPermissions={"users.status.update"} disableOnDenied>
+          <PermissionGate requiredPermissions={"user.status.update"} disableOnDenied>
             <IconButton 
               size="small" 
               onClick={(e) => { e.stopPropagation(); openStatusModal(r); }} 

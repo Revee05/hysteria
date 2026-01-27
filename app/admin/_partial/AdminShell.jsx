@@ -6,6 +6,7 @@ import AdminSidebar from "./AdminSidebar.jsx";
 import { AuthProvider } from "../../../lib/context/auth-context.jsx";
 import Users from "../users/user_management/page.jsx";
 import Permission from "../users/permission/page.jsx";
+import StatusManagement from "../users/status_management/page.jsx";
 import HeroManagement from "../section/HeroManagement.jsx";
 
 export default function AdminShell({ children }) {
@@ -31,6 +32,8 @@ export default function AdminShell({ children }) {
       case 'users':
       case 'users.user_management':
         return <Users />;
+      case 'users.status_management':
+        return <StatusManagement />;
       case 'users.permission':
         return <Permission />;
       case 'section':

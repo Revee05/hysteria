@@ -6,12 +6,12 @@ import logger from '../../../../../../../lib/logger.js';
 /**
  * GET /api/admin/users/[id]/status/history
  * Get user status change history
- * Required permission: users.read
+ * Required permission: user.status.get
  */
 export async function GET(request, { params }) {
   try {
-    // Require authentication and 'users.read' permission
-    const user = await requireAuthWithPermission(request, 'users.read');
+    // Require authentication and 'user.status.get' permission
+    const user = await requireAuthWithPermission(request, 'user.status.get');
 
     const resolvedParams = await params;
     const userId = parseInt(resolvedParams.id, 10);

@@ -58,11 +58,11 @@ export default function ChangeStatusModal({
       </DialogTitle>
       
       <form onSubmit={handleSubmit}>
-        <DialogContent className="mt-4 space-y-6 p-6">
+        <DialogContent className="mt-4 space-y-4 p-6">
           {user && (
             <div className="bg-zinc-50 p-4 rounded-lg space-y-2">
               <div className="text-sm">
-                <span className="font-medium text-zinc-700">User:</span>{' '}
+                <span className="font-medium text-zinc-700">Name: </span>{' '}
                 <span className="text-zinc-900">{user.name || user.email}</span>
               </div>
               <div className="text-sm">

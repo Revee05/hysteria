@@ -11,6 +11,7 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
     { key: 'users', label: 'Users', view: 'users', icon: IconUsers, enabled: true, children: [
       { key: 'user_management', label: 'User Management', view: 'users.user_management', enabled: true },
       { key: 'permission', label: 'Permission', view: 'users.permission', enabled: true },
+      { key: 'status_management', label: 'Status', view: 'users.status_management', enabled: true },
     ]},
     { key: 'section', label: 'Section', view: 'section', icon: IconSection, enabled: true, children: [
       { key: 'hero', label: 'Hero', view: 'section.hero', enabled: true },
