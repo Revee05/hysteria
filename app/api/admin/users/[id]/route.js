@@ -14,8 +14,11 @@ export async function GET(request, { params }) {
 
 		const resolvedParams = await params
 		const userId = parseInt(resolvedParams.id)
+
+		logger.info('Get user details request', { adminId: user.id, userId })
 		
 		if (!userId || isNaN(userId)) {
+			logger.error('Get user details failed - invalid userId', { adminId: user.id, userId: resolvedParams.id })
 			return respondError({
 				status: 400,
 				code: 'VALIDATION_ERROR',
@@ -46,7 +49,7 @@ export async function GET(request, { params }) {
 			data: userWithoutPassword,
 		})
 	} catch (error) {
-		logger.error('Failed to fetch user details', { error: error.message })
+		logger.error('Failed to fetch user details', { error: error.message, stack: error.stack })
 		return respondError(error)
 	}
 }

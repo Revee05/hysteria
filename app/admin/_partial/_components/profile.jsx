@@ -120,7 +120,7 @@ export default function ProfileSheet({ open, onClose }) {
             {!showConfirm ? (
               <button
                 onClick={() => setShowConfirm(true)}
-                className="w-full rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+                className="w-full rounded-md border border-red-400 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
               >
                 Keluar
               </button>

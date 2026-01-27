@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Logo, IconDashboard, IconUsers, IconSettings, IconPlatform, IconEvent, IconPost, IconSocial } from "../../../components/ui/icon";
+import { Logo, IconDashboard, IconUsers, IconSettings, IconSection, IconPlatform, IconEvent, IconPost, IconSocial } from "../../../components/ui/icon";
 
 export default function AdminSidebar({ open, collapsed, onClose, onToggleCollapse, onNavigate, currentView }) {
   const [openKeys, setOpenKeys] = useState({});
@@ -11,12 +11,17 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
     { key: 'users', label: 'Users', view: 'users', icon: IconUsers, enabled: true, children: [
       { key: 'user_management', label: 'User Management', view: 'users.user_management', enabled: true },
       { key: 'permission', label: 'Permission', view: 'users.permission', enabled: true },
+      { key: 'status_management', label: 'Status', view: 'users.status_management', enabled: true },
+    ]},
+    { key: 'section', label: 'Section', view: 'section', icon: IconSection, enabled: true, children: [
+      { key: 'hero', label: 'Hero', view: 'section.hero', enabled: true },
     ]},
     { key: 'platform', label: 'Platform', view: 'platform', icon: IconPlatform, enabled: false },
     { key: 'event', label: 'Event', view: 'event', icon: IconEvent, enabled: false },
     { key: 'post', label: 'Post', view: 'post', icon: IconPost, enabled: false },
-    { key: 'social', label: 'Social', view: 'social', icon: IconSocial, enabled: false },
-    { key: 'settings', label: 'Settings', view: 'settings', icon: IconSettings, enabled: false },
+    { key: 'settings', label: 'Settings', view: 'settings', icon: IconSettings, enabled: true, children: [
+      { key: 'social', label: 'Social', view: 'settings.social', enabled: false },
+    ]},
   ];
 
   const toggleOpen = (key) => setOpenKeys(prev => ({ ...prev, [key]: !prev[key] }));

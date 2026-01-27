@@ -61,8 +61,8 @@ function DialogShell({ opts = {}, onClose, onConfirm }) {
       </div>
 
       <div className={`fixed inset-0 z-50 flex items-center justify-center p-4`} aria-modal="true" role="dialog">
-        <div className={`w-full ${sizeClass} rounded-lg bg-white shadow-2xl ring-1 ring-zinc-100 overflow-hidden transform transition-all duration-200`}>
-          <header className="px-6 py-4 border-b">
+        <div className={`w-full ${sizeClass} rounded-lg bg-white shadow-2xl ring-1 ring-zinc-100 transform transition-all duration-200 max-h-[80vh] flex flex-col`}>
+          <header className="px-6 py-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-start gap-4">
                 {opts.icon ? (
@@ -87,11 +87,11 @@ function DialogShell({ opts = {}, onClose, onConfirm }) {
             </div>
           </header>
 
-          <div className="p-6 text-sm text-zinc-700 leading-relaxed">
+          <div className="p-6 text-sm text-zinc-700 leading-relaxed overflow-y-auto flex-1">
             {typeof content === "function" ? content({ onClose, onConfirm }) : content}
           </div>
 
-          <div className="px-6 py-4 border-t flex justify-end gap-3 bg-gradient-to-b from-white/40 to-white/0">
+          <div className="px-6 py-4 border-t flex-shrink-0 flex justify-end gap-3 bg-gradient-to-b from-white/40 to-white/0">
             {footer ? (
               footer({ onClose, onConfirm })
             ) : (
@@ -115,3 +115,4 @@ function DialogShell({ opts = {}, onClose, onConfirm }) {
 }
 
 export default DialogProvider;
+export { DialogShell };

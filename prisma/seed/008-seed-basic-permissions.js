@@ -50,6 +50,26 @@ module.exports = async function seed() {
     );
     let roleGroupId = roleGroupResult.rows[0]?.id;
 
+    const heroGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["hero-management", "Hero Management", "Permissions related to hero section management"],
+    );
+    let heroGroupId = heroGroupResult.rows[0]?.id;
+
+    const statusGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["status-management",
+        "Status Management",
+        "Permissions related to status/master management"],
+    );
+    let statusGroupId = statusGroupResult.rows[0]?.id;
+
     // If groups not returned (already exist), fetch them
     if (!userGroupId) {
       const existing = await client.query(
@@ -71,6 +91,20 @@ module.exports = async function seed() {
         ["role-management"],
       );
       roleGroupId = existing.rows[0].id;
+    }
+    if (!heroGroupId) {
+      const existing = await client.query(
+        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
+        ["hero-management"],
+      );
+      heroGroupId = existing.rows[0].id;
+    }
+    if (!statusGroupId) {
+      const existing = await client.query(
+        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
+        ["status-management"],
+      );
+      statusGroupId = existing.rows[0].id;
     }
 
     // Define all permissions
@@ -124,6 +158,46 @@ module.exports = async function seed() {
         key: "users.roles.replace",
         name: "Replace User Roles",
         description: "Bulk replace all roles for a user",
+        groupId: userGroupId,
+      },
+
+      // Status management (master CRUD)
+      {
+        key: "status.get",
+        name: "Read Status Types",
+        description: "View available status types",
+        groupId: statusGroupId,
+      },
+      {
+        key: "status.create",
+        name: "Create Status Type",
+        description: "Create new status types",
+        groupId: statusGroupId,
+      },
+      {
+        key: "status.update",
+        name: "Update Status Type",
+        description: "Update existing status types",
+        groupId: statusGroupId,
+      },
+      {
+        key: "status.delete",
+        name: "Delete Status Type",
+        description: "Delete status types (only if unused)",
+        groupId: statusGroupId,
+      },
+
+      // User status operations (assign/change user status)
+      {
+        key: "user.status.get",
+        name: "Read User Status",
+        description: "View user status and history",
+        groupId: userGroupId,
+      },
+      {
+        key: "user.status.update",
+        name: "Update User Status",
+        description: "Change user status (active, suspended, banned, etc.)",
         groupId: userGroupId,
       },
 
@@ -229,6 +303,32 @@ module.exports = async function seed() {
         name: "Delete Permission Groups",
         description: "Delete permission groups",
         groupId: permGroupId,
+      },
+
+      // Hero management
+      {
+        key: "hero.read",
+        name: "Read Hero Sections",
+        description: "View hero sections",
+        groupId: heroGroupId,
+      },
+      {
+        key: "hero.create",
+        name: "Create Hero Section",
+        description: "Create new hero sections",
+        groupId: heroGroupId,
+      },
+      {
+        key: "hero.update",
+        name: "Update Hero Section",
+        description: "Update existing hero sections",
+        groupId: heroGroupId,
+      },
+      {
+        key: "hero.delete",
+        name: "Delete Hero Section",
+        description: "Delete hero sections",
+        groupId: heroGroupId,
       },
     ];
 

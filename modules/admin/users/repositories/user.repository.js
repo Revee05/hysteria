@@ -135,3 +135,56 @@ export async function updateUserById(id, data) {
 		},
 	})
 }
+
+/**
+ * Create user status history record
+ * @param {Object} data
+ * @param {number} data.userId - User ID
+ * @param {number} data.statusId - New status ID
+ * @param {string} data.reason - Reason for status change
+ * @param {Date|null} data.endAt - When this status ends (null = permanent)
+ * @returns {Promise<UserStatusHistory>}
+ */
+export async function createStatusHistory(data) {
+	return prisma.userStatusHistory.create({
+		data,
+		include: {
+			status: true,
+		},
+	})
+}
+
+/**
+ * Close previous status history records for a user
+ * Sets endAt to now for all records where endAt is null
+ * @param {number} userId
+ * @returns {Promise<{count: number}>}
+ */
+export async function closePreviousStatusHistory(userId) {
+	return prisma.userStatusHistory.updateMany({
+		where: {
+			userId,
+			endAt: null,
+		},
+		data: {
+			endAt: new Date(),
+		},
+	})
+}
+
+/**
+ * Get user status history
+ * @param {number} userId
+ * @returns {Promise<Array<UserStatusHistory>>}
+ */
+export async function getUserStatusHistory(userId) {
+	return prisma.userStatusHistory.findMany({
+		where: { userId },
+		include: {
+			status: true,
+		},
+		orderBy: {
+			startAt: 'desc',
+		},
+	})
+}

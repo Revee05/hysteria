@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import SearchButton from "../ui/SearchButton";
-import Sheet from "../ui/Sheet";
 
-export default function Header() {
+export default function Header({ onMenuToggle }) {
   const pathname = usePathname() || "";
-  const [open, setOpen] = useState(false);
   const [isAtTop, setIsAtTop] = useState(true);
 
   const isHome = pathname === "/";
@@ -43,11 +41,11 @@ export default function Header() {
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-3">
             <Image
-              src="/next.svg"
+              src="/svg/Logo-hysteria.svg"
               alt="Logo"
-              width={120}
-              height={28}
-              className="dark:invert"
+              width={70}
+              height={15}
+              // className="filter invert w-[90px] h-auto"
               priority
             />
           </Link>
@@ -82,7 +80,7 @@ export default function Header() {
 
           {/* Hamburger */}
           <button
-            onClick={() => setOpen(!open)}
+            onClick={onMenuToggle}
             aria-label="Toggle menu"
             className="p-2 rounded-md text-zinc-700 dark:text-zinc-50"
           >
@@ -99,84 +97,6 @@ export default function Header() {
           </button>
         </div>
       </div>
-
-      {/* Mobile menu (fullscreen sheet from right) */}
-      <Sheet
-        open={open}
-        onClose={() => setOpen(false)}
-        anchor="right"
-        title={null}
-        // make backdrop darker + blur to match Figma overlay
-        backdropSx={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
-        // make the Drawer full viewport so we can render a fullscreen split layout
-        paperSx={{
-          width: '100vw',
-          maxWidth: '100vw',
-          height: '100vh',
-          bgcolor: 'transparent',
-          boxShadow: 'none',
-          p: 0,
-        }}
-      >
-        <div className="h-full min-h-[100vh] flex w-full">
-          {/* Left: illustration / hero area (hidden on small screens) */}
-          <div
-            className="hidden md:block flex-1 h-full bg-center bg-cover"
-            style={{ backgroundImage: "url('/illustration-hero.jpg')", minHeight: '100vh' }}
-          />
-
-          {/* Right: pink menu panel */}
-          <div className="w-full md:w-[36vw] lg:w-[420px] h-full flex items-center">
-            <div className="w-full h-full bg-[#ff2b87] md:rounded-l-[48px] px-6 py-8 md:px-10 md:py-12 flex flex-col">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-white/90">Close</div>
-                <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <nav className="flex flex-col gap-6 items-start justify-center flex-1">
-                <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-3 text-white text-xl font-semibold">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  Beranda
-                </Link>
-
-                <Link href="/about" onClick={() => setOpen(false)} className="flex items-center gap-3 text-white text-xl font-semibold">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  Tentang Kami
-                </Link>
-
-                <Link href="/program" onClick={() => setOpen(false)} className="flex items-center gap-3 text-white text-xl font-semibold">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  Program Hysteria
-                </Link>
-
-                <Link href="/artikel" onClick={() => setOpen(false)} className="flex items-center gap-3 text-white text-xl font-semibold">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  Artikel
-                </Link>
-
-                <Link href="/contact" onClick={() => setOpen(false)} className="flex items-center gap-3 text-white text-xl font-semibold">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transform rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                  Kontak Kami
-                </Link>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </Sheet>
     </header>
   );
 }

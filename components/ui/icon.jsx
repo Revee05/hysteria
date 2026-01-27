@@ -1,4 +1,6 @@
-import { useState, useId } from 'react';
+import { useState, useId, useEffect } from 'react';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 export function Logo({ className = '', size = 32, initials = 'H', bgColor = '#F3F4F6', textColor = '#374151', label = 'Hysteria logo' }) {
   return (
@@ -40,6 +42,16 @@ export function IconSettings({ className = '', size = 20 }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
       <path d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06A2 2 0 014.28 17.9l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82L4.2 6.6A2 2 0 016.99 3.77l.06.06a1.65 1.65 0 001.82.33h.09A1.65 1.65 0 0010 3.9V3a2 2 0 014 0v.09c.2.07.39.18.56.31.7.49 1.57.4 2.16-.19l.06-.06A2 2 0 0119.4 6.6l-.06.06c-.49.7-.4 1.57.19 2.16.13.17.24.36.31.56H21a2 2 0 010 4h-.09c-.16.58-.72 1-1.31 1z" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function IconSection({ className = '', size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="2" stroke="#6B7280" strokeWidth="1.2" fill="none" />
+      <path d="M3 9h18" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M3 15h18" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -89,9 +101,9 @@ export function IconSocial({ className = '', size = 20 }) {
 export function IconInstagram({ className = '', size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
-      <rect x="3" y="3" width="18" height="18" rx="5" stroke="#6B7280" strokeWidth="1.2" fill="none" />
-      <circle cx="12" cy="12" r="4" stroke="#6B7280" strokeWidth="1.2" fill="none" />
-      <circle cx="17.5" cy="6.5" r="0.9" fill="#6B7280" />
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" />
     </svg>
   );
 }
@@ -99,8 +111,8 @@ export function IconInstagram({ className = '', size = 20 }) {
 export function IconFacebook({ className = '', size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
-      <rect x="2" y="2" width="20" height="20" rx="3" stroke="#6B7280" strokeWidth="1.2" fill="none" />
-      <path d="M14.5 8.5h1.9v2.2h-1.9v6H12v-6h-1.3V9.7H12V8.6c0-1.1.6-2.6 2.5-2.6h1.5v1.5h-.5c-.4 0-.9.2-.9.9v.7z" fill="#6B7280" />
+      <rect x="2" y="2" width="20" height="20" rx="3" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <path d="M14.5 8.5h1.9v2.2h-1.9v6H12v-6h-1.3V9.7H12V8.6c0-1.1.6-2.6 2.5-2.6h1.5v1.5h-.5c-.4 0-.9.2-.9.9v.7z" fill="currentColor" />
     </svg>
   );
 }
@@ -146,9 +158,53 @@ export function IconLinkedIn({ className = '', size = 20 }) {
 export function IconYoutube({ className = '', size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
-      <rect x="3" y="6" width="18" height="12" rx="3" stroke="#6B7280" strokeWidth="1.2" fill="none" />
-      <path d="M10 9.5l5 2.5-5 2.5V9.5z" fill="#6B7280" />
+      <rect x="3" y="6" width="18" height="12" rx="3" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <path d="M10 9.5l5 2.5-5 2.5V9.5z" fill="currentColor" />
     </svg>
+  );
+}
+
+export function IconSpeaker({ className = '', size = 20, initialMuted = false, muted: mutedProp, onChange }) {
+  const isControlled = typeof mutedProp !== 'undefined';
+  const [internalMuted, setInternalMuted] = useState(initialMuted);
+  const muted = isControlled ? mutedProp : internalMuted;
+
+  useEffect(() => {
+    if (!isControlled) return;
+    // when controlled, keep internal state in sync for any local reads
+    setInternalMuted(mutedProp);
+  }, [mutedProp, isControlled]);
+
+  const toggle = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const next = !muted;
+    if (!isControlled) setInternalMuted(next);
+    if (onChange) onChange(next);
+  };
+
+  const Icon = muted ? VolumeOffIcon : VolumeUpIcon;
+
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={toggle}
+      aria-pressed={muted}
+      aria-label={muted ? 'Unmute' : 'Mute'}
+      style={{
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        width: size,
+        height: size,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Icon style={{ width: size, height: size }} />
+    </button>
   );
 }
 
@@ -235,7 +291,7 @@ export function Avatar({
 export function IconTelephone({ className = '', size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
-      <path d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 014.09 5.18 2 2 0 016 3h3a2 2 0 012 1.72c.12.99.38 2 .76 2.98a2 2 0 01-.45 2.11L10.91 9.09a16 16 0 006 6l1.18-1.18a2 2 0 012.11-.45c.98.38 1.99.64 2.98.76A2 2 0 0122 16.92z" stroke="#6B7280" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 014.09 5.18 2 2 0 016 3h3a2 2 0 012 1.72c.12.99.38 2 .76 2.98a2 2 0 01-.45 2.11L10.91 9.09a16 16 0 006 6l1.18-1.18a2 2 0 012.11-.45c.98.38 1.99.64 2.98.76A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }
@@ -243,9 +299,9 @@ export function IconTelephone({ className = '', size = 20 }) {
 export function IconMap({ className = '', size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
-      <path d="M3 6l7-3 7 3 7-3v13l-7 3-7-3L3 20V6z" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <path d="M10 3v14" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M17 6v14" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 6l7-3 7 3 7-3v13l-7 3-7-3L3 20V6z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M10 3v14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17 6v14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -253,8 +309,8 @@ export function IconMap({ className = '', size = 20 }) {
 export function IconEnvelope({ className = '', size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
-      <rect x="2" y="4" width="20" height="16" rx="2" stroke="#6B7280" strokeWidth="1.2" fill="none" />
-      <path d="M3 7l9 6 9-6" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <path d="M3 7l9 6 9-6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   );
 }
