@@ -31,7 +31,9 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen flex flex-col">
         <Providers>
           <Header onMenuToggle={() => setMenuOpen(!menuOpen)} />
-          <main>{children}</main>
+            <main>
+              {children}
+            </main>
           <Footer />
           <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
         </Providers>
