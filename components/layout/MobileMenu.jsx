@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Sheet from "../ui/Sheet";
@@ -24,6 +24,7 @@ function ArrowIcon({ active = false, rotate = false }) {
 export default function MobileMenu({ open, onClose }) {
   const [subOpen, setSubOpen] = useState(false);
   const [activeSub, setActiveSub] = useState(null);
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false));
 
   function openSub(key) {
     setActiveSub(key);
@@ -34,6 +35,21 @@ export default function MobileMenu({ open, onClose }) {
     setSubOpen(false);
     setActiveSub(null);
   }
+
+  useEffect(() => {
+    const m = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)') : null;
+    if (!m) return;
+    const handler = (e) => setIsMobile(e.matches);
+    // register listener (fallback for older browsers that use addListener)
+    if (typeof m.addEventListener === 'function') {
+      m.addEventListener('change', handler);
+      return () => m.removeEventListener('change', handler);
+    } else if (typeof m.addListener === 'function') {
+      m.addListener(handler);
+      return () => m.removeListener(handler);
+    }
+    return;
+  }, []);
 
   return (
     <Sheet
@@ -118,6 +134,24 @@ export default function MobileMenu({ open, onClose }) {
                       Tentang Kami
                     </button>
                   </div>
+
+                  {isMobile && subOpen && activeSub === 'about' && (
+                    <div className="pr-4 mt-2">
+                      <div className="border-t border-b border-gray-200 p-0">
+                        <ul id="submenu-about-mobile" className="space-y-1 text-right">
+                          <li>
+                            <Link href="/about#visi" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Visi dan Misi</Link>
+                          </li>
+                          <li>
+                            <Link href="/about#sejarah" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Sejarah Hysteria</Link>
+                          </li>
+                          <li>
+                            <Link href="/about#panduan-visual" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Panduan Visual</Link>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </li>
 
                 <li className="w-full">
@@ -139,6 +173,21 @@ export default function MobileMenu({ open, onClose }) {
                       Program Hysteria
                     </button>
                   </div>
+
+                  {isMobile && subOpen && activeSub === 'program' && (
+                    <div className="pr-4 mt-2">
+                      <div className="border-t border-b border-gray-200 p-0">
+                        <ul id="submenu-program-mobile" className="space-y-1 text-right">
+                          <li>
+                            <Link href="/program/1" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Program A</Link>
+                          </li>
+                          <li>
+                            <Link href="/program/2" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Program B</Link>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </li>
 
                 <li className="w-full">
@@ -166,6 +215,21 @@ export default function MobileMenu({ open, onClose }) {
                       Platform
                     </button>
                   </div>
+
+                  {isMobile && subOpen && activeSub === 'platform' && (
+                    <div className="pr-4 mt-2">
+                      <div className="border-t border-b border-gray-200 p-0">
+                        <ul id="submenu-platform-mobile" className="space-y-1 text-right">
+                          <li>
+                            <Link href="/platform/web" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Platform Web</Link>
+                          </li>
+                          <li>
+                            <Link href="/platform/mobile" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Platform Mobile</Link>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </li>
 
                 <li className="w-full">
@@ -187,6 +251,21 @@ export default function MobileMenu({ open, onClose }) {
                       Artikel
                     </button>
                   </div>
+
+                  {isMobile && subOpen && activeSub === 'artikel' && (
+                    <div className="pr-4 mt-2">
+                      <div className="border-t border-b border-gray-200 p-0">
+                        <ul id="submenu-artikel-mobile" className="space-y-1 text-right">
+                          <li>
+                            <Link href="/artikel" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Terbaru</Link>
+                          </li>
+                          <li>
+                            <Link href="/artikel/categories" onClick={() => { closeSub(); onClose(); }} className="block text-gray-700 px-3 py-2 rounded hover:bg-gray-50">Kategori</Link>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </li>
 
                 <li className="w-full">
