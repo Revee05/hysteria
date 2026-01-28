@@ -77,7 +77,7 @@ export default function MobileMenu({ open, onClose }) {
         zIndex: 100,
       }}
     >
-      <div className="relative h-full min-h-[100vh] flex w-full min-w-0 overflow-hidden">
+      <div className="relative h-full min-h-[100vh] flex w-full min-w-0 overflow-hidden justify-end">
         {/* Left: illustration / hero area (hidden on small screens) */}
         <div
           className="hidden md:block absolute left-0 top-0 w-full min-w-[600px] bg-center bg-cover min-h-[100vh] z-0 pointer-events-none"
@@ -85,10 +85,10 @@ export default function MobileMenu({ open, onClose }) {
         />
 
         {/* Right: pink menu panel (overlay) wrapper */}
-        <div className="absolute right-0 top-0 h-full w-full md:w-[36vw] lg:w-[300px] flex-shrink-0 pointer-events-auto">
+        <div className="h-full w-[70vw] md:w-[36vw] lg:w-[300px] flex-shrink-0 pointer-events-auto">
           
           {/* menu panel container */}
-          <div className="w-full h-full bg-[#E83C91] md:rounded-l-[25px] px-6 py-8 md:px-10 md:py-12 flex flex-col relative z-30 ">
+          <div className="w-full h-full bg-[#E83C91] rounded-l-[25px] md:rounded-l-[25px] px-6 py-8 md:px-10 md:py-12 flex flex-col relative z-30 ">
             
             {/* close btn */}
             <div className="flex items-center justify-end">
@@ -278,12 +278,14 @@ export default function MobileMenu({ open, onClose }) {
           </div>
         </div>
         
-        {/* nested submenu panel pinned left of the menu */}
-        {subOpen && (
+        {/* nested submenu panel pinned left of the menu (desktop only) */}
+        {subOpen && !isMobile && (
           <div className="absolute top-0 bottom-0 left-0 right-0 md:right-[calc(36vw-12px)] lg:right-[calc(300px-20px)] z-10 bg-[#f7f7f7] overflow-auto transition-transform duration-200" role="dialog" aria-modal="true" style={{boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.02)'}}>
             <div className="w-full h-full flex flex-col p-6 pr-8 md:pr-12 lg:pr-16 border border-red-900">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-md font-semibold text-gray-700">{activeSub === 'about' ? 'Tentang Hysteria' : activeSub === 'program' ? 'Program Hysteria' : activeSub === 'platform' ? 'Platform' : activeSub === 'artikel' ? 'Artikel' : ''}</div>                  
+              
+              {/* header nested sheet */}
+              <div className="flex items-center justify-between mb-4 border-b-2 border-gray-200 pb-1">
+                <div className="text-md font-semibold text-gray-700">{activeSub === 'about' ? 'Tentang Hysteria' : activeSub === 'program' ? 'Program Hysteria' : activeSub === 'platform' ? 'Platform' : activeSub === 'artikel' ? 'Artikel' : ''}</div>                  
                   {/* close btn untuk nested sheet */}
                   <button onClick={closeSub} aria-label="Close submenu" className="p-2 text-gray-600 cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5}>
@@ -292,7 +294,7 @@ export default function MobileMenu({ open, onClose }) {
                   </button>
               </div>
 
-              <div className="flex-1 overflow-auto">
+              <div className="pt-2 flex-1 overflow-auto">
                 {activeSub === 'about' && (
                   <ul id="submenu-about" className="space-y-3 text-right pr-4">
                     <li><Link href="/about#visi" onClick={() => { closeSub(); onClose(); }} className="text-gray-700 cursor-pointer">Visi dan Misi</Link></li>

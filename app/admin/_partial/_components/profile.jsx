@@ -56,14 +56,16 @@ export default function ProfileSheet({ open, onClose }) {
   }, [open, refreshUser, user]);
 
   return (
-    <Sheet open={open} onClose={onClose}>
-        <div className="flex items-center justify-between p-4 border-b">
+    <Sheet open={open} onClose={onClose} panelClassName="rounded-l-xl overflow-hidden">
+
+        {/* header sheet profile */}
+        <div className="flex items-center justify-between px-4 py-2 border-b">
           <h2 className="text-lg font-semibold text-zinc-900">Profile</h2>
           <button
             ref={closeRef}
             aria-label="Close profile"
             onClick={onClose}
-            className="p-2 rounded-md hover:bg-zinc-100"
+            className="p-2 rounded-md hover:bg-zinc-100 cursor-pointer"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
               <path d="M4 4l12 12M16 4L4 16" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -71,10 +73,11 @@ export default function ProfileSheet({ open, onClose }) {
           </button>
         </div>
 
-        <div className="p-4">
+        {/* Isi kontent sheet profile */}
+        <div className="px-4 py-3">
             <div className="flex flex-col items-center gap-2">
             <Avatar
-              className="h-16 w-16"
+              className="h-16 w-16 rounded-full bg-transparent overflow-hidden"
               hoverBorderColor="#60A5FA"
               hoverBorderWidth={1}
               hoverScale={1.06}
