@@ -21,7 +21,8 @@ import ChangeStatusModal from '../../../../components/adminUI/ChangeStatusModal.
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 export default function UserManagement() {
-  const { apiCall } = useAuth();
+  const auth = useAuth();
+  const { apiCall, user: currentUser } = auth;
   const open = useDialog();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -58,6 +59,24 @@ export default function UserManagement() {
   const [availableStatuses, setAvailableStatuses] = useState([]);
   const [selectedStatusId, setSelectedStatusId] = useState(null);
   const [statusReason, setStatusReason] = useState('');
+
+  const normalizeKey = (k) => (k || '').toString().replace(/[_\s-]/g, '').toUpperCase();
+  const isSuperAdminUser = (user) => {
+    const roles = user?.roles || [];
+    return roles.some(ur => normalizeKey(ur.role?.key || ur.key) === 'SUPERADMIN');
+  };
+
+  const isCurrentSuperAdmin = () => {
+    const roles = currentUser?.roles || [];
+    // roles might be array of strings or objects
+    return roles.some(r => {
+      if (!r) return false;
+      if (typeof r === 'string') return normalizeKey(r) === 'SUPERADMIN';
+      // object shape might be { role: { key } } or { key }
+      const key = r.role?.key || r.key || r;
+      return normalizeKey(key) === 'SUPERADMIN';
+    });
+  };
 
   const fetchUsers = useCallback(async (cursor = null, searchTerm = '') => {
     try {
@@ -177,6 +196,12 @@ export default function UserManagement() {
   };
 
   const handleDelete = async (user) => {
+    // Prevent deleting SUPERADMIN users
+    if (isSuperAdminUser(user)) {
+      setToast({ message: 'Cannot delete Super Admin users', type: 'error', visible: true });
+      return;
+    }
+
     if (!confirm(`Are you sure to delete user "${user.name}"?`)) return;
     try {
       setLoading(true);
@@ -193,6 +218,11 @@ export default function UserManagement() {
   };
 
   const openEditModal = (user) => {
+    // Prevent non-SUPERADMINs from editing SUPERADMIN users
+    if (isSuperAdminUser(user) && !isCurrentSuperAdmin()) {
+      setToast({ message: 'Only Super Admin can edit Super Admin users', type: 'error', visible: true });
+      return;
+    }
     setEditingUser(user);
     setFormData({
       email: user.email,
@@ -204,6 +234,12 @@ export default function UserManagement() {
   };
 
   const openRoleModal = async (user) => {
+    // Prevent changing roles for SUPERADMIN users
+    if (isSuperAdminUser(user)) {
+      setToast({ message: 'Cannot change roles for Super Admin users', type: 'error', visible: true });
+      return;
+    }
+
     setRoleUser(user);
     setLoading(true);
     try {
@@ -219,7 +255,13 @@ export default function UserManagement() {
       const availableJson = await availableRes.json();
       
       setUserRoles(rolesJson.data.roles || []);
-      setAvailableRoles(availableJson.data.roles || []);
+
+      // Filter out any SUPERADMIN variant from available roles so it cannot
+      // be assigned/changed via the UI. Keep selectedRoles intact (if user
+      // already has SUPERADMIN it will remain selected but not togglable).
+      const allAvailable = availableJson.data.roles || [];
+      const filteredAvailable = allAvailable.filter(r => normalizeKey(r.key || r.role?.key) !== 'SUPERADMIN');
+      setAvailableRoles(filteredAvailable);
       
       const assignedRoleIds = new Set((rolesJson.data.roles || []).map(r => r.roleId));
       setSelectedRoles(assignedRoleIds);
@@ -268,6 +310,12 @@ export default function UserManagement() {
   };
 
   const openStatusModal = async (user) => {
+    // Prevent changing status for SUPERADMIN users
+    if (isSuperAdminUser(user)) {
+      setToast({ message: 'Cannot change status for Super Admin users', type: 'error', visible: true });
+      return;
+    }
+
     setStatusUser(user);
     setSelectedStatusId(user.status?.id || null);
     setStatusReason('');
@@ -376,44 +424,53 @@ export default function UserManagement() {
       render: (r) => (
         <div className="grid grid-cols-2 gap-1 justify-items-center">
           <PermissionGate requiredPermissions={"user.status.update"} disableOnDenied>
-            <IconButton 
-              size="small" 
-              onClick={(e) => { e.stopPropagation(); openStatusModal(r); }} 
-              className="text-orange-600"
-              title="Change status"
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); openStatusModal(r); }}
+              className={isSuperAdminUser(r) ? 'text-gray-400' : 'text-orange-600'}
+              title={isSuperAdminUser(r) ? 'Cannot change status for Super Admin' : 'Change status'}
+              disabled={isSuperAdminUser(r)}
             >
               <SwapHorizIcon fontSize="small" />
             </IconButton>
           </PermissionGate>
 
           <PermissionGate requiredPermissions={"users.roles.assign"} disableOnDenied>
-            <IconButton 
-              size="small" 
-              onClick={(e) => { e.stopPropagation(); openRoleModal(r); }} 
-              className="text-purple-600"
-              title="Manage roles"
+            <IconButton
+              size="small"
+              onClick={(e) => { e.stopPropagation(); openRoleModal(r); }}
+              className={isSuperAdminUser(r) ? 'text-gray-400' : 'text-purple-600'}
+              title={isSuperAdminUser(r) ? 'Cannot change roles for Super Admin' : 'Manage roles'}
+              disabled={isSuperAdminUser(r)}
             >
               <ManageAccountsIcon fontSize="small" />
             </IconButton>
           </PermissionGate>
 
           <PermissionGate requiredPermissions={"users.update"} disableOnDenied>
-            <IconButton 
-              size="small" 
-              onClick={(e) => { e.stopPropagation(); openEditModal(r); }} 
-              className="text-blue-600"
-              title="Edit user"
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
+            {(() => {
+              const cannotEditSuper = isSuperAdminUser(r) && !isCurrentSuperAdmin();
+              return (
+                <IconButton 
+                  size="small" 
+                  onClick={(e) => { e.stopPropagation(); if (!cannotEditSuper) openEditModal(r); else setToast({ message: 'Only Super Admin can edit Super Admin users', type: 'error', visible: true }); }} 
+                  className={cannotEditSuper ? 'text-gray-400' : 'text-blue-600'}
+                  title={cannotEditSuper ? 'Only Super Admin can edit Super Admin users' : 'Edit user'}
+                  disabled={cannotEditSuper}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              );
+            })()}
           </PermissionGate>
 
           <PermissionGate requiredPermissions={"users.delete"} disableOnDenied>
             <IconButton 
               size="small" 
-              onClick={(e) => { e.stopPropagation(); handleDelete(r); }} 
-              className="text-red-600"
-              title="Delete user"
+              onClick={(e) => { e.stopPropagation(); if (!isSuperAdminUser(r)) handleDelete(r); }} 
+              className={isSuperAdminUser(r) ? 'text-gray-400' : 'text-red-600'}
+              title={isSuperAdminUser(r) ? 'Cannot delete Super Admin' : 'Delete user'}
+              disabled={isSuperAdminUser(r)}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>

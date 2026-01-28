@@ -29,7 +29,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
 
       <button aria-label="User menu" onClick={() => setOpenProfile(true)} className="flex items-center justify-center rounded-full bg-zinc-50 h-10 w-10 hover:bg-zinc-100 focus:outline-none focus:ring-0">
         <Avatar
-          className="h-8 w-8"
+          className="h-8 w-8 rounded-full bg-transparent overflow-hidden"
           hoverBorderColor="#3B82F6"
           hoverBorderWidth={1}
           hoverScale={1.08}
