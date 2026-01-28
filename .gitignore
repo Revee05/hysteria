@@ -51,5 +51,5 @@ next-env.d.ts
 /logs
 
 .vscode/
-.Agent/
+.github/
 
