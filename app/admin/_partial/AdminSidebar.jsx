@@ -38,7 +38,7 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
             className="flex items-center gap-3 focus:outline-none"
             title={collapsed ? "Open sidebar" : "Collapse sidebar"}
           >
-            <div className={`rounded-full p-1 ${collapsed ? 'bg-zinc-600' : 'bg-teal-500'}`}>
+            <div className={`rounded-full p-1 ${collapsed ? 'bg-[#E83C91]' : 'bg-[#E83C91]'}`}>
               <Image src="/image/Logo-hysteria.svg" alt="Hysteria logo" width={40} height={40} className="h-8 w-8" priority />
             </div>
             {!collapsed && <span className="text-sm font-semibold text-zinc-900">Hysteria</span>}

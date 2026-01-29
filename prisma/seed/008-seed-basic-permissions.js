@@ -330,6 +330,7 @@ module.exports = async function seed() {
         description: "Delete hero sections",
         groupId: heroGroupId,
       },
+      
     ];
 
     // Create all permissions

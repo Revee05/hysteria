@@ -108,7 +108,7 @@ export default function MobileMenu({ open, onClose }) {
 
             {/* navigation links - semantic list for SEO */}
             <nav aria-label="Main navigation" className="flex-1">
-              <ul className="flex flex-col gap-1 items-end justify-start pt-6 md:pt-4">
+              <ul className="flex flex-col gap-2 items-end justify-start pt-6 md:pt-4">
                 <li className="w-full">
                   <Link href="/" onClick={onClose} className="flex items-center gap-3 justify-end w-full text-white text-xl font-semibold text-right hover:text-[#43334C] cursor-pointer">
                     Beranda
