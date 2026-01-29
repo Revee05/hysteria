@@ -166,14 +166,8 @@ export function IconYoutube({ className = '', size = 20 }) {
 
 export function IconSpeaker({ className = '', size = 20, initialMuted = false, muted: mutedProp, onChange }) {
   const isControlled = typeof mutedProp !== 'undefined';
-  const [internalMuted, setInternalMuted] = useState(initialMuted);
+  const [internalMuted, setInternalMuted] = useState(() => (isControlled ? mutedProp : initialMuted));
   const muted = isControlled ? mutedProp : internalMuted;
-
-  useEffect(() => {
-    if (!isControlled) return;
-    // when controlled, keep internal state in sync for any local reads
-    setInternalMuted(mutedProp);
-  }, [mutedProp, isControlled]);
 
   const toggle = (e) => {
     if (e && e.preventDefault) e.preventDefault();
