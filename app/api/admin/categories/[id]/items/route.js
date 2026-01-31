@@ -1,13 +1,38 @@
-import { prisma } from '../../../../../../lib/prisma.js';
-import { respondSuccess, respondError } from '../../../../../../lib/response.js';
-import logger from '../../../../../../lib/logger.js';
-import { requireAuthWithPermission } from '../../../../../../lib/helper/permission.helper.js';
-import { buildTreeFromPrisma } from '../../../../../../lib/helper/tree.helper.js';
+import { prisma } from '@/lib/prisma.js';
+import { respondSuccess, respondError } from '@/lib/response.js';
+import logger from '@/lib/logger.js';
+import { requireAuthWithPermission } from '@/lib/helper/permission.helper.js';
+import { buildTreeFromPrisma } from '@/lib/helper/tree.helper.js';
 
-/**
- * GET /api/admin/categories/[id]/items
- * Get all items untuk category tertentu dalam tree structure
- */
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const itemSelectFields = {
+  id: true,
+  title: true,
+  slug: true,
+  url: true,
+  order: true,
+  isActive: true,
+  meta: true,
+  parentId: true,
+  createdAt: true,
+  updatedAt: true
+};
+
+const buildNestedSelect = (depth = 4) => {
+  if (depth === 0) return itemSelectFields;
+  return {
+    ...itemSelectFields,
+    children: { select: buildNestedSelect(depth - 1) }
+  };
+};
+
+// ============================================================================
+// GET - Fetch all items in tree structure
+// ============================================================================
+
 export async function GET(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.view');
@@ -19,123 +44,39 @@ export async function GET(request, { params }) {
       return respondError({ message: 'Invalid category ID', status: 400 });
     }
 
-    // Check if category exists
+    // Verify category exists
     const category = await prisma.category.findUnique({
       where: { id: categoryId },
-      select: {
-        id: true,
-        title: true,
-        slug: true
-      }
+      select: { id: true, title: true, slug: true }
     });
 
     if (!category) {
       return respondError({ message: 'Category not found', status: 404 });
     }
 
-    // Fetch all items with nested children (up to 5 levels deep)
+    // Fetch root items with nested children (up to 5 levels)
     const items = await prisma.categoryItem.findMany({
-      where: { 
-        categoryId,
-        parentId: null  // Only root items
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        url: true,
-        order: true,
-        isActive: true,
-        meta: true,
-        parentId: true,
-        createdAt: true,
-        updatedAt: true,
-        children: {
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            url: true,
-            order: true,
-            isActive: true,
-            meta: true,
-            parentId: true,
-            createdAt: true,
-            updatedAt: true,
-            children: {
-              select: {
-                id: true,
-                title: true,
-                slug: true,
-                url: true,
-                order: true,
-                isActive: true,
-                meta: true,
-                parentId: true,
-                createdAt: true,
-                updatedAt: true,
-                children: {
-                  select: {
-                    id: true,
-                    title: true,
-                    slug: true,
-                    url: true,
-                    order: true,
-                    isActive: true,
-                    meta: true,
-                    parentId: true,
-                    createdAt: true,
-                    updatedAt: true,
-                    children: {
-                      select: {
-                        id: true,
-                        title: true,
-                        slug: true,
-                        url: true,
-                        order: true,
-                        isActive: true,
-                        meta: true,
-                        parentId: true,
-                        createdAt: true,
-                        updatedAt: true,
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      orderBy: {
-        order: 'asc'
-      }
+      where: { categoryId, parentId: null },
+      select: buildNestedSelect(4),
+      orderBy: { order: 'asc' }
     });
 
-    // Build tree
     const tree = buildTreeFromPrisma(items);
 
-    logger.info('Admin fetched category items', { 
-      categoryId, 
-      itemCount: items.length 
-    });
+    logger.info('Admin fetched category items', { categoryId, itemCount: items.length });
 
-    return respondSuccess({ 
-      category,
-      items: tree,
-      totalItems: items.length
-    }, 200);
+    return respondSuccess({ category, items: tree, totalItems: items.length }, 200);
 
   } catch (error) {
-    logger.error('Error fetching category items (admin):', error);
+    logger.error('Error fetching category items:', error);
     return respondError({ message: 'Failed to fetch category items', status: 500 });
   }
 }
 
-/**
- * POST /api/admin/categories/[id]/items
- * Create new category item
- */
+// ============================================================================
+// POST - Create new category item
+// ============================================================================
+
 export async function POST(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.create');
@@ -147,11 +88,8 @@ export async function POST(request, { params }) {
       return respondError({ message: 'Invalid category ID', status: 400 });
     }
 
-    // Check if category exists
-    const category = await prisma.category.findUnique({
-      where: { id: categoryId }
-    });
-
+    // Verify category exists
+    const category = await prisma.category.findUnique({ where: { id: categoryId } });
     if (!category) {
       return respondError({ message: 'Category not found', status: 404 });
     }
@@ -164,15 +102,11 @@ export async function POST(request, { params }) {
       return respondError({ message: 'Title is required', status: 400 });
     }
 
-    // Check if parent exists (if provided)
+    // Verify parent exists if provided
     if (parentId) {
       const parent = await prisma.categoryItem.findFirst({
-        where: { 
-          id: parentId,
-          categoryId 
-        }
+        where: { id: parentId, categoryId }
       });
-
       if (!parent) {
         return respondError({ message: 'Parent item not found in this category', status: 400 });
       }

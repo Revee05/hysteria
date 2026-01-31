@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma.js';
-import { respondSuccess, respondError } from '../../../../lib/response.js';
-import logger from '../../../../lib/logger.js';
-import { requireAuthWithPermission } from '../../../../lib/helper/permission.helper.js';
+import { prisma } from '@/lib/prisma.js';
+import { respondSuccess, respondError } from '@/lib/response.js';
+import logger from '@/lib/logger.js';
+import { requireAuthWithPermission } from '@/lib/helper/permission.helper.js';
 
-/**
- * GET /api/admin/categories
- * List semua categories dengan detail untuk admin
- */
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const formatCategoryResponse = (cat) => ({
+  id: cat.id,
+  title: cat.title,
+  slug: cat.slug,
+  description: cat.description,
+  order: cat.order,
+  isActive: cat.isActive,
+  requiredPermissionId: cat.requiredPermissionId,
+  itemCount: cat._count.items,
+  createdAt: cat.createdAt,
+  updatedAt: cat.updatedAt
+});
+
+// ============================================================================
+// GET - List all categories
+// ============================================================================
+
 export async function GET(request) {
   try {
     await requireAuthWithPermission(request, 'categories.view');
@@ -24,43 +41,28 @@ export async function GET(request) {
         createdAt: true,
         updatedAt: true,
         _count: {
-          select: {
-            items: true
-          }
+          select: { items: true }
         }
       },
-      orderBy: {
-        order: 'asc'
-      }
+      orderBy: { order: 'asc' }
     });
 
-    const formatted = categories.map(cat => ({
-      id: cat.id,
-      title: cat.title,
-      slug: cat.slug,
-      description: cat.description,
-      order: cat.order,
-      isActive: cat.isActive,
-      requiredPermissionId: cat.requiredPermissionId,
-      itemCount: cat._count.items,
-      createdAt: cat.createdAt,
-      updatedAt: cat.updatedAt
-    }));
+    const formatted = categories.map(formatCategoryResponse);
 
     logger.info('Admin fetched categories', { count: categories.length });
 
     return respondSuccess({ categories: formatted }, 200);
 
   } catch (error) {
-    logger.error('Error fetching categories (admin):', error);
+    logger.error('Error fetching categories:', error);
     return respondError({ message: 'Failed to fetch categories', status: 500 });
   }
 }
 
-/**
- * POST /api/admin/categories
- * Create new category
- */
+// ============================================================================
+// POST - Create new category
+// ============================================================================
+
 export async function POST(request) {
   try {
     await requireAuthWithPermission(request, 'categories.create');
@@ -74,10 +76,7 @@ export async function POST(request) {
     }
 
     // Check slug uniqueness
-    const existing = await prisma.category.findUnique({
-      where: { slug }
-    });
-
+    const existing = await prisma.category.findUnique({ where: { slug } });
     if (existing) {
       return respondError({ message: 'Category with this slug already exists', status: 400 });
     }

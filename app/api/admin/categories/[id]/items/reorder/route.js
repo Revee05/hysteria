@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../../../../lib/prisma.js';
-import { respondSuccess, respondError } from '../../../../../../../lib/response.js';
-import logger from '../../../../../../../lib/logger.js';
-import { requireAuthWithPermission } from '../../../../../../../lib/helper/permission.helper.js';
+import { prisma } from '@/lib/prisma.js';
+import { respondSuccess, respondError } from '@/lib/response.js';
+import logger from '@/lib/logger.js';
+import { requireAuthWithPermission } from '@/lib/helper/permission.helper.js';
 
-/**
- * POST /api/admin/categories/[id]/items/reorder
- * Bulk update order untuk items
- * Body: { items: [{ id: 1, order: 0 }, { id: 2, order: 1 }] }
- */
+// ============================================================================
+// POST - Bulk reorder items
+// Body: { items: [{ id: 1, order: 0 }, { id: 2, order: 1 }] }
+// ============================================================================
+
 export async function POST(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.update');
@@ -20,11 +20,8 @@ export async function POST(request, { params }) {
       return respondError({ message: 'Invalid category ID', status: 400 });
     }
 
-    // Check if category exists
-    const category = await prisma.category.findUnique({
-      where: { id: categoryId }
-    });
-
+    // Verify category exists
+    const category = await prisma.category.findUnique({ where: { id: categoryId } });
     if (!category) {
       return respondError({ message: 'Category not found', status: 404 });
     }
@@ -36,13 +33,10 @@ export async function POST(request, { params }) {
       return respondError({ message: 'Items array is required', status: 400 });
     }
 
-    // Validate all items belong to this category
+    // Verify all items belong to this category
     const itemIds = items.map(item => item.id);
     const existingItems = await prisma.categoryItem.findMany({
-      where: {
-        id: { in: itemIds },
-        categoryId
-      }
+      where: { id: { in: itemIds }, categoryId }
     });
 
     if (existingItems.length !== itemIds.length) {

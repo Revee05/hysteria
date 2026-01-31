@@ -96,6 +96,153 @@ function TreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
   );
 }
 
+// Modal untuk Add/Edit Category
+function CategoryModal({ isOpen, onClose, onSave, category, mode }) {
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    description: '',
+    order: 0,
+    isActive: true
+  });
+
+  useEffect(() => {
+    let timer;
+    if (category) {
+      timer = setTimeout(() => {
+        setFormData({
+          title: category.title || '',
+          slug: category.slug || '',
+          description: category.description || '',
+          order: category.order || 0,
+          isActive: category.isActive !== undefined ? category.isActive : true
+        });
+      }, 0);
+    } else {
+      timer = setTimeout(() => {
+        setFormData({
+          title: '',
+          slug: '',
+          description: '',
+          order: 0,
+          isActive: true
+        });
+      }, 0);
+    }
+    return () => clearTimeout(timer);
+  }, [category]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              {category ? 'Edit Category' : 'Add New Category'}
+            </h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Title *
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-400 bg-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Slug
+              </label>
+              <input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-400 bg-white"
+                placeholder="auto-generated from title if empty"
+              />
+              <p className="text-xs text-gray-500 mt-1">URL-friendly identifier (e.g., &quot;program-hysteria&quot;)</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 placeholder-gray-400 bg-white"
+                placeholder="Optional description for this category"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Display Order
+              </label>
+              <input
+                type="number"
+                value={formData.order}
+                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white"
+              />
+              <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="categoryIsActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="w-4 h-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+              />
+              <label htmlFor="categoryIsActive" className="text-sm font-medium text-gray-700">
+                Active
+              </label>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <button
+                type="submit"
+                className="flex-1 bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors"
+              >
+                {category ? 'Update' : 'Create'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Modal untuk Add/Edit Item
 function ItemModal({ isOpen, onClose, onSave, item, categoryId, allItems }) {
   const [formData, setFormData] = useState({
@@ -264,20 +411,39 @@ function ItemModal({ isOpen, onClose, onSave, item, categoryId, allItems }) {
 
 export default function NavigationPage() {
   const { user } = useAuth();
+
+  // ============================================================================
+  // STATE MANAGEMENT
+  // ============================================================================
+  
+  // Categories state
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  
+  // Category items state
   const [categoryItems, setCategoryItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // Category modal state
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [categoryModalMode, setCategoryModalMode] = useState('create');
+  const [editingCategory, setEditingCategory] = useState(null);
+  
+  // Item modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [parentForNew, setParentForNew] = useState(null);
 
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
   const fetchCategories = useCallback(async () => {
     try {
       const response = await apiGet('/api/admin/categories');
-      console.log('Categories response:', response);
       const categories = response.data?.categories || [];
       setCategories(categories);
+      
       if (categories.length > 0 && !selectedCategory) {
         setSelectedCategory(categories[0]);
       }
@@ -286,7 +452,7 @@ export default function NavigationPage() {
     }
   }, [selectedCategory]);
 
-  async function fetchCategoryItems(categoryId) {
+  const fetchCategoryItems = useCallback(async (categoryId) => {
     setLoading(true);
     try {
       const response = await apiGet(`/api/admin/categories/${categoryId}/items`);
@@ -296,39 +462,126 @@ export default function NavigationPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  // Fetch categories
+  // ============================================================================
+  // EFFECTS
+  // ============================================================================
+
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Fetch items when category selected
   useEffect(() => {
     if (selectedCategory) {
       fetchCategoryItems(selectedCategory.id);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, fetchCategoryItems]);
 
-  function handleAddRoot() {
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  const slugify = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const flattenItems = (items, result = []) => {
+    items.forEach(item => {
+      result.push(item);
+      if (item.children && item.children.length > 0) {
+        flattenItems(item.children, result);
+      }
+    });
+    return result;
+  };
+
+  // ============================================================================
+  // CATEGORY HANDLERS
+  // ============================================================================
+
+  const handleCreateCategory = () => {
+    setEditingCategory(null);
+    setCategoryModalMode('create');
+    setShowCategoryModal(true);
+  };
+
+  const handleEditCategory = (category) => {
+    setEditingCategory(category);
+    setCategoryModalMode('edit');
+    setShowCategoryModal(true);
+  };
+
+  const handleDeleteCategory = async (category) => {
+    const itemCount = category.itemCount || 0;
+    const message = itemCount > 0
+      ? `Are you sure you want to delete "${category.title}"? This will also delete ${itemCount} menu item(s).`
+      : `Are you sure you want to delete "${category.title}"?`;
+    
+    if (!confirm(message)) return;
+
+    try {
+      await apiDelete(`/api/admin/categories/${category.id}`);
+      await fetchCategories();
+      
+      // Reset selection if deleted category was selected
+      if (selectedCategory?.id === category.id) {
+        setSelectedCategory(categories[0] || null);
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Failed to delete category');
+    }
+  };
+
+  const handleSaveCategory = async (formData) => {
+    try {
+      // Auto-generate slug if empty
+      if (!formData.slug && formData.title) {
+        formData.slug = slugify(formData.title);
+      }
+
+      if (editingCategory) {
+        await apiPut(`/api/admin/categories/${editingCategory.id}`, formData);
+      } else {
+        await apiPost('/api/admin/categories', formData);
+      }
+      
+      setShowCategoryModal(false);
+      setEditingCategory(null);
+      await fetchCategories();
+    } catch (error) {
+      console.error('Error saving category:', error);
+      alert(error.message || 'Failed to save category');
+    }
+  };
+
+  // ============================================================================
+  // ITEM HANDLERS
+  // ============================================================================
+
+  const handleAddRoot = () => {
     setEditingItem(null);
     setParentForNew(null);
     setModalOpen(true);
-  }
+  };
 
-  function handleAddChild(parent) {
+  const handleAddChild = (parent) => {
     setEditingItem(null);
     setParentForNew(parent);
     setModalOpen(true);
-  }
+  };
 
-  function handleEdit(item) {
+  const handleEdit = (item) => {
     setEditingItem(item);
     setParentForNew(null);
     setModalOpen(true);
-  }
+  };
 
-  async function handleDelete(item) {
+  const handleDelete = async (item) => {
     if (!confirm(`Are you sure you want to delete "${item.title}"? This will also delete all child items.`)) {
       return;
     }
@@ -340,18 +593,16 @@ export default function NavigationPage() {
       console.error('Error deleting item:', error);
       alert('Failed to delete item');
     }
-  }
+  };
 
-  async function handleSave(formData) {
+  const handleSave = async (formData) => {
     try {
       if (editingItem) {
-        // Update existing
         await apiPut(
           `/api/admin/categories/${selectedCategory.id}/items/${editingItem.id}`,
           formData
         );
       } else {
-        // Create new
         const data = {
           ...formData,
           parentId: parentForNew ? parentForNew.id : formData.parentId
@@ -367,23 +618,21 @@ export default function NavigationPage() {
       console.error('Error saving item:', error);
       alert('Failed to save item');
     }
-  }
+  };
 
-  // Flatten items for parent selector
-  function flattenItems(items, result = []) {
-    items.forEach(item => {
-      result.push(item);
-      if (item.children && item.children.length > 0) {
-        flattenItems(item.children, result);
-      }
-    });
-    return result;
-  }
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
 
   const flatItems = flattenItems(categoryItems);
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
   return (
     <div className="p-6">
+      {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Navigation Management</h1>
         <p className="text-gray-600 mt-1">Manage navigation categories and menu items</p>
@@ -391,25 +640,64 @@ export default function NavigationPage() {
 
       {/* Category Selector */}
       <div className="mb-6 bg-white rounded-lg shadow p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select Category
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Select Category
+          </label>
+          <button
+            onClick={handleCreateCategory}
+            className="text-sm bg-pink-600 text-white px-3 py-1.5 rounded-md hover:bg-pink-700 transition-colors flex items-center gap-1"
+            title="Add new category"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Category
+          </button>
+        </div>
         {categories.length === 0 ? (
-          <p className="text-gray-500 text-sm">Loading categories...</p>
+          <p className="text-gray-500 text-sm">No categories yet. Click &quot;Add Category&quot; to create one.</p>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {categories.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-md transition-colors ${
-                  selectedCategory?.id === cat.id
-                    ? 'bg-pink-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {cat.title} ({cat.itemCount})
-              </button>
+              <div key={cat.id} className="group relative">
+                <button
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-md transition-colors pr-16 ${
+                    selectedCategory?.id === cat.id
+                      ? 'bg-pink-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat.title} ({cat.itemCount})
+                </button>
+                <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditCategory(cat);
+                    }}
+                    className="p-1 hover:bg-green-100 rounded text-green-600"
+                    title="Edit category"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCategory(cat);
+                    }}
+                    className="p-1 hover:bg-red-100 rounded text-red-600"
+                    title="Delete category"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -473,6 +761,18 @@ export default function NavigationPage() {
         item={editingItem}
         categoryId={selectedCategory?.id}
         allItems={flatItems}
+      />
+
+      {/* Category Modal */}
+      <CategoryModal
+        isOpen={showCategoryModal}
+        onClose={() => {
+          setShowCategoryModal(false);
+          setEditingCategory(null);
+        }}
+        onSave={handleSaveCategory}
+        category={editingCategory}
+        mode={categoryModalMode}
       />
     </div>
   );

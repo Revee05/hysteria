@@ -1,13 +1,12 @@
-import { prisma } from '../../../../../../lib/prisma.js';
-import { respondSuccess, respondError } from '../../../../../../lib/response.js';
-import logger from '../../../../../../lib/logger.js';
-import { requireAuthWithPermission } from '../../../../../../lib/helper/permission.helper.js';
-import { buildTreeFromPrisma } from '../../../../../../lib/helper/tree.helper.js';
+import { prisma } from '@/lib/prisma.js';
+import { respondSuccess, respondError } from '@/lib/response.js';
+import logger from '@/lib/logger.js';
+import { requireAuthWithPermission } from '@/lib/helper/permission.helper.js';
 
-/**
- * GET /api/admin/categories/[id]
- * Get single category dengan detail lengkap
- */
+// ============================================================================
+// GET - Fetch single category
+// ============================================================================
+
 export async function GET(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.view');
@@ -32,9 +31,7 @@ export async function GET(request, { params }) {
         createdAt: true,
         updatedAt: true,
         _count: {
-          select: {
-            items: true
-          }
+          select: { items: true }
         }
       }
     });
@@ -48,15 +45,15 @@ export async function GET(request, { params }) {
     return respondSuccess({ category }, 200);
 
   } catch (error) {
-    logger.error('Error fetching category (admin):', error);
-    return errorResponse('Failed to fetch category', 500);
+    logger.error('Error fetching category:', error);
+    return respondError({ message: 'Failed to fetch category', status: 500 });
   }
 }
 
-/**
- * PUT /api/admin/categories/[id]
- * Update category
- */
+// ============================================================================
+// PUT - Update category
+// ============================================================================
+
 export async function PUT(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.update');
@@ -72,20 +69,14 @@ export async function PUT(request, { params }) {
     const { title, slug, description, order, isActive, requiredPermissionId } = body;
 
     // Check if category exists
-    const existing = await prisma.category.findUnique({
-      where: { id: categoryId }
-    });
-
+    const existing = await prisma.category.findUnique({ where: { id: categoryId } });
     if (!existing) {
       return respondError({ message: 'Category not found', status: 404 });
     }
 
     // Check slug uniqueness if changed
     if (slug && slug !== existing.slug) {
-      const slugExists = await prisma.category.findUnique({
-        where: { slug }
-      });
-
+      const slugExists = await prisma.category.findUnique({ where: { slug } });
       if (slugExists) {
         return respondError({ message: 'Category with this slug already exists', status: 400 });
       }
@@ -117,10 +108,10 @@ export async function PUT(request, { params }) {
   }
 }
 
-/**
- * DELETE /api/admin/categories/[id]
- * Delete category (cascade delete items)
- */
+// ============================================================================
+// DELETE - Remove category (cascade deletes items)
+// ============================================================================
+
 export async function DELETE(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.delete');

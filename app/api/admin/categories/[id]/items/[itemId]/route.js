@@ -1,24 +1,40 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../../../../lib/prisma.js';
-import { respondSuccess, respondError } from '../../../../../../../lib/response.js';
-import logger from '../../../../../../../lib/logger.js';
-import { requireAuthWithPermission } from '../../../../../../../lib/helper/permission.helper.js';
+import { prisma } from '@/lib/prisma.js';
+import { respondSuccess, respondError } from '@/lib/response.js';
+import logger from '@/lib/logger.js';
+import { requireAuthWithPermission } from '@/lib/helper/permission.helper.js';
 
-/**
- * GET /api/admin/categories/[id]/items/[itemId]
- * Get single category item
- */
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const validateIds = (id, itemId) => {
+  const categoryId = parseInt(id);
+  const itemIdInt = parseInt(itemId);
+  
+  if (!categoryId || isNaN(categoryId) || !itemIdInt || isNaN(itemIdInt)) {
+    return { valid: false, error: 'Invalid ID' };
+  }
+  
+  return { valid: true, categoryId, itemIdInt };
+};
+
+// ============================================================================
+// GET - Fetch single item
+// ============================================================================
+
 export async function GET(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.view');
 
     const { id, itemId } = await params;
-    const categoryId = parseInt(id);
-    const itemIdInt = parseInt(itemId);
-
-    if (!categoryId || isNaN(categoryId) || !itemIdInt || isNaN(itemIdInt)) {
-      return respondError({ message: 'Invalid ID', status: 400 });
+    const validation = validateIds(id, itemId);
+    
+    if (!validation.valid) {
+      return respondError({ message: validation.error, status: 400 });
     }
+
+    const { categoryId, itemIdInt } = validation;
 
     const item = await prisma.categoryItem.findFirst({
       where: { 
@@ -65,21 +81,22 @@ export async function GET(request, { params }) {
   }
 }
 
-/**
- * PUT /api/admin/categories/[id]/items/[itemId]
- * Update category item
- */
+// ============================================================================
+// PUT - Update item
+// ============================================================================
+
 export async function PUT(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.update');
 
     const { id, itemId } = await params;
-    const categoryId = parseInt(id);
-    const itemIdInt = parseInt(itemId);
-
-    if (!categoryId || isNaN(categoryId) || !itemIdInt || isNaN(itemIdInt)) {
-      return respondError({ message: 'Invalid ID', status: 400 });
+    const validation = validateIds(id, itemId);
+    
+    if (!validation.valid) {
+      return respondError({ message: validation.error, status: 400 });
     }
+
+    const { categoryId, itemIdInt } = validation;
 
     // Check if item exists
     const existing = await prisma.categoryItem.findFirst({
@@ -144,21 +161,22 @@ export async function PUT(request, { params }) {
   }
 }
 
-/**
- * DELETE /api/admin/categories/[id]/items/[itemId]
- * Delete category item (cascade delete children)
- */
+// ============================================================================
+// DELETE - Remove item (cascade deletes children)
+// ============================================================================
+
 export async function DELETE(request, { params }) {
   try {
     await requireAuthWithPermission(request, 'categories.delete');
 
     const { id, itemId } = await params;
-    const categoryId = parseInt(id);
-    const itemIdInt = parseInt(itemId);
-
-    if (!categoryId || isNaN(categoryId) || !itemIdInt || isNaN(itemIdInt)) {
-      return respondError({ message: 'Invalid ID', status: 400 });
+    const validation = validateIds(id, itemId);
+    
+    if (!validation.valid) {
+      return respondError({ message: validation.error, status: 400 });
     }
+
+    const { categoryId, itemIdInt } = validation;
 
     // Check if item exists
     const existing = await prisma.categoryItem.findFirst({
