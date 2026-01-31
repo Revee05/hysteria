@@ -3,15 +3,61 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../../lib/context/auth-context';
 import { apiGet, apiPost, apiPut, apiDelete } from '../../../../lib/api-client';
+import { 
+  DndContext, 
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
-// Tree Node Component dengan expand/collapse
-function TreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
+// Sortable Tree Node Component dengan drag handle
+function SortableTreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = item.children && item.children.length > 0;
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: item.id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1
+  };
 
   return (
-    <div className={`${depth > 0 ? 'ml-6 border-l-2 border-gray-300 border-opacity-75 pl-4' : ''}`}>
-          <div className="flex items-center gap-2 py-2 hover:bg-gray-50 rounded px-2">
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={`${depth > 0 ? 'ml-6 border-l-2 border-gray-300 border-opacity-75 pl-4' : ''}`}
+    >
+      <div className="flex items-center gap-2 py-2 hover:bg-gray-50 rounded px-2">
+        {/* Drag Handle */}
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-1 cursor-grab active:cursor-grabbing hover:bg-gray-200 rounded text-gray-400 hover:text-gray-600"
+          title="Drag to reorder"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+          </svg>
+        </button>
+        
         {/* Expand/Collapse button */}
         {hasChildren && (
           <button
@@ -81,7 +127,7 @@ function TreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
       {expanded && hasChildren && (
         <div className="mt-1">
           {item.children.map(child => (
-            <TreeNode
+            <SortableTreeNode
               key={child.id}
               item={child}
               onEdit={onEdit}
@@ -433,6 +479,11 @@ export default function NavigationPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [parentForNew, setParentForNew] = useState(null);
+  
+  // Drag-n-drop state
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [activeId, setActiveId] = useState(null);
 
   // ============================================================================
   // DATA FETCHING
@@ -457,12 +508,22 @@ export default function NavigationPage() {
     try {
       const response = await apiGet(`/api/admin/categories/${categoryId}/items`);
       setCategoryItems(response.data?.items || []);
+      setHasChanges(false); // Reset changes on fetch
     } catch (error) {
       console.error('Error fetching category items:', error);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // Configure drag sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement before drag starts
+      },
+    })
+  );
 
   // ============================================================================
   // EFFECTS
@@ -497,6 +558,64 @@ export default function NavigationPage() {
       }
     });
     return result;
+  };
+
+  // ============================================================================
+  // DRAG-N-DROP HANDLERS
+  // ============================================================================
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over || active.id === over.id) return;
+
+    setCategoryItems((items) => {
+      const oldIndex = items.findIndex(item => item.id === active.id);
+      const newIndex = items.findIndex(item => item.id === over.id);
+
+      if (oldIndex === -1 || newIndex === -1) return items;
+
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      setHasChanges(true);
+      return newItems;
+    });
+  };
+
+  const handleSaveReorder = async () => {
+    if (!selectedCategory || !hasChanges) return;
+
+    setIsSavingOrder(true);
+    try {
+      // Flatten items with new order
+      const flatItems = flattenItems(categoryItems);
+      const reorderData = flatItems.map((item, index) => ({
+        id: item.id,
+        order: index
+      }));
+
+      await apiPost(`/api/admin/categories/${selectedCategory.id}/items/reorder`, {
+        items: reorderData
+      });
+
+      setHasChanges(false);
+      await fetchCategoryItems(selectedCategory.id);
+    } catch (error) {
+      console.error('Error saving order:', error);
+      alert('Failed to save order changes');
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
+  const handleCancelReorder = () => {
+    if (selectedCategory) {
+      fetchCategoryItems(selectedCategory.id);
+    }
   };
 
   // ============================================================================
@@ -710,15 +829,47 @@ export default function NavigationPage() {
             <h2 className="text-lg font-semibold text-gray-900">
               {selectedCategory.title} - Menu Items
             </h2>
-            <button
-              onClick={handleAddRoot}
-              className="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add Root Item
-            </button>
+            <div className="flex items-center gap-2">
+              {hasChanges && (
+                <>
+                  <button
+                    onClick={handleCancelReorder}
+                    disabled={isSavingOrder}
+                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveReorder}
+                    disabled={isSavingOrder}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isSavingOrder ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Order
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+              <button
+                onClick={handleAddRoot}
+                className="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Root Item
+              </button>
+            </div>
           </div>
 
           <div className="p-4">
@@ -732,18 +883,30 @@ export default function NavigationPage() {
                 No items yet. Click &quot;Add Root Item&quot; to create your first menu item.
               </div>
             ) : (
-              <div className="space-y-1">
-                {categoryItems.map(item => (
-                  <TreeNode
-                    key={item.id}
-                    item={item}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onAddChild={handleAddChild}
-                    depth={0}
-                  />
-                ))}
-              </div>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={categoryItems.map(item => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-1">
+                    {categoryItems.map(item => (
+                      <SortableTreeNode
+                        key={item.id}
+                        item={item}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onAddChild={handleAddChild}
+                        depth={0}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             )}
           </div>
         </div>
