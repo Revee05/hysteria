@@ -70,6 +70,15 @@ module.exports = async function seed() {
     );
     let statusGroupId = statusGroupResult.rows[0]?.id;
 
+    const categoryGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["category-management", "Category Management", "Permissions related to navigation category management"],
+    );
+    let categoryGroupId = categoryGroupResult.rows[0]?.id;
+
     // If groups not returned (already exist), fetch them
     if (!userGroupId) {
       const existing = await client.query(
@@ -105,6 +114,13 @@ module.exports = async function seed() {
         ["status-management"],
       );
       statusGroupId = existing.rows[0].id;
+    }
+    if (!categoryGroupId) {
+      const existing = await client.query(
+        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
+        ["category-management"],
+      );
+      categoryGroupId = existing.rows[0].id;
     }
 
     // Define all permissions
@@ -330,7 +346,32 @@ module.exports = async function seed() {
         description: "Delete hero sections",
         groupId: heroGroupId,
       },
-      
+
+      // Category management (general permissions only)
+      {
+        key: "categories.view",
+        name: "View Categories",
+        description: "View navigation categories and items",
+        groupId: categoryGroupId,
+      },
+      {
+        key: "categories.create",
+        name: "Create Categories",
+        description: "Create new categories and items",
+        groupId: categoryGroupId,
+      },
+      {
+        key: "categories.update",
+        name: "Update Categories",
+        description: "Update existing categories and items",
+        groupId: categoryGroupId,
+      },
+      {
+        key: "categories.delete",
+        name: "Delete Categories",
+        description: "Delete categories and items",
+        groupId: categoryGroupId,
+      },
     ];
 
     // Create all permissions

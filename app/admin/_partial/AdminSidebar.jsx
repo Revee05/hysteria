@@ -16,6 +16,7 @@ export default function AdminSidebar({ open, collapsed, onClose, onToggleCollaps
     ]},
     { key: 'section', label: 'Section', view: 'section', icon: IconSection, enabled: true, children: [
       { key: 'hero', label: 'Hero', view: 'section.hero', enabled: true },
+      { key: 'category', label: 'Category', view: 'section.navigation', enabled: true },
     ]},
     { key: 'platform', label: 'Platform', view: 'platform', icon: IconPlatform, enabled: false },
     { key: 'event', label: 'Event', view: 'event', icon: IconEvent, enabled: false },
