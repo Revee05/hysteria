@@ -37,7 +37,7 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
           <button
             onClick={onToggleCollapse}
             aria-pressed={collapsed}
-            className="flex items-center gap-3 focus:outline-none"
+            className="flex items-center gap-3 focus:outline-none cursor-pointer"
             title={collapsed ? "Open sidebar" : "Collapse sidebar"}
           >
             <div className={`rounded-full p-1 ${collapsed ? 'bg-[#E83C91]' : 'bg-[#E83C91]'}`}>
