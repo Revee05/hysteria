@@ -1,5 +1,7 @@
 import { AppError } from "../../../../lib/response.js";
 import logger from "../../../../lib/logger.js";
+import Uploads from "../../../../lib/upload/uploads.js";
+import { createWithUpload, updateWithUpload } from "../../../../lib/upload/transactionalUpload.js";
 import * as teamMemberRepository from "../repositories/teamMember.repository.js";
 import * as teamCategoryRepository from "../repositories/teamCategory.repository.js";
 import { createTeamMemberSchema, updateTeamMemberSchema, validateTeamMemberData } from "../validators/teamMember.validator.js";
@@ -13,6 +15,26 @@ const toSlug = (value) => {
   return base || "item";
 };
 
+const normalizeTeamMemberPayload = (data) => {
+  const payload = { ...data };
+  delete payload.type;
+  if (!payload.slug && payload.name) {
+    payload.slug = toSlug(payload.name);
+  }
+  return payload;
+};
+
+const looksLikeManagedUpload = (source) => {
+  if (!source || typeof source !== "string") return false;
+  if (source.startsWith("/uploads/") || source.startsWith("uploads/") || source.includes("/uploads/")) return true;
+  if (process.env.S3_PUBLIC_URL) {
+    const normalized = process.env.S3_PUBLIC_URL.replace(/\/$/, "");
+    if (source.startsWith(normalized)) return true;
+  }
+  if (/s3\.amazonaws\.com/.test(source) || /s3[.-]/.test(source)) return true;
+  return false;
+};
+
 export async function getTeamMemberById(id) {
   const member = await teamMemberRepository.findTeamMemberById(id);
   if (!member) {
@@ -22,11 +44,7 @@ export async function getTeamMemberById(id) {
 }
 
 export async function createTeamMember(data) {
-  const payload = { ...data };
-  delete payload.type;
-  if (!payload.slug && payload.name) {
-    payload.slug = toSlug(payload.name);
-  }
+  const payload = normalizeTeamMemberPayload(data);
 
   let validatedData;
   try {
@@ -56,14 +74,51 @@ export async function createTeamMember(data) {
   }
 }
 
+export async function createTeamMemberWithFile(data, file) {
+  const payload = normalizeTeamMemberPayload(data);
+  const schema = createTeamMemberSchema.omit({ imageUrl: true });
+  let validatedData;
+  try {
+    validatedData = validateTeamMemberData(payload, schema);
+  } catch (error) {
+    logger.warn("Team member validation failed (with file)", { payload, error: error.errors });
+    throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
+  }
+
+  const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
+  if (!category) {
+    throw new AppError("Team category not found", 404);
+  }
+
+  const existing = await teamMemberRepository.findTeamMemberBySlugName(validatedData.slug, validatedData.name);
+  if (existing) {
+    throw new AppError("Team member with this slug and name already exists", 400);
+  }
+
+  const uploads = new Uploads();
+
+  try {
+    const member = await createWithUpload(
+      {
+        createRecord: async () => teamMemberRepository.createTeamMember(validatedData),
+        uploadFile: async (filePayload) => uploads.handleUpload(filePayload),
+        updateSource: async (id, url) => teamMemberRepository.updateTeamMember(id, { imageUrl: url }),
+        deleteRecord: async (id) => teamMemberRepository.deleteTeamMember(id),
+      },
+      file,
+    );
+    logger.info("Team member created with upload", { memberId: member?.id, categoryId: member?.categoryId });
+    return member;
+  } catch (error) {
+    logger.error("Error creating team member with file", { error: error && (error.stack || error.message) });
+    throw error;
+  }
+}
+
 export async function updateTeamMember(id, data) {
   const existingMember = await getTeamMemberById(id);
 
-  const payload = { ...data };
-  delete payload.type;
-  if (!payload.slug && payload.name) {
-    payload.slug = toSlug(payload.name);
-  }
+  const payload = normalizeTeamMemberPayload(data);
 
   let validatedData;
   try {
@@ -99,11 +154,109 @@ export async function updateTeamMember(id, data) {
   }
 }
 
+export async function updateTeamMemberWithFile(id, data, file) {
+  const existingMember = await getTeamMemberById(id);
+  const payload = normalizeTeamMemberPayload(data);
+
+  let validatedData;
+  try {
+    validatedData = validateTeamMemberData(payload, updateTeamMemberSchema);
+  } catch (error) {
+    logger.warn("Team member update validation failed (with file)", { memberId: id, error: error.errors });
+    throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
+  }
+
+  const nextName = validatedData.name ?? existingMember.name;
+  const nextSlug = validatedData.slug ?? existingMember.slug;
+  if (nextName && nextSlug) {
+    const conflict = await teamMemberRepository.findTeamMemberBySlugName(nextSlug, nextName);
+    if (conflict && conflict.id !== id) {
+      throw new AppError("Team member with this slug and name already exists", 400);
+    }
+  }
+
+  if (validatedData.categoryId) {
+    const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
+    if (!category) {
+      throw new AppError("Team category not found", 404);
+    }
+  }
+
+  const updateData = Object.fromEntries(
+    Object.entries(validatedData).filter(([_, value]) => value !== undefined)
+  );
+  delete updateData.imageUrl;
+
+  const uploads = new Uploads();
+  const snapshot = { ...existingMember };
+
+  try {
+    const member = await updateWithUpload(
+      {
+        getExisting: async () => snapshot,
+        updateRecord: async (recordId, dataToUpdate) =>
+          teamMemberRepository.updateTeamMember(recordId, dataToUpdate),
+        uploadFile: async (filePayload) => uploads.handleUpload(filePayload),
+        updateSource: async (recordId, url) => teamMemberRepository.updateTeamMember(recordId, { imageUrl: url }),
+        revertRecord: async (recordId, prev) => {
+          await teamMemberRepository.updateTeamMember(recordId, {
+            categoryId: prev.categoryId,
+            name: prev.name,
+            slug: prev.slug,
+            role: prev.role,
+            imageUrl: prev.imageUrl,
+            email: prev.email,
+            instagram: prev.instagram,
+            order: prev.order,
+            isActive: prev.isActive,
+          });
+        },
+        deleteFile: async (oldSource) => {
+          if (!looksLikeManagedUpload(oldSource)) return;
+          try {
+            await uploads.deleteFile(oldSource);
+          } catch (err) {
+            logger.warn("Failed to delete previous team member upload", {
+              memberId: id,
+              oldSource,
+              error: err && (err.message || err.stack),
+            });
+          }
+        },
+      },
+      id,
+      updateData,
+      file,
+    );
+    logger.info("Team member updated with file", { memberId: id });
+    return member;
+  } catch (error) {
+    logger.error("Error updating team member with file", {
+      memberId: id,
+      error: error && (error.stack || error.message),
+    });
+    throw error;
+  }
+}
+
 export async function deleteTeamMember(id) {
-  await getTeamMemberById(id);
+  const member = await getTeamMemberById(id);
 
   try {
     await teamMemberRepository.deleteTeamMember(id);
+    if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
+      const uploads = new Uploads();
+      try {
+        await uploads.deleteFile(member.imageUrl);
+        logger.info("Deleted stored image for team member", { memberId: id, source: member.imageUrl });
+      } catch (err) {
+        logger.warn("Failed to delete stored image after member removal", {
+          memberId: id,
+          source: member.imageUrl,
+          error: err && (err.message || err.stack),
+        });
+      }
+    }
     logger.info("Team member deleted", { memberId: id });
     return { message: "Team member deleted successfully" };
   } catch (error) {

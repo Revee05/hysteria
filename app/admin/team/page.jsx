@@ -150,20 +150,10 @@ export default function TeamManagementPage() {
   };
 
   const handleMemberSubmit = async (form) => {
-    const payload = {
-      ...form,
-      type: "member",
-      categoryId: form.categoryId ? Number(form.categoryId) : undefined,
-      order: form.order !== undefined ? Number(form.order) : 0,
-      isActive: !!form.isActive,
-    };
-    if (!payload.slug && payload.name) payload.slug = toSlug(payload.name);
+    const payload = prepareMemberPayload(form);
 
     try {
-      const res = await apiCall("/api/admin/team", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const res = await sendMemberRequest("/api/admin/team", "POST", payload);
       const json = await res.json().catch(() => null);
       if (json?.success) {
         await fetchTeams();
@@ -180,20 +170,10 @@ export default function TeamManagementPage() {
 
   const handleMemberUpdate = async (form) => {
     if (!activeMember) return false;
-    const payload = {
-      ...form,
-      type: "member",
-      categoryId: form.categoryId ? Number(form.categoryId) : undefined,
-      order: form.order !== undefined ? Number(form.order) : undefined,
-      isActive: form.isActive !== undefined ? !!form.isActive : undefined,
-    };
-    if (!payload.slug && payload.name) payload.slug = toSlug(payload.name);
+    const payload = prepareMemberPayload(form, { forUpdate: true });
 
     try {
-      const res = await apiCall(`/api/admin/team/${activeMember.id}?type=member`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
+      const res = await sendMemberRequest(`/api/admin/team/${activeMember.id}?type=member`, "PUT", payload);
       const json = await res.json().catch(() => null);
       if (json?.success) {
         await fetchTeams();
@@ -228,6 +208,47 @@ export default function TeamManagementPage() {
     }
   };
 
+  const prepareMemberPayload = (form, { forUpdate = false } = {}) => {
+    const payload = {
+      type: "member",
+      categoryId: form.categoryId ? Number(form.categoryId) : undefined,
+      name: form.name,
+      slug: form.slug,
+      role: form.role,
+      imageUrl: form.imageUrl,
+      email: form.email,
+      instagram: form.instagram,
+      order: form.order !== undefined ? Number(form.order) : forUpdate ? undefined : 0,
+      isActive: forUpdate ? (form.isActive !== undefined ? !!form.isActive : undefined) : !!form.isActive,
+    };
+    if (!payload.slug && payload.name) {
+      payload.slug = toSlug(payload.name);
+    }
+    return payload;
+  };
+
+  const sendMemberRequest = async (url, method, payload) => {
+    const hasFile = typeof File !== "undefined" && payload.imageUrl instanceof File;
+    const requestPayload = { ...payload };
+    const options = { method };
+
+    if (hasFile) {
+      const formData = new FormData();
+      const imageFile = requestPayload.imageUrl;
+      delete requestPayload.imageUrl;
+      Object.entries(requestPayload).forEach(([key, value]) => {
+        if (value === undefined) return;
+        formData.append(key, value);
+      });
+      formData.append("imageUrl", imageFile);
+      options.body = formData;
+    } else {
+      options.body = JSON.stringify(requestPayload);
+    }
+
+    return apiCall(url, options);
+  };
+
   const categoryFields = [
     { name: "name", label: "Nama Kategori", type: "text", required: true },
     { name: "slug", label: "Slug", type: "text", placeholder: "auto-generated from name" },
@@ -247,7 +268,13 @@ export default function TeamManagementPage() {
     { name: "name", label: "Nama", type: "text", required: true },
     { name: "slug", label: "Slug", type: "text", placeholder: "auto-generated from name" },
     { name: "role", label: "Peran", type: "text", required: true },
-    { name: "imageUrl", label: "Image URL", type: "text", placeholder: "/image/placeholder-profile.png" },
+    {
+      name: "imageUrl",
+      label: "Foto",
+      type: "file",
+      accept: "image/*",
+      help: "Unggah foto anggota untuk menghasilkan URL secara otomatis.",
+    },
     { name: "email", label: "Email", type: "text" },
     { name: "instagram", label: "Instagram", type: "text", placeholder: "username atau URL" },
     { name: "order", label: "Urutan", type: "number" },

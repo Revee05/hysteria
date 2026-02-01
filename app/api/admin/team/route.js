@@ -1,7 +1,15 @@
 import { respondSuccess, respondError, AppError } from "../../../../lib/response.js";
 import logger from "../../../../lib/logger.js";
+import { parseMultipartForm, validateFileMimeType, validateFileSize } from "../../../../lib/upload/multipart";
 import { requireAuthWithPermission } from "../../../../lib/helper/permission.helper.js";
-import { getTeamCategoriesWithMembers, createTeamCategory, createTeamMember } from "../../../../modules/admin/team/index.js";
+import { getTeamCategoriesWithMembers, createTeamCategory, createTeamMember, createTeamMemberWithFile } from "../../../../modules/admin/team/index.js";
+
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+
+const resolveType = (request, payload = {}) => {
+  const { searchParams } = new URL(request.url);
+  return payload?.type || searchParams.get("type");
+};
 
 // GET - Fetch team categories with members
 export async function GET(request) {
@@ -37,9 +45,24 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     await requireAuthWithPermission(request, "team.create");
+    const contentType = request.headers.get("content-type") || "";
+    let body = {};
+    let uploadedFile = null;
 
-    const body = await request.json();
-    const type = body?.type;
+    if (contentType.includes("multipart/form-data")) {
+      const { fields, files } = await parseMultipartForm(request, {
+        maxFileSize: MAX_UPLOAD_SIZE,
+      });
+      body = fields;
+      uploadedFile = (files || []).find((file) => file.fieldname === "imageUrl") || null;
+      if (body.isActive !== undefined) {
+        body.isActive = body.isActive === "true" || body.isActive === true;
+      }
+    } else {
+      body = await request.json();
+    }
+
+    const type = resolveType(request, body);
 
     if (type === "category") {
       const category = await createTeamCategory(body);
@@ -47,6 +70,24 @@ export async function POST(request) {
     }
 
     if (type === "member") {
+      if (uploadedFile) {
+        const allowedTypes = (process.env.UPLOAD_ALLOWED_TYPES || "image/*")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+
+        if (!validateFileMimeType(uploadedFile, allowedTypes)) {
+          return respondError(new AppError(`Invalid file type. Allowed types: ${allowedTypes.join(", ")}`, 415));
+        }
+
+        if (!validateFileSize(uploadedFile, MAX_UPLOAD_SIZE)) {
+          return respondError(new AppError(`File too large. Maximum size: ${MAX_UPLOAD_SIZE / 1024 / 1024}MB`, 413));
+        }
+
+        const member = await createTeamMemberWithFile(body, uploadedFile);
+        return respondSuccess(member, 201);
+      }
+
       const member = await createTeamMember(body);
       return respondSuccess(member, 201);
     }
