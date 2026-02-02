@@ -1,6 +1,7 @@
 import { AppError } from "../../../../lib/response.js";
 import logger from "../../../../lib/logger.js";
 import Uploads from "../../../../lib/upload/uploads.js";
+import path from "path";
 import { createWithUpload, updateWithUpload } from "../../../../lib/upload/transactionalUpload.js";
 import * as teamMemberRepository from "../repositories/teamMember.repository.js";
 import * as teamCategoryRepository from "../repositories/teamCategory.repository.js";
@@ -26,7 +27,9 @@ const normalizeTeamMemberPayload = (data) => {
 
 const looksLikeManagedUpload = (source) => {
   if (!source || typeof source !== "string") return false;
-  if (source.startsWith("/uploads/") || source.startsWith("uploads/") || source.includes("/uploads/")) return true;
+  const normalized = source.replace(/\\/g, "/");
+  if (normalized.startsWith("/uploads/") || normalized.startsWith("uploads/") || normalized.includes("/uploads/")) return true;
+  if (normalized.startsWith("/public/uploads/") || normalized.startsWith("public/uploads/") || normalized.includes("/public/uploads/")) return true;
   if (process.env.S3_PUBLIC_URL) {
     const normalized = process.env.S3_PUBLIC_URL.replace(/\/$/, "");
     if (source.startsWith(normalized)) return true;
@@ -37,11 +40,21 @@ const looksLikeManagedUpload = (source) => {
 
 const normalizeUploadSourceForDeletion = (source) => {
   if (!source || typeof source !== "string") return source;
+  const normalized = source.replace(/\\/g, "/");
+  if (normalized.startsWith("/public/uploads/")) return normalized.replace(/^\/public\//, "/");
+  if (normalized.startsWith("public/uploads/")) return normalized.replace(/^public\//, "");
+  if (normalized.includes("/public/uploads/")) {
+    const idx = normalized.indexOf("/public/uploads/");
+    return normalized.slice(idx + "/public".length);
+  }
   if (source.startsWith("/uploads/") || source.startsWith("uploads/")) return source;
   try {
     const parsed = new URL(source);
     if (parsed.pathname.startsWith("/uploads/")) {
       return `${parsed.pathname}${parsed.search}`;
+    }
+    if (parsed.pathname.startsWith("/public/uploads/")) {
+      return parsed.pathname.replace(/^\/public\//, "/");
     }
   } catch (err) {
     // fall back to raw source when parsing fails
@@ -254,29 +267,43 @@ export async function deleteTeamMember(id) {
   const member = await getTeamMemberById(id);
 
   try {
-    if (member?.imageUrl) {
+    if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
       const uploads = new Uploads();
+      const rawSource = String(member.imageUrl || "");
+      const source = normalizeUploadSourceForDeletion(rawSource);
       try {
-        const attemptedSources = [member.imageUrl];
-        let deleted = await uploads.deleteFile(member.imageUrl);
-
+        let deleted = await uploads.deleteFile(rawSource);
+        if (!deleted && source !== rawSource) {
+          deleted = await uploads.deleteFile(source);
+        }
         if (!deleted) {
-          const normalized = normalizeUploadSourceForDeletion(member.imageUrl);
-          if (normalized && normalized !== member.imageUrl) {
-            attemptedSources.push(normalized);
-            deleted = await uploads.deleteFile(normalized);
+          const normalized = String(source).replace(/\\/g, "/");
+          let absolutePath = null;
+
+          if (normalized.startsWith("/uploads/")) {
+            absolutePath = path.join(process.cwd(), "public", normalized.replace(/^\//, ""));
+          } else if (normalized.startsWith("uploads/")) {
+            absolutePath = path.join(process.cwd(), "public", normalized);
+          } else if (normalized.startsWith("/public/uploads/")) {
+            absolutePath = path.join(process.cwd(), normalized.replace(/^\//, ""));
+          } else if (normalized.startsWith("public/uploads/")) {
+            absolutePath = path.join(process.cwd(), normalized);
+          }
+
+          if (absolutePath) {
+            deleted = await uploads.deleteFile(absolutePath);
           }
         }
-
-        if (deleted) {
-          logger.info("Deleted stored image for team member", { memberId: id, source: member.imageUrl });
-        } else {
-          logger.warn("Stored image not found during deletion", { memberId: id, source: member.imageUrl, attemptedSources });
-        }
+        logger.info("Deleted stored image for team member", {
+          memberId: id,
+          source,
+          rawSource,
+          deleted,
+        });
       } catch (err) {
         logger.warn("Failed to delete stored image before member removal", {
           memberId: id,
-          source: member.imageUrl,
+          source,
           error: err && (err.message || err.stack),
         });
       }
