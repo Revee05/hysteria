@@ -6,9 +6,20 @@ const booleanSchema = z.preprocess((val) => {
   return val;
 }, z.boolean());
 
-const optionalText = (max, message) => z.preprocess((val) => (val === "" ? undefined : val), z.string().max(max, message).optional().nullable());
+const optionalText = (max, message) =>
+  z.preprocess((val) => {
+    if (val === "" || val === null || val === "null") return undefined;
+    return val;
+  }, z.string().max(max, message).optional().nullable());
 
-const optionalEmail = () => z.preprocess((val) => (val === "" ? undefined : val), z.string().email("Email must be valid").max(255, "Email must not exceed 255 characters").optional().nullable());
+const optionalEmail = () =>
+  z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === "null") return undefined;
+      return val;
+    },
+    z.email({ error: "Email must be valid" }).max(255, "Email must not exceed 255 characters").optional(),
+  );
 
 /**
  * Schema for creating a team member
