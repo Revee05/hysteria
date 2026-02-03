@@ -16,7 +16,7 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
     ]},
     { key: 'category', label: 'Category', view: 'category', icon: IconCategorySmall, enabled: true },
     { key: 'section', label: 'Section', view: 'section', icon: IconSection, enabled: true, children: [
-      { key: 'hero', label: 'Hero', view: 'section.hero', icon: IconHero, enabled: true },
+      { key: 'hero', label: 'Hero - Halaman Home', view: 'section.hero', icon: IconHero, enabled: true },
       // { key: 'category', label: 'Category', view: 'section.navigation', icon: IconCategorySmall, enabled: true },
     ]},
     { key: 'platform', label: 'Platform', view: 'platform', icon: IconPlatform, enabled: false },
