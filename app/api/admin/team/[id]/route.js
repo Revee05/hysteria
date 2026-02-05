@@ -97,6 +97,7 @@ export async function PUT(request, { params }) {
         }
 
         const member = await updateTeamMemberWithFile(entityId, body, uploadedFile);
+        logger.info('API PUT /api/admin/team/:id called with file upload', { id: entityId }); 
         return respondSuccess(member, 200);
       }
 
@@ -132,12 +133,16 @@ export async function DELETE(request, { params }) {
 
     const type = resolveType(request, {});
     if (type === "member") {
+      logger.info('API DELETE /api/admin/team/:id?type=member called', { id });
       const result = await deleteTeamMember(entityId);
+      logger.info('Team member deleted', { id });
       return respondSuccess(result, 200);
     }
 
     if (type === "category") {
+      logger.info('API DELETE /api/admin/team/:id?type=category called', { id });
       const result = await deleteTeamCategory(entityId);
+      logger.info('Team category deleted', { id });
       return respondSuccess(result, 200);
     }
 

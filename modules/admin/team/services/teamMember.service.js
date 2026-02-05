@@ -264,55 +264,87 @@ export async function updateTeamMemberWithFile(id, data, file) {
 }
 
 export async function deleteTeamMember(id) {
-  const member = await getTeamMemberById(id);
+  logger.info('deleteTeamMember called', { memberId: id });
+  // Check if team member exists
+  await getTeamMemberById(id);
 
   try {
-    if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
-      const uploads = new Uploads();
-      const rawSource = String(member.imageUrl || "");
-      const source = normalizeUploadSourceForDeletion(rawSource);
-      try {
-        let deleted = await uploads.deleteFile(rawSource);
-        if (!deleted && source !== rawSource) {
-          deleted = await uploads.deleteFile(source);
+    // Attempt to delete associated file if any
+    try {
+      const member = await teamMemberRepository.findTeamMemberById(id);
+      logger.info('Lookup team member media before delete', { memberId: id, source: member.imageUrl });
+      if (member && member.imageUrl) {
+        logger.info('Found team member media to delete', { memberId: id, source: member.imageUrl });
+        const uploads = new Uploads();
+        try {
+          await uploads.deleteFile(member.imageUrl);
+          logger.info('Deleted team member media file', { memberId: id, source: member.imageUrl });
+        } catch (err) {
+          logger.info('Failed to delete team member media file, continuing with DB delete', { memberId: id, source: member.imageUrl, error: err.message });
         }
-        if (!deleted) {
-          const normalized = String(source).replace(/\\/g, "/");
-          let absolutePath = null;
-
-          if (normalized.startsWith("/uploads/")) {
-            absolutePath = path.join(process.cwd(), "public", normalized.replace(/^\//, ""));
-          } else if (normalized.startsWith("uploads/")) {
-            absolutePath = path.join(process.cwd(), "public", normalized);
-          } else if (normalized.startsWith("/public/uploads/")) {
-            absolutePath = path.join(process.cwd(), normalized.replace(/^\//, ""));
-          } else if (normalized.startsWith("public/uploads/")) {
-            absolutePath = path.join(process.cwd(), normalized);
-          }
-
-          if (absolutePath) {
-            deleted = await uploads.deleteFile(absolutePath);
-          }
-        }
-        logger.info("Deleted stored image for team member", {
-          memberId: id,
-          source,
-          rawSource,
-          deleted,
-        });
-      } catch (err) {
-        logger.warn("Failed to delete stored image before member removal", {
-          memberId: id,
-          source,
-          error: err && (err.message || err.stack),
-        });
       }
+    } catch (err) {
+      logger.info('Could not lookup team member media before delete', { memberId: id, error: err.message });
     }
+
     await teamMemberRepository.deleteTeamMember(id);
-    logger.info("Team member deleted", { memberId: id });
-    return { message: "Team member deleted successfully" };
+    logger.info('Team member deleted successfully', { memberId: id });
   } catch (error) {
-    logger.error("Error deleting team member", { memberId: id, error: error.message });
-    throw new AppError("Failed to delete team member", 500);
+    logger.error('Error deleting team member', { memberId: id, error: error.message });
+    throw new AppError('Failed to delete team member', 500);
   }
 }
+
+// export async function deleteTeamMember(id) {
+//   const member = await getTeamMemberById(id);
+
+//   try {
+//     if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
+//       const uploads = new Uploads();
+//       const rawSource = String(member.imageUrl || "");
+//       const source = normalizeUploadSourceForDeletion(rawSource);
+//       try {
+//         let deleted = await uploads.deleteFile(rawSource);
+//         if (!deleted && source !== rawSource) {
+//           deleted = await uploads.deleteFile(source);
+//         }
+//         if (!deleted) {
+//           const normalized = String(source).replace(/\\/g, "/");
+//           let absolutePath = null;
+
+//           if (normalized.startsWith("/uploads/")) {
+//             absolutePath = path.join(process.cwd(), "public", normalized.replace(/^\//, ""));
+//           } else if (normalized.startsWith("uploads/")) {
+//             absolutePath = path.join(process.cwd(), "public", normalized);
+//           } else if (normalized.startsWith("/public/uploads/")) {
+//             absolutePath = path.join(process.cwd(), normalized.replace(/^\//, ""));
+//           } else if (normalized.startsWith("public/uploads/")) {
+//             absolutePath = path.join(process.cwd(), normalized);
+//           }
+
+//           if (absolutePath) {
+//             deleted = await uploads.deleteFile(absolutePath);
+//           }
+//         }
+//         logger.info("Deleted stored image for team member", {
+//           memberId: id,
+//           source,
+//           rawSource,
+//           deleted,
+//         });
+//       } catch (err) {
+//         logger.warn("Failed to delete stored image before member removal", {
+//           memberId: id,
+//           source,
+//           error: err && (err.message || err.stack),
+//         });
+//       }
+//     }
+//     await teamMemberRepository.deleteTeamMember(id);
+//     logger.info("Team member deleted", { memberId: id });
+//     return { message: "Team member deleted successfully" };
+//   } catch (error) {
+//     logger.error("Error deleting team member", { memberId: id, error: error.message });
+//     throw new AppError("Failed to delete team member", 500);
+//   }
+// }
