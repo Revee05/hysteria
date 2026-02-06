@@ -6,6 +6,7 @@ import { createWithUpload, updateWithUpload } from "../../../../lib/upload/trans
 import * as teamMemberRepository from "../repositories/teamMember.repository.js";
 import * as teamCategoryRepository from "../repositories/teamCategory.repository.js";
 import { createTeamMemberSchema, updateTeamMemberSchema, validateTeamMemberData } from "../validators/teamMember.validator.js";
+import { log } from "console";
 
 const toSlug = (value) => {
   const base = String(value || "")
@@ -143,37 +144,55 @@ export async function createTeamMemberWithFile(data, file) {
 }
 
 export async function updateTeamMember(id, data) {
+  // New implementation modeled after hero.service's updateHero
   const existingMember = await getTeamMemberById(id);
+  logger.info("data", data);
 
-  const payload = normalizeTeamMemberPayload(data);
-
+  // Validate input
   let validatedData;
   try {
-    validatedData = validateTeamMemberData(payload, updateTeamMemberSchema);
+    validatedData = validateTeamMemberData(data, updateTeamMemberSchema);
+    logger.info("Team member update data validated", validatedData);
   } catch (error) {
     logger.warn("Team member update validation failed", { memberId: id, error: error.errors });
     throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
   }
 
-  const nextName = validatedData.name ?? existingMember.name;
-  const nextSlug = validatedData.slug ?? existingMember.slug;
-  if (nextName && nextSlug) {
-    const conflict = await teamMemberRepository.findTeamMemberBySlugName(nextSlug, nextName);
-    if (conflict && conflict.id !== id) {
-      throw new AppError("Team member with this slug and name already exists", 400);
+  // Remove undefined fields
+  let updateData = Object.fromEntries(Object.entries(validatedData).filter(([_, value]) => value !== undefined));
+
+  // If the caller did NOT include `imageUrl`, perform pre-update cleanup
+  // (delete previously managed upload) and mark `imageUrl` for clearing.
+  if (!data.imageUrl) {
+    try {
+      const uploads = new Uploads();
+      const oldSource = existingMember && existingMember.imageUrl ? String(existingMember.imageUrl) : null;
+      if (oldSource && looksLikeManagedUpload(oldSource)) {
+        try {
+          await uploads.deleteFile(oldSource);
+          logger.info("Deleted atas previous team member upload during pre-update cleanup", { memberId: id, deletedSource: oldSource });
+        } catch (err) {
+          logger.warn("Failed to delete previous team member upload during pre-update cleanup", { memberId: id, deletedSource: oldSource, error: err && err.message });
+        }
+      }
+    } catch (err) {
+      logger.warn("Could not perform pre-update uploaded-file cleanup", { memberId: id, error: err && err.message });
     }
+
+    // Ensure we explicitly clear the image reference in the DB
+    updateData = { ...updateData, imageUrl: "" };
+    logger.info("Clearing imageUrl in updateData", { updateData });
   }
 
-  if (validatedData.categoryId) {
-    const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
-    if (!category) {
-      throw new AppError("Team category not found", 404);
-    }
+  if (Object.keys(updateData).length === 0) {
+    throw new AppError("No valid fields to update", 400);
   }
+
+  logger.info("Updating team member", { memberId: id, updateData: Object.keys(updateData) });
 
   try {
-    const member = await teamMemberRepository.updateTeamMember(id, validatedData);
-    logger.info("Team member updated", { memberId: id, changes: Object.keys(validatedData) });
+    const member = await teamMemberRepository.updateTeamMember(id, updateData);
+    logger.info("Team member updated successfully", { memberId: id, updatedFields: Object.keys(updateData) });
     return member;
   } catch (error) {
     logger.error("Error updating team member", { memberId: id, error: error.message });
@@ -264,7 +283,7 @@ export async function updateTeamMemberWithFile(id, data, file) {
 }
 
 export async function deleteTeamMember(id) {
-  logger.info('deleteTeamMember called', { memberId: id });
+  logger.info("deleteTeamMember called", { memberId: id });
   // Check if team member exists
   await getTeamMemberById(id);
 
@@ -272,26 +291,26 @@ export async function deleteTeamMember(id) {
     // Attempt to delete associated file if any
     try {
       const member = await teamMemberRepository.findTeamMemberById(id);
-      logger.info('Lookup team member media before delete', { memberId: id, source: member.imageUrl });
+      logger.info("Lookup team member media before delete", { memberId: id, source: member.imageUrl });
       if (member && member.imageUrl) {
-        logger.info('Found team member media to delete', { memberId: id, source: member.imageUrl });
+        logger.info("Found team member media to delete", { memberId: id, source: member.imageUrl });
         const uploads = new Uploads();
         try {
           await uploads.deleteFile(member.imageUrl);
-          logger.info('Deleted team member media file', { memberId: id, source: member.imageUrl });
+          logger.info("Deleted team member media file", { memberId: id, source: member.imageUrl });
         } catch (err) {
-          logger.info('Failed to delete team member media file, continuing with DB delete', { memberId: id, source: member.imageUrl, error: err.message });
+          logger.info("Failed to delete team member media file, continuing with DB delete", { memberId: id, source: member.imageUrl, error: err.message });
         }
       }
     } catch (err) {
-      logger.info('Could not lookup team member media before delete', { memberId: id, error: err.message });
+      logger.info("Could not lookup team member media before delete", { memberId: id, error: err.message });
     }
 
     await teamMemberRepository.deleteTeamMember(id);
-    logger.info('Team member deleted successfully', { memberId: id });
+    logger.info("Team member deleted successfully", { memberId: id });
   } catch (error) {
-    logger.error('Error deleting team member', { memberId: id, error: error.message });
-    throw new AppError('Failed to delete team member', 500);
+    logger.error("Error deleting team member", { memberId: id, error: error.message });
+    throw new AppError("Failed to delete team member", 500);
   }
 }
 
