@@ -20,11 +20,7 @@ module.exports = async function seed() {
        VALUES ($1, $2, $3, NOW())
        ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
        RETURNING id`,
-      [
-        "user-management",
-        "User Management",
-        "Permissions related to user management",
-      ],
+      ["user-management", "User Management", "Permissions related to user management"],
     );
     let userGroupId = userGroupResult.rows[0]?.id;
 
@@ -33,11 +29,7 @@ module.exports = async function seed() {
        VALUES ($1, $2, $3, NOW())
        ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
        RETURNING id`,
-      [
-        "permission-management",
-        "Permission Management",
-        "Permissions related to permission and role management",
-      ],
+      ["permission-management", "Permission Management", "Permissions related to permission and role management"],
     );
     let permGroupId = permGroupResult.rows[0]?.id;
 
@@ -64,47 +56,56 @@ module.exports = async function seed() {
        VALUES ($1, $2, $3, NOW())
        ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
        RETURNING id`,
-      ["status-management",
-        "Status Management",
-        "Permissions related to status/master management"],
+      ["status-management", "Status Management", "Permissions related to status/master management"],
     );
     let statusGroupId = statusGroupResult.rows[0]?.id;
 
+    const categoryGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["category-management", "Category Management", "Permissions related to navigation category management"],
+    );
+    let categoryGroupId = categoryGroupResult.rows[0]?.id;
+
+    const teamGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["team-management", "Team Management", "Permissions related to team categories and members"],
+    );
+    let teamGroupId = teamGroupResult.rows[0]?.id;
+
     // If groups not returned (already exist), fetch them
     if (!userGroupId) {
-      const existing = await client.query(
-        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
-        ["user-management"],
-      );
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["user-management"]);
       userGroupId = existing.rows[0].id;
     }
     if (!permGroupId) {
-      const existing = await client.query(
-        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
-        ["permission-management"],
-      );
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["permission-management"]);
       permGroupId = existing.rows[0].id;
     }
     if (!roleGroupId) {
-      const existing = await client.query(
-        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
-        ["role-management"],
-      );
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["role-management"]);
       roleGroupId = existing.rows[0].id;
     }
     if (!heroGroupId) {
-      const existing = await client.query(
-        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
-        ["hero-management"],
-      );
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["hero-management"]);
       heroGroupId = existing.rows[0].id;
     }
     if (!statusGroupId) {
-      const existing = await client.query(
-        `SELECT id FROM "PermissionGroup" WHERE key = $1`,
-        ["status-management"],
-      );
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["status-management"]);
       statusGroupId = existing.rows[0].id;
+    }
+    if (!categoryGroupId) {
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["category-management"]);
+      categoryGroupId = existing.rows[0].id;
+    }
+    if (!teamGroupId) {
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["team-management"]);
+      teamGroupId = existing.rows[0].id;
     }
 
     // Define all permissions
@@ -330,6 +331,58 @@ module.exports = async function seed() {
         description: "Delete hero sections",
         groupId: heroGroupId,
       },
+
+      // Category management (general permissions only)
+      {
+        key: "categories.view",
+        name: "View Categories",
+        description: "View navigation categories and items",
+        groupId: categoryGroupId,
+      },
+      {
+        key: "categories.create",
+        name: "Create Categories",
+        description: "Create new categories and items",
+        groupId: categoryGroupId,
+      },
+      {
+        key: "categories.update",
+        name: "Update Categories",
+        description: "Update existing categories and items",
+        groupId: categoryGroupId,
+      },
+      {
+        key: "categories.delete",
+        name: "Delete Categories",
+        description: "Delete categories and items",
+        groupId: categoryGroupId,
+      },
+
+      // Team management
+      {
+        key: "team.read",
+        name: "Read Team",
+        description: "View team categories and members",
+        groupId: teamGroupId,
+      },
+      {
+        key: "team.create",
+        name: "Create Team",
+        description: "Create team categories and members",
+        groupId: teamGroupId,
+      },
+      {
+        key: "team.update",
+        name: "Update Team",
+        description: "Update team categories and members",
+        groupId: teamGroupId,
+      },
+      {
+        key: "team.delete",
+        name: "Delete Team",
+        description: "Delete team categories and members",
+        groupId: teamGroupId,
+      },
     ];
 
     // Create all permissions
@@ -347,10 +400,7 @@ module.exports = async function seed() {
     }
 
     // Get ADMIN role
-    const adminRoleResult = await client.query(
-      `SELECT id FROM "Role" WHERE key = $1`,
-      ["ADMIN"],
-    );
+    const adminRoleResult = await client.query(`SELECT id FROM "Role" WHERE key = $1`, ["ADMIN"]);
 
     if (adminRoleResult.rows.length > 0) {
       const adminRoleId = adminRoleResult.rows[0].id;
@@ -358,10 +408,7 @@ module.exports = async function seed() {
 
       // Assign all permissions to ADMIN role
       for (const perm of permissions) {
-        const permissionResult = await client.query(
-          `SELECT id FROM "Permission" WHERE key = $1`,
-          [perm.key],
-        );
+        const permissionResult = await client.query(`SELECT id FROM "Permission" WHERE key = $1`, [perm.key]);
 
         if (permissionResult.rows.length > 0) {
           const permissionId = permissionResult.rows[0].id;
@@ -378,9 +425,7 @@ module.exports = async function seed() {
     }
 
     console.log("\n✅ Permissions seeded successfully!");
-    console.log(
-      "ℹ️  Note: SUPERADMIN automatically bypasses all permission checks",
-    );
+    console.log("ℹ️  Note: SUPERADMIN automatically bypasses all permission checks");
   } catch (error) {
     logger.error("Error seeding permissions:", error);
     throw error;

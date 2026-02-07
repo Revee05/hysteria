@@ -56,7 +56,7 @@ function DialogShell({ opts = {}, onClose, onConfirm }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 transition-opacity duration-200 opacity-100">
+      <div className="h-full w-full fixed inset-0 z-40 transition-opacity duration-200 opacity-100">
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closable ? onClose : undefined} />
       </div>
 

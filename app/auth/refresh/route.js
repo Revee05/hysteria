@@ -49,6 +49,6 @@ export async function GET(request) {
     return response
   } catch (err) {
     logger.error('ServerRefresh: refresh failed', { error: err.message })
-    return NextResponse.redirect('/auth/login')
+    return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 }

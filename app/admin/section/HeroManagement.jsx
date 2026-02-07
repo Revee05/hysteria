@@ -342,7 +342,7 @@ export default function HeroManagement() {
               name: "source",
               label: "Source URL",
               type: "text",
-              placeholder: "https://example.com/video.mp4",
+              placeholder: "https://example.com/(video.mp4/image.jpg)",
               required: false,
               validation: "Masukkan video URL publik (https). (hapus URL jika ingin mengupload file)",
             },
