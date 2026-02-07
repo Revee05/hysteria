@@ -19,7 +19,7 @@ export const createTeamCategorySchema = z.object({
     .max(200, "Slug must not exceed 200 characters")
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase alphanumeric with hyphens only"),
   description: optionalText(1000, "Description must not exceed 1000 characters"),
-  order: z.coerce.number().int().min(0, "Order must be a positive integer").optional().default(0),
+  order: z.coerce.number().int().min(0, "Order must be a positive integer").optional(),
   isActive: booleanSchema.optional().default(true),
 });
 

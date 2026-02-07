@@ -26,13 +26,39 @@ const normalizeTeamMemberPayload = (data) => {
 
 const looksLikeManagedUpload = (source) => {
   if (!source || typeof source !== "string") return false;
-  if (source.startsWith("/uploads/") || source.startsWith("uploads/") || source.includes("/uploads/")) return true;
+  const normalized = source.replace(/\\/g, "/");
+  if (normalized.startsWith("/uploads/") || normalized.startsWith("uploads/") || normalized.includes("/uploads/")) return true;
+  if (normalized.startsWith("/public/uploads/") || normalized.startsWith("public/uploads/") || normalized.includes("/public/uploads/")) return true;
   if (process.env.S3_PUBLIC_URL) {
     const normalized = process.env.S3_PUBLIC_URL.replace(/\/$/, "");
     if (source.startsWith(normalized)) return true;
   }
   if (/s3\.amazonaws\.com/.test(source) || /s3[.-]/.test(source)) return true;
   return false;
+};
+
+const normalizeUploadSourceForDeletion = (source) => {
+  if (!source || typeof source !== "string") return source;
+  const normalized = source.replace(/\\/g, "/");
+  if (normalized.startsWith("/public/uploads/")) return normalized.replace(/^\/public\//, "/");
+  if (normalized.startsWith("public/uploads/")) return normalized.replace(/^public\//, "");
+  if (normalized.includes("/public/uploads/")) {
+    const idx = normalized.indexOf("/public/uploads/");
+    return normalized.slice(idx + "/public".length);
+  }
+  if (source.startsWith("/uploads/") || source.startsWith("uploads/")) return source;
+  try {
+    const parsed = new URL(source);
+    if (parsed.pathname.startsWith("/uploads/")) {
+      return `${parsed.pathname}${parsed.search}`;
+    }
+    if (parsed.pathname.startsWith("/public/uploads/")) {
+      return parsed.pathname.replace(/^\/public\//, "/");
+    }
+  } catch (err) {
+    // fall back to raw source when parsing fails
+  }
+  return source;
 };
 
 export async function getTeamMemberById(id) {
@@ -57,6 +83,11 @@ export async function createTeamMember(data) {
   const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
   if (!category) {
     throw new AppError("Team category not found", 404);
+  }
+
+  if (validatedData.order === undefined || validatedData.order === null) {
+    const maxOrder = await teamMemberRepository.getMaxTeamMemberOrder(validatedData.categoryId);
+    validatedData.order = maxOrder + 1;
   }
 
   const existing = await teamMemberRepository.findTeamMemberBySlugName(validatedData.slug, validatedData.name);
@@ -90,6 +121,11 @@ export async function createTeamMemberWithFile(data, file) {
     throw new AppError("Team category not found", 404);
   }
 
+  if (validatedData.order === undefined || validatedData.order === null) {
+    const maxOrder = await teamMemberRepository.getMaxTeamMemberOrder(validatedData.categoryId);
+    validatedData.order = maxOrder + 1;
+  }
+
   const existing = await teamMemberRepository.findTeamMemberBySlugName(validatedData.slug, validatedData.name);
   if (existing) {
     throw new AppError("Team member with this slug and name already exists", 400);
@@ -116,41 +152,90 @@ export async function createTeamMemberWithFile(data, file) {
 }
 
 export async function updateTeamMember(id, data) {
+  // New implementation modeled after hero.service's updateHero
   const existingMember = await getTeamMemberById(id);
 
-  const payload = normalizeTeamMemberPayload(data);
-
+  // Validate input
   let validatedData;
   try {
-    validatedData = validateTeamMemberData(payload, updateTeamMemberSchema);
+    validatedData = validateTeamMemberData(data, updateTeamMemberSchema);
+    logger.info("Team member update data validated", validatedData);
   } catch (error) {
     logger.warn("Team member update validation failed", { memberId: id, error: error.errors });
     throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
   }
 
-  const nextName = validatedData.name ?? existingMember.name;
-  const nextSlug = validatedData.slug ?? existingMember.slug;
-  if (nextName && nextSlug) {
-    const conflict = await teamMemberRepository.findTeamMemberBySlugName(nextSlug, nextName);
-    if (conflict && conflict.id !== id) {
-      throw new AppError("Team member with this slug and name already exists", 400);
+  // Remove undefined fields
+  let updateData = Object.fromEntries(Object.entries(validatedData).filter(([_, value]) => value !== undefined));
+
+  const hasImageField = Object.prototype.hasOwnProperty.call(data, "imageUrl");
+  const shouldClearImage = hasImageField && (data.imageUrl === "" || data.imageUrl === null);
+
+  if (shouldClearImage) {
+    try {
+      const uploads = new Uploads();
+      const oldSource = existingMember && existingMember.imageUrl ? String(existingMember.imageUrl) : null;
+      if (oldSource && looksLikeManagedUpload(oldSource)) {
+        try {
+          await uploads.deleteFile(oldSource);
+          logger.info("Deleted atas previous team member upload during pre-update cleanup", { memberId: id, deletedSource: oldSource });
+        } catch (err) {
+          logger.warn("Failed to delete previous team member upload during pre-update cleanup", { memberId: id, deletedSource: oldSource, error: err && err.message });
+        }
+      }
+    } catch (err) {
+      logger.warn("Could not perform pre-update uploaded-file cleanup", { memberId: id, error: err && err.message });
     }
+
+    // Ensure we explicitly clear the image reference in the DB
+    updateData = { ...updateData, imageUrl: "" };
+    logger.info("Clearing imageUrl in updateData", { updateData });
   }
 
-  if (validatedData.categoryId) {
-    const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
-    if (!category) {
-      throw new AppError("Team category not found", 404);
-    }
+  if (Object.keys(updateData).length === 0) {
+    throw new AppError("No valid fields to update", 400);
   }
+
+  logger.info("Updating team member", { memberId: id, updateData: Object.keys(updateData) });
 
   try {
-    const member = await teamMemberRepository.updateTeamMember(id, validatedData);
-    logger.info("Team member updated", { memberId: id, changes: Object.keys(validatedData) });
+    const member = await teamMemberRepository.updateTeamMember(id, updateData);
+    logger.info("Team member updated successfully", { memberId: id, updatedFields: Object.keys(updateData) });
     return member;
   } catch (error) {
     logger.error("Error updating team member", { memberId: id, error: error.message });
     throw new AppError("Failed to update team member", 500);
+  }
+}
+
+export async function reorderTeamMembers(items = []) {
+  if (!Array.isArray(items)) {
+    throw new AppError("Invalid reorder payload", 400);
+  }
+
+  const normalized = items.map((item) => {
+    const id = Number(item.id);
+    const order = Number(item.order);
+    const categoryId = Number(item.categoryId);
+    if (!Number.isFinite(id) || id <= 0) {
+      throw new AppError("Invalid team member id", 400);
+    }
+    if (!Number.isFinite(order) || order < 0) {
+      throw new AppError("Invalid team member order", 400);
+    }
+    if (!Number.isFinite(categoryId) || categoryId <= 0) {
+      throw new AppError("Invalid team member category", 400);
+    }
+    return { id, order, categoryId };
+  });
+
+  try {
+    await teamMemberRepository.updateTeamMemberOrders(normalized);
+    logger.info("Team member order updated", { count: normalized.length });
+    return { count: normalized.length };
+  } catch (error) {
+    logger.error("Error reordering team members", { error: error.message });
+    throw new AppError("Failed to reorder team members", 500);
   }
 }
 
@@ -182,20 +267,17 @@ export async function updateTeamMemberWithFile(id, data, file) {
     }
   }
 
-  const updateData = Object.fromEntries(
-    Object.entries(validatedData).filter(([_, value]) => value !== undefined)
-  );
+  const updateData = Object.fromEntries(Object.entries(validatedData).filter(([_, value]) => value !== undefined));
   delete updateData.imageUrl;
 
   const uploads = new Uploads();
-  const snapshot = { ...existingMember };
+  const snapshot = { ...existingMember, source: existingMember.imageUrl };
 
   try {
     const member = await updateWithUpload(
       {
         getExisting: async () => snapshot,
-        updateRecord: async (recordId, dataToUpdate) =>
-          teamMemberRepository.updateTeamMember(recordId, dataToUpdate),
+        updateRecord: async (recordId, dataToUpdate) => teamMemberRepository.updateTeamMember(recordId, dataToUpdate),
         uploadFile: async (filePayload) => uploads.handleUpload(filePayload),
         updateSource: async (recordId, url) => teamMemberRepository.updateTeamMember(recordId, { imageUrl: url }),
         revertRecord: async (recordId, prev) => {
@@ -240,27 +322,87 @@ export async function updateTeamMemberWithFile(id, data, file) {
 }
 
 export async function deleteTeamMember(id) {
-  const member = await getTeamMemberById(id);
+  logger.info("deleteTeamMember called", { memberId: id });
+  // Check if team member exists
+  await getTeamMemberById(id);
 
   try {
-    await teamMemberRepository.deleteTeamMember(id);
-    if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
-      const uploads = new Uploads();
-      try {
-        await uploads.deleteFile(member.imageUrl);
-        logger.info("Deleted stored image for team member", { memberId: id, source: member.imageUrl });
-      } catch (err) {
-        logger.warn("Failed to delete stored image after member removal", {
-          memberId: id,
-          source: member.imageUrl,
-          error: err && (err.message || err.stack),
-        });
+    // Attempt to delete associated file if any
+    try {
+      const member = await teamMemberRepository.findTeamMemberById(id);
+      logger.info("Lookup team member media before delete", { memberId: id, source: member.imageUrl });
+      if (member && member.imageUrl) {
+        logger.info("Found team member media to delete", { memberId: id, source: member.imageUrl });
+        const uploads = new Uploads();
+        try {
+          await uploads.deleteFile(member.imageUrl);
+          logger.info("Deleted team member media file", { memberId: id, source: member.imageUrl });
+        } catch (err) {
+          logger.info("Failed to delete team member media file, continuing with DB delete", { memberId: id, source: member.imageUrl, error: err.message });
+        }
       }
+    } catch (err) {
+      logger.info("Could not lookup team member media before delete", { memberId: id, error: err.message });
     }
-    logger.info("Team member deleted", { memberId: id });
-    return { message: "Team member deleted successfully" };
+
+    await teamMemberRepository.deleteTeamMember(id);
+    logger.info("Team member deleted successfully", { memberId: id });
   } catch (error) {
     logger.error("Error deleting team member", { memberId: id, error: error.message });
     throw new AppError("Failed to delete team member", 500);
   }
 }
+
+// export async function deleteTeamMember(id) {
+//   const member = await getTeamMemberById(id);
+
+//   try {
+//     if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
+//       const uploads = new Uploads();
+//       const rawSource = String(member.imageUrl || "");
+//       const source = normalizeUploadSourceForDeletion(rawSource);
+//       try {
+//         let deleted = await uploads.deleteFile(rawSource);
+//         if (!deleted && source !== rawSource) {
+//           deleted = await uploads.deleteFile(source);
+//         }
+//         if (!deleted) {
+//           const normalized = String(source).replace(/\\/g, "/");
+//           let absolutePath = null;
+
+//           if (normalized.startsWith("/uploads/")) {
+//             absolutePath = path.join(process.cwd(), "public", normalized.replace(/^\//, ""));
+//           } else if (normalized.startsWith("uploads/")) {
+//             absolutePath = path.join(process.cwd(), "public", normalized);
+//           } else if (normalized.startsWith("/public/uploads/")) {
+//             absolutePath = path.join(process.cwd(), normalized.replace(/^\//, ""));
+//           } else if (normalized.startsWith("public/uploads/")) {
+//             absolutePath = path.join(process.cwd(), normalized);
+//           }
+
+//           if (absolutePath) {
+//             deleted = await uploads.deleteFile(absolutePath);
+//           }
+//         }
+//         logger.info("Deleted stored image for team member", {
+//           memberId: id,
+//           source,
+//           rawSource,
+//           deleted,
+//         });
+//       } catch (err) {
+//         logger.warn("Failed to delete stored image before member removal", {
+//           memberId: id,
+//           source,
+//           error: err && (err.message || err.stack),
+//         });
+//       }
+//     }
+//     await teamMemberRepository.deleteTeamMember(id);
+//     logger.info("Team member deleted", { memberId: id });
+//     return { message: "Team member deleted successfully" };
+//   } catch (error) {
+//     logger.error("Error deleting team member", { memberId: id, error: error.message });
+//     throw new AppError("Failed to delete team member", 500);
+//   }
+// }

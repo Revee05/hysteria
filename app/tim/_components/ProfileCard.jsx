@@ -65,12 +65,12 @@ export default function ProfileCard({ name, role, imageUrl, email, instagram }) 
 
   return (
     <div className="flex flex-col items-start bg-white rounded-[10px] shadow-[0px_0px_20px_-3px_rgba(0,0,0,0.25)] overflow-hidden w-full max-w-[420px] h-full min-h-[500px] hover:shadow-xl transition-shadow duration-300">
-      <div className="w-full aspect-[420/518] relative bg-gray-200 overflow-hidden">
+      <div className="w-full aspect-[420/423] relative bg-gray-200 overflow-hidden">
         <Image
           src={imgSrc}
           alt={name}
           width={420}
-          height={518}
+          height={423}
           className="w-full h-full object-cover"
         />
       </div>
