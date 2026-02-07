@@ -1,12 +1,10 @@
 import { AppError } from "../../../../lib/response.js";
 import logger from "../../../../lib/logger.js";
 import Uploads from "../../../../lib/upload/uploads.js";
-import path from "path";
 import { createWithUpload, updateWithUpload } from "../../../../lib/upload/transactionalUpload.js";
 import * as teamMemberRepository from "../repositories/teamMember.repository.js";
 import * as teamCategoryRepository from "../repositories/teamCategory.repository.js";
 import { createTeamMemberSchema, updateTeamMemberSchema, validateTeamMemberData } from "../validators/teamMember.validator.js";
-import { log } from "console";
 
 const toSlug = (value) => {
   const base = String(value || "")
@@ -87,6 +85,11 @@ export async function createTeamMember(data) {
     throw new AppError("Team category not found", 404);
   }
 
+  if (validatedData.order === undefined || validatedData.order === null) {
+    const maxOrder = await teamMemberRepository.getMaxTeamMemberOrder(validatedData.categoryId);
+    validatedData.order = maxOrder + 1;
+  }
+
   const existing = await teamMemberRepository.findTeamMemberBySlugName(validatedData.slug, validatedData.name);
   if (existing) {
     throw new AppError("Team member with this slug and name already exists", 400);
@@ -118,6 +121,11 @@ export async function createTeamMemberWithFile(data, file) {
     throw new AppError("Team category not found", 404);
   }
 
+  if (validatedData.order === undefined || validatedData.order === null) {
+    const maxOrder = await teamMemberRepository.getMaxTeamMemberOrder(validatedData.categoryId);
+    validatedData.order = maxOrder + 1;
+  }
+
   const existing = await teamMemberRepository.findTeamMemberBySlugName(validatedData.slug, validatedData.name);
   if (existing) {
     throw new AppError("Team member with this slug and name already exists", 400);
@@ -146,7 +154,6 @@ export async function createTeamMemberWithFile(data, file) {
 export async function updateTeamMember(id, data) {
   // New implementation modeled after hero.service's updateHero
   const existingMember = await getTeamMemberById(id);
-  logger.info("data", data);
 
   // Validate input
   let validatedData;
@@ -161,9 +168,10 @@ export async function updateTeamMember(id, data) {
   // Remove undefined fields
   let updateData = Object.fromEntries(Object.entries(validatedData).filter(([_, value]) => value !== undefined));
 
-  // If the caller did NOT include `imageUrl`, perform pre-update cleanup
-  // (delete previously managed upload) and mark `imageUrl` for clearing.
-  if (!data.imageUrl) {
+  const hasImageField = Object.prototype.hasOwnProperty.call(data, "imageUrl");
+  const shouldClearImage = hasImageField && (data.imageUrl === "" || data.imageUrl === null);
+
+  if (shouldClearImage) {
     try {
       const uploads = new Uploads();
       const oldSource = existingMember && existingMember.imageUrl ? String(existingMember.imageUrl) : null;
@@ -197,6 +205,37 @@ export async function updateTeamMember(id, data) {
   } catch (error) {
     logger.error("Error updating team member", { memberId: id, error: error.message });
     throw new AppError("Failed to update team member", 500);
+  }
+}
+
+export async function reorderTeamMembers(items = []) {
+  if (!Array.isArray(items)) {
+    throw new AppError("Invalid reorder payload", 400);
+  }
+
+  const normalized = items.map((item) => {
+    const id = Number(item.id);
+    const order = Number(item.order);
+    const categoryId = Number(item.categoryId);
+    if (!Number.isFinite(id) || id <= 0) {
+      throw new AppError("Invalid team member id", 400);
+    }
+    if (!Number.isFinite(order) || order < 0) {
+      throw new AppError("Invalid team member order", 400);
+    }
+    if (!Number.isFinite(categoryId) || categoryId <= 0) {
+      throw new AppError("Invalid team member category", 400);
+    }
+    return { id, order, categoryId };
+  });
+
+  try {
+    await teamMemberRepository.updateTeamMemberOrders(normalized);
+    logger.info("Team member order updated", { count: normalized.length });
+    return { count: normalized.length };
+  } catch (error) {
+    logger.error("Error reordering team members", { error: error.message });
+    throw new AppError("Failed to reorder team members", 500);
   }
 }
 

@@ -36,7 +36,7 @@ export const createTeamMemberSchema = z.object({
   imageUrl: optionalText(500, "Image URL must not exceed 500 characters"),
   email: optionalEmail(),
   instagram: optionalText(255, "Instagram must not exceed 255 characters"),
-  order: z.coerce.number().int().min(0, "Order must be a positive integer").optional().default(0),
+  order: z.coerce.number().int().min(0, "Order must be a positive integer").optional(),
   isActive: booleanSchema.optional().default(true),
 });
 

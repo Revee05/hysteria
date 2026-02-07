@@ -45,6 +45,34 @@ export async function createTeamMember(data) {
 }
 
 /**
+ * Get max order value for team members in a category
+ * @param {number} categoryId
+ * @returns {Promise<number>}
+ */
+export async function getMaxTeamMemberOrder(categoryId) {
+  const result = await prisma.teamMember.aggregate({
+    _max: { order: true },
+    where: { categoryId },
+  });
+  return Number.isFinite(result?._max?.order) ? result._max.order : -1;
+}
+
+/**
+ * Update orders for multiple team members
+ * @param {Array<{id:number, order:number, categoryId:number}>} items
+ * @returns {Promise<Array>}
+ */
+export async function updateTeamMemberOrders(items) {
+  const updates = items.map((item) =>
+    prisma.teamMember.update({
+      where: { id: item.id },
+      data: { order: item.order, categoryId: item.categoryId },
+    }),
+  );
+  return prisma.$transaction(updates);
+}
+
+/**
  * Update team member
  * @param {number} id
  * @param {Object} data
