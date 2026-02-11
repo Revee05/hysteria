@@ -7,6 +7,10 @@ import { STATUS_KEYS } from "../../modules/auth/domain/status.constants.js";
 import logger from "../../lib/logger.js";
 import AdminShell from "./_partial/AdminShell.jsx";
 
+export const metadata = {
+  title: "Admin Panel",
+};
+
 export default async function AdminLayout({ children }) {
 	// `cookies()` can be async in some Next versions / runtimes
 	const cookieStore = await cookies();

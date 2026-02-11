@@ -4,6 +4,8 @@ import HeadSection from '../../../_sectionComponents/halaman_platform/head.secti
 import ListCategorySection from '../../../_sectionComponents/halaman_platform/list_category.section'
 import MediaSection from '../../../_sectionComponents/halaman_platform/media.section'
 
+const MAINTENNACE=false
+
 const PLATFORM_DATA = {
   'artlab': {
     head: {
@@ -12,38 +14,38 @@ const PLATFORM_DATA = {
       instagramUrl: '#',
       youtubeUrl: '#',
       images: [
-        { src: 'https://via.placeholder.com/500x516.png?text=ArtLab', alt: 'ArtLab' }
+        { src: '/image/Artlab.jpg', alt: 'ArtLab' }
       ]
     },
     categories: [
-      { title: 'Merchandise', href: '/platform/artlab/merchandise', image: '/image/artlab-cat1.jpg' },
-      { title: 'Podcast ArtLab', href: '/platform/artlab/podcast-artlab', image: '/image/artlab-cat2.jpg' },
-      { title: 'Workshop ArtLab', href: '/platform/artlab/workshop-artlab', image: '/image/artlab-cat3.jpg' },
-      { title: 'Screening Film', href: '/platform/artlab/screening-film', image: '/image/artlab-cat4.jpg' },
-      { title: 'Untuk Perhatian', href: '/platform/artlab/screening-film', image: '/image/artlab-cat4.jpg' }
+      { title: 'Merchandise', href: '/platform/artlab/merchandise', image: '/image/list-item.jpg' },
+      { title: 'Podcast ArtLab', href: '/platform/artlab/podcast-artlab', image: '/image/list-item.jpg' },
+      { title: 'Workshop ArtLab', href: '/platform/artlab/workshop-artlab', image: '/image/list-item.jpg' },
+      { title: 'Screening Film', href: '/platform/artlab/screening-film', image: '/image/list-item.jpg' },
+      { title: 'Untuk Perhatian', href: '/platform/artlab/screening-film', image: '/image/list-item.jpg' }
     ],
-    videoId: 'M7lc1UVf-VE'
+    mediaURL: 'https://www.youtube.com/embed/M7lc1UVf-VE'
   },
   'ditampart': {
     head: {
       title: 'Laboratorium Para Seniman Semarang Eksis',
       description: 'Kolektif Hysteria merupakan ruang produksi artistik sekaligus fasilitator untuk pertemuan lintas disipliner dalam skala lokal hingga global untuk mencari trobosan-trobosan dalam persoalan kreatifitas, seni, komunitas, anak muda, dan isu kota.',
-      instagramUrl: '#',
-      youtubeUrl: '#',
+      // instagramUrl: '#',
+      // youtubeUrl: '#',
       images: [
-        { src: 'https://via.placeholder.com/480x600.png?text=Ditam+Part+1', alt: 'Ditam Part' },
-        { src: 'https://via.placeholder.com/480x600.png?text=Ditam+Part+2', alt: 'Ditam Part' },
+        { src: '/image/ditampart1.png', alt: 'Ditam Part' },
+        { src: '/image/ditampart2.png', alt: 'Ditam Part' },
       ],
       multyImages: true
     },
     categories: [
-        { title: '3D', image: '/image/placeholder-artlab.png', href: '/platform/ditampart/3d' },
-		{ title: 'Foto Kegiatan', image: '/image/placeholder-artlab.png', href: '/platform/ditampart/foto-kegiatan' },
-		{ title: 'Kebutuhan Ditampart', image: '/image/placeholder-artlab.png', href: '/platform/ditampart/kebutuhan-ditampart' },
-		{ title: 'Mock Up and Poster', image: '/image/placeholder-artlab.png', href: '/platform/ditampart/mock-up-and-poster' },
-		{ title: 'Short Documentary', image: '/image/placeholder-artlab.png', href: '/platform/ditampart/short-documentary' }
+    { title: '3D', image: '/image/list-item.jpg', href: '/platform/ditampart/3d' },
+		{ title: 'Foto Kegiatan', image: '/image/list-item.jpg', href: '/platform/ditampart/foto-kegiatan' },
+		{ title: 'Kebutuhan Ditampart', image: '/image/list-item.jpg', href: '/platform/ditampart/kebutuhan-ditampart' },
+		{ title: 'Mock Up and Poster', image: '/image/list-item.jpg', href: '/platform/ditampart/mock-up-and-poster' },
+		{ title: 'Short Documentary', image: '/image/list-item.jpg', href: '/platform/ditampart/short-documentary' }
     ],
-    videoId: 'dQw4w9WgXcQ'
+    mediaURL: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
   },
   'laki-masak': {
     head: {
@@ -51,15 +53,17 @@ const PLATFORM_DATA = {
       description: 'Laki Masak adalah ruang masak yang nggak cuma soal resep, tapi juga soal cerita, obrolan, dan sikap. Di dapur, laki-laki hadir bukan buat pamer jago, tapi buat berbagi—tentang rasa, proses, ingatan, dan keseharian yang sering luput dibicarakan.',
       instagramUrl: '#',
       youtubeUrl: '#',
-      images: [ { src: 'https://via.placeholder.com/500x516.png?text=Laki+Masak', alt: 'Laki Masak' } ]
+      images: [ 
+        { src: '/image/Artlab.jpg', alt: 'Laki Masak' } 
+      ]
     },
     categories: [
-        { title: 'Meramu', image: '/image/placeholder-artlab.png', href: '/platform/laki-masak/meramu' },
-        { title: 'Homecooked', image: '/image/placeholder-artlab.png', href: '/platform/laki-masak/homecooked' },
-        { title: 'Komik Ramuan', image: '/image/placeholder-artlab.png', href: '/platform/laki-masak/komik-ramuan' },
-        { title: 'Pre-Order', image: '/image/placeholder-artlab.png', href: '/platform/laki-masak/pre-order' },
+        { title: 'Meramu', image: '/image/list-item.jpg', href: '/platform/laki-masak/meramu' },
+        { title: 'Homecooked', image: '/image/list-item.jpg', href: '/platform/laki-masak/homecooked' },
+        { title: 'Komik Ramuan', image: '/image/list-item.jpg', href: '/platform/laki-masak/komik-ramuan' },
+        { title: 'Pre-Order', image: '/image/list-item.jpg', href: '/platform/laki-masak/pre-order' },
     ],
-    videoId: 'e-ORhEE9VVg'
+    mediaURL: 'https://www.youtube.com/embed/e-ORhEE9VVg'
   }
 }
 
@@ -75,12 +79,14 @@ export default async function Page({ params }) {
   const data = PLATFORM_DATA[slug]
 
   // If we don't have a configured page, render a generic view instead of 404
-  if (!data) {
+  if (!data || MAINTENNACE) {
     return (
-      <main className="py-20 px-4">
-        <div className="container mx-auto">
-          <h1 className="text-3xl font-bold">Platform: {slug}</h1>
-          <p className="mt-4 text-gray-600">Halaman ini belum dikonfigurasi. Kamu bisa menambahkan konten khusus untuk <strong>{slug}</strong> di <code>app/platform/{slug}/page.jsx</code> atau tambahkan data di `PLATFORM_DATA`.</p>
+      <main className="bg-white py-20 px-4">
+        <div className="container mx-auto text-center">
+          <h1 className="text-3xl text-zinc-900 font-bold mb-4">Platform: {slug}</h1>
+          <p className="mt-4 text-zinc-700">
+            Sedang dalam tahap maintenance.
+          </p>
         </div>
       </main>
     )
@@ -89,7 +95,7 @@ export default async function Page({ params }) {
   return (
     <main className="bg-white min-h-screen">
       <HeadSection {...data.head} />
-      <MediaSection videoId={data.videoId} />
+      <MediaSection mediaURL={data.mediaURL} />
       <ListCategorySection items={data.categories} />
     </main>
   )

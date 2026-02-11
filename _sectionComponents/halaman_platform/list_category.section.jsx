@@ -11,15 +11,16 @@ export default function ListCategorySection({
   const CARD_H = 450
 
   return (
-    <section className="px-4 py-8 sm:py-12 md:py-8 lg:py-10 text-black">
+    <section className="px-4 py-8 sm:py-8 md:py-8 lg:py-8 text-black">
       <div className="mx-auto w-full max-w-[1100px] sm:max-w-[1200px] md:max-w-[1400px] lg:max-w-[1800px] px-0 sm:px-2 md:px-4">
         {/* item wrapper: responsive grid columns */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* <div className="px-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 border border-zinc-400"> */}
+        <div className="px-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 ">
           {items.map((it, idx) => (
             <a
               key={idx}
               href={it.href}
-              className="py-4 px-3 group block bg-white overflow-hidden border-b border-zinc-200 w-full rounded-md"
+              className="py-3 group block bg-white overflow-hidden border-b border-zinc-400"
             >
               {/* item image: adjust visible heights per breakpoint here */}
               <div className="overflow-hidden rounded-md border border-zinc-200">
@@ -28,7 +29,7 @@ export default function ListCategorySection({
                   alt={it.title}
                   width={CARD_W}
                   height={CARD_H}
-                  className="w-full max-w-full h-48 sm:h-56 lg:h-64 object-cover rounded-md"
+                  className="w-full max-w-full h-48 sm:h-56 lg:h-64 object-cover rounded-lg"
                 />
               </div>
 

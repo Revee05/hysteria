@@ -6,6 +6,7 @@ import Toast from "../../components/ui/Toast";
 import { useAuth } from "../../lib/context/auth-context";
 import Card, { CardHeader, CardBody, CardFooter, CardTitle, CardDescription, CardBadge, CardStats } from "../../components/ui/Card";
 
+
 export default function AdminPage() {
 	const router = useRouter();
 	// use csrfToken from AuthProvider
