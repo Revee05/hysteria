@@ -68,9 +68,24 @@ export async function PUT(request, { params }) {
 
     if (contentType.includes("multipart/form-data")) {
       logger.info("Detected multipart/form-data in PUT", { id: entityId });
-      const { fields, files } = await parseMultipartForm(request, {
-        maxFileSize: MAX_UPLOAD_SIZE,
-      });
+      let fields = {};
+      let files = [];
+      try {
+        const result = await parseMultipartForm(request, {
+          maxFileSize: MAX_UPLOAD_SIZE,
+        });
+        fields = result.fields || {};
+        files = result.files || [];
+      } catch (err) {
+        logger.error("Multipart parse error", { id: entityId, error: err && (err.stack || err.message || err) });
+        const msg = err && (err.message || "");
+        const code = err && err.code;
+        const isSizeError = (typeof code === "string" && code.startsWith && code.startsWith("LIMIT_")) || msg.includes("maxTotalFileSize") || msg.toLowerCase().includes("exceeded") || msg.toLowerCase().includes("file too large");
+        if (isSizeError) {
+          return respondError(new AppError(`File too large. Maximum size: ${MAX_UPLOAD_SIZE / 1024 / 1024}MB`, 413));
+        }
+        throw err;
+      }
       body = fields;
       uploadedFile = (files || []).find((file) => file.fieldname === "imageUrl") || null;
       logger.info("Parsed multipart form fields and files", { id: entityId, fields: Object.keys(body), fileCount: (files || []).length });

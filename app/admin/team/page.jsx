@@ -57,7 +57,7 @@ const SortableCategoryCard = ({ category, collapsed, onToggle, onAddMember, onEd
               type="button"
               {...attributes}
               {...listeners}
-              className="rounded-md border border-zinc-200 bg-white p-1 text-zinc-500 hover:bg-zinc-50"
+              className={`rounded-md border border-zinc-200 bg-white p-1 text-zinc-500 hover:bg-zinc-50 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
               title="Drag untuk mengurutkan kategori">
               <svg
                 className="h-4 w-4"
@@ -142,7 +142,7 @@ const SortableMemberRow = ({ member, onEdit, onDelete, onToggleActive }) => {
             type="button"
             {...attributes}
             {...listeners}
-            className="rounded-md border border-zinc-200 bg-white p-1 text-zinc-500 hover:bg-zinc-50"
+            className={`rounded-md border border-zinc-200 bg-white p-1 text-zinc-500 hover:bg-zinc-50 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
             title="Drag untuk mengurutkan anggota">
             <svg
               className="h-4 w-4"
@@ -499,7 +499,7 @@ export default function TeamManagementPage() {
       label: "Foto",
       type: "file",
       accept: "image/*",
-      help: "Unggah foto anggota untuk menghasilkan URL secara otomatis.",
+      help: "Unggah foto ukuran foto 1:1 untuk hasil terbaik. maksimal 5MB.",
     },
     { name: "email", label: "Email", type: "text" },
     { name: "instagram", label: "Instagram", type: "text", placeholder: "username atau URL" },

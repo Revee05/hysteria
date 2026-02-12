@@ -59,7 +59,7 @@ export default function TimPage() {
           {loading && !primaryCategory ? (
             <div className="text-center text-sm text-zinc-500">Memuat data tim...</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16 justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[35px] gap-y-16 justify-items-center">
               {(primaryCategory?.members || []).map((member) => (
                 <ProfileCard
                   key={member.id}
