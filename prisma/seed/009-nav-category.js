@@ -73,8 +73,8 @@ module.exports = async function seed() {
 		{ categorySlug: 'program-hysteria', title: 'Kandang Tandang', slug: 'kandang-tandang', url: '/program/residensi-workshop/kandang-tandang', order: 1, parentSlug: 'residensi-dan-workshop' },
 
 		{ categorySlug: 'program-hysteria', title: 'Video Series', slug: 'video-series', url: '/program/video-series', order: 8, parentSlug: null },
-		{ categorySlug: 'program-hysteria', title: 'Screening AM', slug: 'screening-am-video', url: '/program/video-series/screening-am', order: 0, parentSlug: 'video-series' },
-		{ categorySlug: 'program-hysteria', title: 'Lawatan Bandeng Keliling', slug: 'lawatan-bandeng-keliling-video', url: '/program/video-series/lawatan-bandeng-keliling', order: 1, parentSlug: 'video-series' },
+		{ categorySlug: 'program-hysteria', title: 'Sapa Warga', slug: 'sapa-warga', url: '/program/video-series/sapa-warga', order: 0, parentSlug: 'video-series' },
+		{ categorySlug: 'program-hysteria', title: 'Hysteria Berkelana', slug: 'hysteria-berkelana', url: '/program/video-series/hysteria-berkelana', order: 1, parentSlug: 'video-series' },
 
 		// Platform (category: platform)
 		{ categorySlug: 'platform', title: 'Hysteria Artlab', slug: 'hysteria-artlab', url: '/platform/artlab', order: 0, parentSlug: null },

@@ -17,18 +17,12 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
     },
     { key: "category", label: "Category", view: "category", icon: IconCategorySmall, enabled: true },
     { key: "team", label: "Team", view: "team", icon: IconUsers, enabled: true },
-    {
-      key: "section",
-      label: "Section",
-      view: "section",
-      icon: IconSection,
-      enabled: true,
-      children: [
+    { key: "section", label: "Section", view: "section", icon: IconSection, enabled: true, children: [
         { key: "hero", label: "Hero", view: "section.hero", icon: IconHero, enabled: true },
         // { key: 'category', label: 'Category', view: 'section.navigation', icon: IconCategorySmall, enabled: true },
       ],
     },
-    { key: "platform", label: "Platform", view: "platform", icon: IconPlatform, enabled: false },
+    { key: "platform", label: "Platform", view: "platform", icon: IconPlatform, enabled: true },
     { key: "event", label: "Event", view: "event", icon: IconEvent, enabled: false },
     { key: "post", label: "Post", view: "post", icon: IconPost, enabled: false },
     { key: "settings", label: "Settings", view: "settings", icon: IconSettings, enabled: true, children: [{ key: "social", label: "Social", view: "settings.social", icon: IconSocial, enabled: false }] },

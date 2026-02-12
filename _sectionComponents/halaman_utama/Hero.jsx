@@ -32,7 +32,7 @@ export default function Hero() {
 
   const defaultHero = {
     source:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "/image/ilustrasi-menu.png",
       // "image/ilustrasi-menu.png",
     title: "Media & Kolektif\nSeni-Budaya Alternatif",
     description:
