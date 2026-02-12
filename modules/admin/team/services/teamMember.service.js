@@ -1,4 +1,4 @@
-import { AppError } from "../../../../lib/response.js";
+import { AppError } from "@/lib/response";
 import logger from "../../../../lib/logger.js";
 import Uploads from "../../../../lib/upload/uploads.js";
 import { createWithUpload, updateWithUpload } from "../../../../lib/upload/transactionalUpload.js";
@@ -61,6 +61,16 @@ const normalizeUploadSourceForDeletion = (source) => {
   return source;
 };
 
+function rethrowZodAsAppError(error) {
+  // zod uses error.errors or error.issues
+  const issues = error?.issues || error?.errors;
+  if (Array.isArray(issues) && issues.length > 0) {
+    const msg = issues.map((i) => i?.message || JSON.stringify(i)).join(", ");
+    throw new AppError(msg, 400, "VALIDATION_ERROR");
+  }
+  throw error;
+}
+
 export async function getTeamMemberById(id) {
   const member = await teamMemberRepository.findTeamMemberById(id);
   if (!member) {
@@ -76,8 +86,8 @@ export async function createTeamMember(data) {
   try {
     validatedData = validateTeamMemberData(payload, createTeamMemberSchema);
   } catch (error) {
-    logger.warn("Team member validation failed", { payload, error: error.errors });
-    throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
+    logger.warn("Create Team member validation failed", { payload, error: error.errors });
+    rethrowZodAsAppError(error);
   }
 
   const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
@@ -113,7 +123,7 @@ export async function createTeamMemberWithFile(data, file) {
     validatedData = validateTeamMemberData(payload, schema);
   } catch (error) {
     logger.warn("Team member validation failed (with file)", { payload, error: error.errors });
-    throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
+    rethrowZodAsAppError(error);
   }
 
   const category = await teamCategoryRepository.findTeamCategoryById(validatedData.categoryId);
@@ -162,7 +172,7 @@ export async function updateTeamMember(id, data) {
     logger.info("Team member update data validated", validatedData);
   } catch (error) {
     logger.warn("Team member update validation failed", { memberId: id, error: error.errors });
-    throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
+    rethrowZodAsAppError(error);
   }
 
   // Remove undefined fields
@@ -248,7 +258,7 @@ export async function updateTeamMemberWithFile(id, data, file) {
     validatedData = validateTeamMemberData(payload, updateTeamMemberSchema);
   } catch (error) {
     logger.warn("Team member update validation failed (with file)", { memberId: id, error: error.errors });
-    throw new AppError(error.errors?.[0]?.message || "Invalid team member data", 400, "VALIDATION_ERROR");
+    rethrowZodAsAppError(error);
   }
 
   const nextName = validatedData.name ?? existingMember.name;
@@ -352,57 +362,3 @@ export async function deleteTeamMember(id) {
     throw new AppError("Failed to delete team member", 500);
   }
 }
-
-// export async function deleteTeamMember(id) {
-//   const member = await getTeamMemberById(id);
-
-//   try {
-//     if (member?.imageUrl && looksLikeManagedUpload(member.imageUrl)) {
-//       const uploads = new Uploads();
-//       const rawSource = String(member.imageUrl || "");
-//       const source = normalizeUploadSourceForDeletion(rawSource);
-//       try {
-//         let deleted = await uploads.deleteFile(rawSource);
-//         if (!deleted && source !== rawSource) {
-//           deleted = await uploads.deleteFile(source);
-//         }
-//         if (!deleted) {
-//           const normalized = String(source).replace(/\\/g, "/");
-//           let absolutePath = null;
-
-//           if (normalized.startsWith("/uploads/")) {
-//             absolutePath = path.join(process.cwd(), "public", normalized.replace(/^\//, ""));
-//           } else if (normalized.startsWith("uploads/")) {
-//             absolutePath = path.join(process.cwd(), "public", normalized);
-//           } else if (normalized.startsWith("/public/uploads/")) {
-//             absolutePath = path.join(process.cwd(), normalized.replace(/^\//, ""));
-//           } else if (normalized.startsWith("public/uploads/")) {
-//             absolutePath = path.join(process.cwd(), normalized);
-//           }
-
-//           if (absolutePath) {
-//             deleted = await uploads.deleteFile(absolutePath);
-//           }
-//         }
-//         logger.info("Deleted stored image for team member", {
-//           memberId: id,
-//           source,
-//           rawSource,
-//           deleted,
-//         });
-//       } catch (err) {
-//         logger.warn("Failed to delete stored image before member removal", {
-//           memberId: id,
-//           source,
-//           error: err && (err.message || err.stack),
-//         });
-//       }
-//     }
-//     await teamMemberRepository.deleteTeamMember(id);
-//     logger.info("Team member deleted", { memberId: id });
-//     return { message: "Team member deleted successfully" };
-//   } catch (error) {
-//     logger.error("Error deleting team member", { memberId: id, error: error.message });
-//     throw new AppError("Failed to delete team member", 500);
-//   }
-// }
