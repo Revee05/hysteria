@@ -10,54 +10,54 @@ model UserStatus {
   id          Int      @id @default(autoincrement())
   key         String   @unique @db.VarChar(50) // ACTIVE, SUSPENDED, BANNED, dll
   name        String?  @db.VarChar(255)
-  description String? @db.Text
+  description String?  @db.Text
   createdAt   DateTime @default(now())
 
-  users       User[]
-  histories   UserStatusHistory[]
+  users     User[]
+  histories UserStatusHistory[]
 }
 
 model Role {
-  id          Int        @id @default(autoincrement())
-  key         String     @unique @db.VarChar(100)
-  name        String?    @db.VarChar(255)
-  description String?    @db.Text
-  createdAt   DateTime   @default(now())
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(100)
+  name        String?  @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
 
-  userRoles   UserRole[]
+  userRoles       UserRole[]
   rolePermissions RolePermission[]
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String     @unique @db.VarChar(255)
-  name      String?    @db.VarChar(255)
-  avatar    String?    @db.VarChar(255)
-  password  String     @db.VarChar(255)
+  id       Int     @id @default(autoincrement())
+  email    String  @unique @db.VarChar(255)
+  name     String? @db.VarChar(255)
+  avatar   String? @db.VarChar(255)
+  password String  @db.VarChar(255)
 
-  status    UserStatus @relation(fields: [statusId], references: [id])
-  statusId  Int
+  status   UserStatus @relation(fields: [statusId], references: [id])
+  statusId Int
 
   // Increment this when user's roles/permissions change to invalidate existing access tokens
-  tokenVersion Int      @default(0)
+  tokenVersion Int @default(0)
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   lastLoginAt DateTime?
 
-  roles     UserRole[]
-  tokens    RefreshToken[]
+  roles           UserRole[]
+  tokens          RefreshToken[]
   statusHistories UserStatusHistory[]
 }
 
 model UserRole {
-  id         Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 
-  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId     Int
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId Int
 
   assignedAt DateTime @default(now())
 
@@ -67,33 +67,33 @@ model UserRole {
 }
 
 model RefreshToken {
-  id         Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 
-  tokenHash  String   @db.VarChar(255)
-  replacedByTokenHash String? @db.VarChar(255)
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime @default(now())
+  tokenHash           String    @db.VarChar(255)
+  replacedByTokenHash String?   @db.VarChar(255)
+  expiresAt           DateTime
+  revokedAt           DateTime?
+  createdAt           DateTime  @default(now())
 
   @@index([userId])
 }
 
 model UserStatusHistory {
-  id         Int        @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 
-  status     UserStatus @relation(fields: [statusId], references: [id])
-  statusId   Int
+  status   UserStatus @relation(fields: [statusId], references: [id])
+  statusId Int
 
-  startAt    DateTime   @default(now())
-  endAt      DateTime?  // null = permanen
-  reason     String?    @db.Text
-  createdAt  DateTime   @default(now())
+  startAt   DateTime  @default(now())
+  endAt     DateTime? // null = permanen
+  reason    String?   @db.Text
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@index([statusId])
@@ -107,37 +107,39 @@ model Test {
 
 // Permission models for RBAC
 model PermissionGroup {
-  id          Int         @id @default(autoincrement())
-  key         String      @unique @db.VarChar(150)
-  name        String?     @db.VarChar(255)
-  description String?     @db.Text
-  createdAt   DateTime    @default(now())
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(150)
+  name        String?  @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
 
   permissions Permission[]
 }
 
 model Permission {
-  id          Int         @id @default(autoincrement())
-  key         String      @unique @db.VarChar(150) // e.g. users.create, users.view
-  name        String?     @db.VarChar(255)
-  description String?     @db.Text
+  id          Int              @id @default(autoincrement())
+  key         String           @unique @db.VarChar(150) // e.g. users.create, users.view
+  name        String?          @db.VarChar(255)
+  description String?          @db.Text
   group       PermissionGroup? @relation(fields: [groupId], references: [id])
   groupId     Int?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime         @default(now())
+
+  categories Category[]
 
   rolePermissions RolePermission[]
 }
 
 model RolePermission {
-  id           Int        @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId       Int
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId Int
 
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
   permissionId Int
 
-  assignedAt   DateTime   @default(now())
+  assignedAt DateTime @default(now())
 
   @@unique([roleId, permissionId])
   @@index([roleId])
@@ -152,4 +154,106 @@ model HeroSection {
   isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ====================================
+// NAVIGASI & KATEGORI
+// ====================================
+
+model Category {
+  id          Int     @id @default(autoincrement())
+  title       String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  // Optional: Permission gating untuk visibility kategori
+  requiredPermissionId Int?
+  requiredPermission   Permission? @relation(fields: [requiredPermissionId], references: [id])
+
+  items CategoryItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([order])
+}
+
+model CategoryItem {
+  id Int @id @default(autoincrement())
+
+  // Relasi ke category parent
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  // Self-referential untuk hirarki multi-level
+  parent   CategoryItem?  @relation("CatChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId Int?
+  children CategoryItem[] @relation("CatChildren")
+
+  title String  @db.VarChar(255)
+  slug  String? @db.VarChar(255)
+  url   String? @db.VarChar(500)
+
+  // Order untuk sorting
+  order Int @default(0)
+
+  // Metadata flexible (JSON)
+  meta Json? @db.JsonB
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([parentId])
+  @@index([order])
+}
+
+// ====================================
+// TEAM
+// ====================================
+
+model TeamCategory {
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(255)
+  slug        String  @db.VarChar(255)
+  description String? @db.Text
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  members TeamMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, name])
+  @@index([slug])
+  @@index([order])
+}
+
+model TeamMember {
+  id Int @id @default(autoincrement())
+
+  category   TeamCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  name      String  @db.VarChar(255)
+  slug      String  @db.VarChar(255)
+  role      String  @db.VarChar(255)
+  imageUrl  String? @db.VarChar(500)
+  email     String? @db.VarChar(255)
+  instagram String? @db.VarChar(255)
+  order     Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, name])
+  @@index([categoryId])
+  @@index([order])
 }
