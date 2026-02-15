@@ -44,6 +44,10 @@ export async function createTeamCategory(data) {
   if (!payload.slug && payload.name) {
     payload.slug = toSlug(payload.name);
   }
+  if (payload.order === undefined || payload.order === null) {
+    const maxOrder = await teamCategoryRepository.getMaxTeamCategoryOrder();
+    payload.order = maxOrder + 1;
+  }
 
   let validatedData;
   try {
@@ -65,6 +69,33 @@ export async function createTeamCategory(data) {
   } catch (error) {
     logger.error("Error creating team category", { error: error.message });
     throw new AppError("Failed to create team category", 500);
+  }
+}
+
+export async function reorderTeamCategories(items = []) {
+  if (!Array.isArray(items)) {
+    throw new AppError("Invalid reorder payload", 400);
+  }
+
+  const normalized = items.map((item) => {
+    const id = Number(item.id);
+    const order = Number(item.order);
+    if (!Number.isFinite(id) || id <= 0) {
+      throw new AppError("Invalid team category id", 400);
+    }
+    if (!Number.isFinite(order) || order < 0) {
+      throw new AppError("Invalid team category order", 400);
+    }
+    return { id, order };
+  });
+
+  try {
+    await teamCategoryRepository.updateTeamCategoryOrders(normalized);
+    logger.info("Team category order updated", { count: normalized.length });
+    return { count: normalized.length };
+  } catch (error) {
+    logger.error("Error reordering team categories", { error: error.message });
+    throw new AppError("Failed to reorder team categories", 500);
   }
 }
 

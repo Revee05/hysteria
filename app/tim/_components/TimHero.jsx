@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function TimHero() {
   return (
-    <div className="relative w-full h-[500px] md:h-[700px] bg-[#d9d9d9] flex flex-col  justify-center items-center text-white overflow-hidden">
+    <div className="relative w-full h-[500px] md:h-[600px] bg-[#d9d9d9] flex flex-col  justify-center items-center text-white overflow-hidden">
       {/* Background placeholder - in production this should probably be an image */}
       <div className="absolute inset-0">
         <Image

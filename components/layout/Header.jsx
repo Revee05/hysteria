@@ -38,23 +38,6 @@ function MegaMenuItems({ items, onClose, depth = 0 }) {
   );
 }
 
-// Desktop Navigation Item dengan dropdown
-function NavDropdown({ title, categorySlug, onMouseEnter, onMouseLeave, isActive }) {
-  return (
-    <div 
-      className="relative"
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <button 
-        className={`px-4 py-2 text-white hover:text-pink-300 transition-colors font-medium ${isActive ? 'text-pink-300' : ''}`}
-      >
-        {title}
-      </button>
-    </div>
-  );
-}
-
 export default function Header({ onMenuToggle }) {
   const pathname = usePathname() || "";
   const [isAtTop, setIsAtTop] = useState(true);
@@ -62,36 +45,7 @@ export default function Header({ onMenuToggle }) {
   const [categoryCache, setCategoryCache] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const isHome = pathname === "/";
-
-  // Load category data
-  async function loadCategory(slug) {
-    if (categoryCache[slug]) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/categories/${slug}`);
-      if (!res.ok) throw new Error('Failed to fetch');
-      
-      const data = await res.json();
-      setCategoryCache(prev => ({ 
-        ...prev, 
-        [slug]: {
-          title: data.data.title,
-          items: data.data.items
-        }
-      }));
-    } catch (err) {
-      console.error('Error loading category:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleMouseEnter(slug) {
-    setActiveDropdown(slug);
-    loadCategory(slug);
-  }
+  // const isHome = pathname === "/";
 
   function handleMouseLeave() {
     // Delay untuk smooth UX
@@ -117,8 +71,8 @@ export default function Header({ onMenuToggle }) {
   // Hide header for admin routes
   if (pathname.startsWith("/admin")) return null;
 
-  const showBg = !isHome || !isAtTop;
-  const headerPositionClass = isHome ? "fixed top-0 left-0 right-0 z-50" : "relative z-10";
+  const showBg = !isAtTop;
+  const headerPositionClass = "fixed top-0 left-0 right-0 z-50";
 
   return (
     <header
@@ -128,15 +82,15 @@ export default function Header({ onMenuToggle }) {
       }}
       className={`${headerPositionClass} transition-all duration-200`}
     >
-      <div className="mx-auto w-full max-w-[1920px] px-4 md:px-6 h-[72px] md:h-[100px] flex items-center justify-between">
+      <div className="mx-auto w-full max-w-[1920px] px-4 md:px-6 h-[72px] md:h-[70px] flex items-center justify-between">
         {/* Left: Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-3">
             <Image
               src="/svg/Logo-hysteria.svg"
-              alt="Logo"
-              width={70}
-              height={15}
+              alt="Hysteria"
+              width={63}
+              height={12}
               priority
             />
           </Link>

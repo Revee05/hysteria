@@ -499,14 +499,10 @@ export default function CategoriesPage() {
       const response = await apiGet('/api/admin/categories');
       const categories = response.data?.categories || [];
       setCategories(categories);
-      
-      if (categories.length > 0 && !selectedCategory) {
-        setSelectedCategory(categories[0]);
-      }
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
-  }, [selectedCategory]);
+  }, []);
 
   const fetchCategoryItems = useCallback(async (categoryId) => {
     setLoading(true);
@@ -537,6 +533,13 @@ export default function CategoriesPage() {
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  // When categories change, set a default selected category (if none yet).
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
 
   useEffect(() => {
     if (selectedCategory) {
