@@ -37,6 +37,10 @@ const PLATFORMS = [
     youtube: null,
     youtubeProfile: null,
     mainImageUrl: "https://picsum.photos/seed/ditampart-main/1600/600",
+    mainImageItems: [
+      { key: "main-1", label: "Gambar Utama 1", imageUrl: "https://picsum.photos/seed/ditampart1/800/900", order: 1 },
+      { key: "main-2", label: "Gambar Utama 2", imageUrl: "https://picsum.photos/seed/ditampart2/800/900", order: 2 },
+    ],
     coverItems: [
       { key: "cover-1", label: "Cover 3D", title: "Karya 3D", subtitle: "Eksplorasi dunia tiga dimensi bersama Ditampart.", imageUrl: "https://picsum.photos/seed/ditampart-cover-1/1200/800", order: 1 },
       { key: "cover-2", label: "Cover Foto Kegiatan", title: "Foto Kegiatan", subtitle: "Dokumentasi visual setiap kegiatan Ditampart.", imageUrl: "https://picsum.photos/seed/ditampart-cover-2/1200/800", order: 2 },
@@ -137,6 +141,19 @@ module.exports = async function seed() {
           [platformId, item.key, item.label, item.title ?? null, item.subtitle ?? null, item.imageUrl ?? null, item.order],
         );
         console.log(`    ✓ Hero: ${item.key}`);
+      }
+
+      for (const item of (platform.mainImageItems || [])) {
+        await client.query(
+          `INSERT INTO "PlatformImage" ("platformId", key, type, label, title, subtitle, "imageUrl", "order", "createdAt", "updatedAt")
+           VALUES ($1, $2, 'main', $3, $4, $5, $6, $7, NOW(), NOW())
+           ON CONFLICT ("platformId", key) DO UPDATE SET
+             label = EXCLUDED.label,
+             "imageUrl" = EXCLUDED."imageUrl",
+             "order" = EXCLUDED."order"`,
+          [platformId, item.key, item.label, null, null, item.imageUrl ?? null, item.order],
+        );
+        console.log(`    ✓ Main image: ${item.key}`);
       }
     }
 

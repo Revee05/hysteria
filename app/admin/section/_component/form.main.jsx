@@ -9,14 +9,17 @@ import PermissionGate from "../../../../components/adminUI/PermissionGate.jsx";
  * FormMain — fully controlled. All state lives in the parent Page component.
  *
  * Props:
- *  form             – { headline, subHeadline, instagram, youtube, youtubeProfile }
- *  onFormChange     – (updater) => void  (receives a setter-style function or new object)
- *  files            – File[] for the main platform image
- *  onMainFilesChange – (newFiles) => void
- *  coverItems       – array of cover items with files
- *  onFilesChange    – (id, newFiles) => void  for cover items
- *  onSubmit         – () => void  called when Save is clicked
- *  submitting       – boolean
+ *  form                        – { headline, subHeadline, instagram, youtube, youtubeProfile, mainImageUrl? }
+ *  onFormChange                – (updater) => void
+ *  files                       – File[] for the single main platform image (when mainImageItems is NOT provided)
+ *  onMainFilesChange           – (newFiles) => void  (single-image mode)
+ *  onClearMainImage            – () => void  (single-image mode)
+ *  mainImageItems              – array of { id, apiKey, label, files, imageUrl? } (multi-image mode, replaces single UploadBox)
+ *  onMainImageItemsFilesChange – (id, newFiles, clearImage?) => void  (multi-image mode)
+ *  coverItems                  – array of cover items with files
+ *  onFilesChange               – (id, newFiles) => void  for cover items
+ *  onSubmit                    – () => void  called when Save is clicked
+ *  submitting                  – boolean
  */
 export default function FormMain({
   form = {},
@@ -24,6 +27,8 @@ export default function FormMain({
   files = [],
   onMainFilesChange = () => {},
   onClearMainImage = () => {},
+  mainImageItems = null,
+  onMainImageItemsFilesChange = () => {},
   coverItems = [],
   onFilesChange = () => {},
   onSubmit = () => {},
@@ -100,14 +105,36 @@ export default function FormMain({
         <label className="block text-sm font-medium text-gray-700">
           Upload Gambar Utama
         </label>
-        <UploadBox
-          files={files}
-          setFiles={onMainFilesChange}
-          existingUrl={form.mainImageUrl || null}
-          onClearExisting={onClearMainImage}
-          accept="image/*"
-          maxSizeMB={5}
-        />
+        {mainImageItems ? (
+          /* Multi-image mode: satu UploadBox per slot (digunakan oleh Ditampart, dll) */
+          <div className="mt-2 space-y-3">
+            {mainImageItems.map((item) => (
+              <div key={item.id}>
+                <p className="text-xs text-gray-500 mb-1">{item.label}</p>
+                <UploadBox
+                  files={Array.isArray(item.files) ? item.files : []}
+                  setFiles={(newFiles) =>
+                    onMainImageItemsFilesChange(item.id, Array.isArray(newFiles) ? newFiles : Array.from(newFiles || []))
+                  }
+                  existingUrl={item.imageUrl || null}
+                  onClearExisting={() => onMainImageItemsFilesChange(item.id, [], true)}
+                  accept="image/*"
+                  maxSizeMB={5}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Single-image mode: default untuk Artlab, Laki Masak, dll */
+          <UploadBox
+            files={files}
+            setFiles={onMainFilesChange}
+            existingUrl={form.mainImageUrl || null}
+            onClearExisting={onClearMainImage}
+            accept="image/*"
+            maxSizeMB={5}
+          />
+        )}
       </div>
 
       <div>

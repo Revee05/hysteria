@@ -91,7 +91,7 @@ export default function UploadBox({
           </button>          
         </div>
 
-        <p className="text-xs mt-1">Max file size: {maxSizeMB} MB <br /> Size: 500 x 500 px</p>
+        <p className="text-xs mt-1">Max file size: {maxSizeMB} MB</p>
 
         <input ref={fileRef} type="file" accept={accept} multiple className="hidden" onChange={onFileChange} />
 

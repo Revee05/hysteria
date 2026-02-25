@@ -4,6 +4,7 @@ import HeadSection from '../../../_sectionComponents/halaman_platform/head.secti
 import ListCategorySection from '../../../_sectionComponents/halaman_platform/list_category.section'
 import MediaSection from '../../../_sectionComponents/halaman_platform/media.section'
 import { getPlatform, listPlatforms } from '../apiData'
+import { prisma } from '../../../lib/prisma'
 
 const MAINTENNACE=false
 
@@ -32,9 +33,30 @@ export default async function Page({ params }) {
     )
   }
 
+  // Fetch main images from DB (type='main'). Falls back to static head.images if none found.
+  let headImages = data.head.images
+  try {
+    const platform = await prisma.platform.findUnique({
+      where: { slug },
+      select: {
+        images: {
+          where: { type: 'main' },
+          orderBy: { order: 'asc' },
+          select: { imageUrl: true, label: true },
+        },
+      },
+    })
+    const dbImages = (platform?.images || []).filter((img) => img.imageUrl)
+    if (dbImages.length > 0) {
+      headImages = dbImages.map((img) => ({ src: img.imageUrl, alt: img.label || slug }))
+    }
+  } catch {
+    // silently fall back to static images
+  }
+
   return (
     <main className="bg-white min-h-screen">
-      <HeadSection {...data.head} />
+      <HeadSection {...data.head} images={headImages} />
       <MediaSection mediaURL={data.mediaURL} />
       <ListCategorySection items={data.categories} />
     </main>

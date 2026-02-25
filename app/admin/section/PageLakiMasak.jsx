@@ -11,12 +11,14 @@ import React, { useState, useEffect } from "react";
 import FormMain from "./_component/form.main.jsx";
 import FormHero from "./_component/form.hero.jsx";
 import PermissionGate from "../../../components/adminUI/PermissionGate.jsx";
+import Toast from "../../../components/ui/Toast.jsx";
 
 /** Slug identifier platform di DB dan URL API. */
 const PLATFORM_SLUG = "laki-masak";
 
 /** Slot cover image Laki Masak. `apiKey` harus cocok dengan kolom `key` di tabel PlatformImage. */
 const COVER_ITEMS = [
+  { id: 1, apiKey: "cover-1", label: "Cover Meramu*" },
   { id: 2, apiKey: "cover-2", label: "Cover Homecooked*" },
   { id: 3, apiKey: "cover-3", label: "Cover Komik Ramuan*" },
   { id: 4, apiKey: "cover-4", label: "Pre-Order*" },
@@ -52,6 +54,10 @@ export default function PageLakiMasak() {
   const [mainSaving, setMainSaving] = useState(false);
   // true jika user menghapus mainImageUrl — akan kirim null ke API saat save
   const [mainPendingClear, setMainPendingClear] = useState(false);
+
+  const [toast, setToast] = useState({ visible: false, message: "", type: "info" });
+  const showToast = (message, type = "info") => setToast({ visible: true, message, type });
+  const closeToast = () => setToast((t) => ({ ...t, visible: false }));
 
   useEffect(() => {
     fetch(`/api/admin/platform/${PLATFORM_SLUG}`)
@@ -179,10 +185,10 @@ export default function PageLakiMasak() {
       setMainFiles([]);
       setMainPendingClear(false);
       setMainItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
-      alert("Data halaman utama berhasil disimpan");
+      showToast("Data halaman utama berhasil disimpan");
     } catch (err) {
       console.error(err);
-      alert(err.message || "Terjadi kesalahan saat menyimpan");
+      showToast(err.message || "Terjadi kesalahan saat menyimpan", "error");
     } finally {
       setMainSaving(false);
     }
@@ -221,10 +227,10 @@ export default function PageLakiMasak() {
       }
 
       setHeroItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
-      alert("Hero berhasil disimpan");
+      showToast("Hero berhasil disimpan");
     } catch (err) {
       console.error(err);
-      alert(err.message || "Terjadi kesalahan saat menyimpan");
+      showToast(err.message || "Terjadi kesalahan saat menyimpan", "error");
     } finally {
       setHeroSaving(false);
     }
@@ -232,6 +238,7 @@ export default function PageLakiMasak() {
 
   return (
     <PermissionGate requiredPermissions={["platform.read"]}>
+    <Toast message={toast.message} type={toast.type} visible={toast.visible} onClose={closeToast} />
     <section className="py-5 px-6 bg-white rounded-xl border border-gray-300">
       <div className="flex items-start justify-between gap-4">
         <div className="max-w-[78%]">
