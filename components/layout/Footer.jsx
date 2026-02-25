@@ -54,7 +54,8 @@ export default function Footer() {
                 <li><Link href="#" className="hover:underline">Kolektif Hysteria</Link></li>
                 <li><Link href="#" className="hover:underline">Art Lab</Link></li>
                 <li><Link href="#" className="hover:underline">Peta Kota</Link></li>
-                <li><Link href="#" className="hover:underline">Buku Buku</Link></li>
+                <li><Link href="#" className="hover:underline">Bukit Buku</Link></li>
+                <li><Link href="#" className="hover:underline">laki Masak</Link></li>
               </ul>
             </div>
 
@@ -69,21 +70,28 @@ export default function Footer() {
             </div>
 
             {/* kolom 4 */}
+            {/* <div className="border border-zink-400"> */}
             <div>
               <div className="font-bold mb-3">Hubungi Kami</div>
               <div className="text-white/70 space-y-2 text-sm">
                   <div className="flex items-center gap-2">
-                    <IconEnvelope className="w-4 h-4 text-white" size={16} />
+                    <div>
+                      <IconEnvelope className="w-4 h-4 text-white" size={16} />
+                    </div>
                     <span>hysteriaicta58@gmail.com</span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <IconTelephone className="w-4 h-4 text-white" size={16} />
+                    <div>
+                      <IconTelephone className="w-4 h-4 text-white" size={16} />
+                    </div>
                     <span>+62 812 1427 2483</span>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <IconMap className="w-4 h-4 text-white mt-0.5" size={16} />
+                    <div>
+                      <IconMap className="w-4 h-4 text-white mt-0.5" size={16} />
+                    </div>
                     <span>Jl Stonen No.29 Gajahmungkur, Kota Semarang, Jawa Tengah 50233</span>
                   </div>
                 </div>

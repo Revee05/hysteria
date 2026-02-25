@@ -156,6 +156,19 @@ model HeroSection {
   updatedAt   DateTime @updatedAt
 }
 
+model PageHero {
+  id       Int     @id @default(autoincrement())
+  pageSlug String  @unique @db.VarChar(100)
+  imageUrl String? @db.VarChar(500)
+  title    String? @db.VarChar(500)
+  subtitle String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pageSlug])
+}
+
 // ====================================
 // NAVIGASI & KATEGORI
 // ====================================
@@ -173,10 +186,10 @@ model Category {
   requiredPermission   Permission? @relation(fields: [requiredPermissionId], references: [id])
 
   items CategoryItem[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+    
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
   @@index([slug])
   @@index([order])
 }
@@ -205,6 +218,8 @@ model CategoryItem {
 
   isActive Boolean @default(true)
 
+  events Event[]
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -258,6 +273,42 @@ model TeamMember {
   @@unique([slug, name])
   @@index([categoryId])
   @@index([order])
+}
+
+model Event {
+  id            Int       @id @default(autoincrement())
+  title         String    @db.VarChar(255)
+  slug          String    @unique @db.VarChar(255)
+  description   String?   @db.Text
+  organizer     String?   @db.VarChar(255)
+  poster        String?   @db.VarChar(500)
+
+  // RELASI KE CATEGORYITEM
+  categoryItemId Int
+  categoryItem   CategoryItem @relation(fields: [categoryItemId], references: [id])
+
+  // WAKTU
+  startAt       DateTime
+  endAt         DateTime?
+
+  // LOKASI
+  location      String?   @db.VarChar(255)
+  mapsEmbedSrc  String?   @db.Text
+
+  // LINK
+  registerLink  String?   @db.VarChar(500)
+  driveLink       String?   @db.VarChar(500)
+  youtubeLink     String?   @db.VarChar(500)
+
+  // PUBLISH
+  isPublished   Boolean   @default(false)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([categoryItemId])
+  @@index([startAt])
+  @@index([isPublished])
 }
 
 // ====================================

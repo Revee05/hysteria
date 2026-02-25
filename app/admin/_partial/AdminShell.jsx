@@ -10,6 +10,8 @@ import StatusManagement from "../users/status_management/page.jsx";
 import HeroManagement from "../section/HeroManagement.jsx";
 import CategoriesPage from "../categories/page.jsx";
 import TeamManagementPage from "../team/page.jsx";
+import EventPage from "../events/page.jsx";
+import { usePathname } from "next/navigation";
 import ArticlesPage from "../articles/page.jsx";
 import CreateArticlePage from "../articles/create/page.jsx";
 
@@ -31,6 +33,9 @@ export default function AdminShell({ children }) {
     setOpen(false); // Close mobile sidebar after navigation
   };
 
+  const pathname = usePathname();
+  const isDashboard = pathname === "/admin";
+
   const renderContent = () => {
     switch (currentView) {
       case "users":
@@ -51,7 +56,9 @@ export default function AdminShell({ children }) {
         return <ArticlesPage onNavigate={handleNavigate} />;
       case "article.create":
         return <CreateArticlePage onNavigate={handleNavigate} />;
-      case "dashboard":
+      case 'event':
+        return <EventPage />;
+      case 'dashboard':
       default:
         return children;
     }
@@ -80,8 +87,8 @@ export default function AdminShell({ children }) {
             </div>
 
             <main className="mx-auto w-full max-w-5xl px-6 py-8">
-              {renderContent()}
-            </main>
+            {isDashboard ? renderContent() : children}
+          </main>
           </div>
 
           {open && (

@@ -2,47 +2,41 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { IconDashboard, IconUsers, IconSettings, IconSection, IconPlatform, IconEvent, IconPost, IconSocial, IconUserManagement, IconPermission, IconStatus, IconHero, IconCategorySmall } from "../../../components/ui/icon";
+import { IconDashboard, IconUsers, IconSettings, IconSection, IconPlatform, IconEvent, IconPost, IconSocial, IconUserManagement, IconPermission, IconStatus, IconHero, IconCategorySmall, IconDiversity } from "../../../components/ui/icon";
 
 export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onNavigate, currentView }) {
   const [openKeys, setOpenKeys] = useState({});
 
   const menus = [
     { key: "dashboard", label: "Dashboard", view: "dashboard", icon: IconDashboard, enabled: true },
-    {
-      key: "users",
-      label: "Users",
-      view: "users",
-      icon: IconUsers,
-      enabled: true,
-      children: [
+    { key: "users", label: "Users", view: "users", icon: IconUsers, enabled: true, children: [
         { key: "user_management", label: "User Management", view: "users.user_management", icon: IconUserManagement, enabled: true },
         { key: "permission", label: "Permission", view: "users.permission", icon: IconPermission, enabled: true },
         { key: "status_management", label: "Status", view: "users.status_management", icon: IconStatus, enabled: true },
       ],
     },
     { key: "category", label: "Category", view: "category", icon: IconCategorySmall, enabled: true },
-    { key: "team", label: "Team", view: "team", icon: IconUsers, enabled: true },
-    {
-      key: "section",
-      label: "Section",
-      view: "section",
-      icon: IconSection,
-      enabled: true,
-      children: [
-        { key: "hero", label: "Hero", view: "section.hero", icon: IconHero, enabled: true },
-        // { key: 'category', label: 'Category', view: 'section.navigation', icon: IconCategorySmall, enabled: true },
+    { key: "section", label: "Section",view: "section",icon: IconSection,enabled: true,children: [
+        { key: "hero", label: "Hero - Home Page", view: "section.hero", icon: IconHero, enabled: true },
       ],
     },
-    { key: "platform", label: "Platform", view: "platform", icon: IconPlatform, enabled: false },
-    { key: "event", label: "Event", view: "event", icon: IconEvent, enabled: false },
+    { key: "platform", label: "Platform", view: "platform", icon: IconPlatform, enabled: true, children: [
+       {key: "artlab", label: "Artlab", view: "platform.artlab", icon: IconSocial, enabled: true},
+       {key: "ditampart", label: "Ditampart", view: "platform.ditampart", icon: IconSocial, enabled: true},
+       {key: "laki-masak", label: "Laki Masak", view: "platform.laki-masak", icon: IconSocial, enabled: true},
+       {key: "thumbnail", label: "Thumbnail", view: "platform.thumbnail", icon: IconSocial, enabled: false},
+    ]},
+    { key: "event", label: "Event", view: "event", icon: IconEvent, enabled: true },
     { key: "article", label: "Artikel", view: "article", icon: IconPost, enabled: true },
-    { key: "settings", label: "Settings", view: "settings", icon: IconSettings, enabled: true, children: [{ key: "social", label: "Social", view: "settings.social", icon: IconSocial, enabled: false }] },
+    { key: "settings", label: "Settings", view: "settings", icon: IconSettings, enabled: true,
+      children: [{ key: "team", label: "Team", view: "team", icon: IconDiversity, enabled: true }],
+    },
   ];
 
   const toggleOpen = (key) => setOpenKeys((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
+    // wrapper sidebar
     <div className="h-full overflow-y-auto bg-[#E83C91] flex flex-col">
       {/* Logo dan tombol tutup */}
       <div className={`px-4 py-4 flex items-center border-b border-zinc-100 ${collapsed ? "justify-center" : "justify-between"}`}>
@@ -99,6 +93,7 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
             return (
               <li key={item.key}>
                 <div className="w-full">
+                  {/* dropdown button menu */}
                   <button
                     onClick={handleClick}
                     title={item.label}

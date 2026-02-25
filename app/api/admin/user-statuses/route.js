@@ -92,7 +92,7 @@ export async function POST(request) {
       createdBy: user.id,
     });
 
-    return respondSuccess(status, { status: 201 });
+    return respondSuccess(status, 201);
   } catch (error) {
     logger.error('Error creating user status', { error: error && error.message ? error.message : error });
     return respondError(error);

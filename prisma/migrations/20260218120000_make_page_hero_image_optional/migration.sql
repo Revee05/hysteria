@@ -1,0 +1,2 @@
+ALTER TABLE "PageHero"
+ALTER COLUMN "imageUrl" DROP NOT NULL;

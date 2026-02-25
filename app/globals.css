@@ -5,6 +5,33 @@
 
 body {
   font-family: var(--font-poppins), sans-serif;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Brand Colors */
+  --Color-1: #E83C91; /* primary */
+  --Color-2: #FF8FB7;
+  --Color-3: #FFFFFF;
+  --Color-4: #43334C;
+  --Color-5: #000000;
+  --Color-6: #EB0573;
+
+  /* Button States */
+  --btn-light: #FDE6F1;
+  --btn-light-hover: #FCDAEA;
+  --btn-light-active: #F9B2D4;
+
+  --btn-normal: #EB0573;
+  --btn-normal-hover: #D40568;
+  --btn-normal-active: #BC045C;
+
+  --btn-dark: #B00456;
+  --btn-dark-hover: #8D0345;
+  --btn-dark-active: #6A0234;
+
+  --btn-darker: #520228;
 }
 
 

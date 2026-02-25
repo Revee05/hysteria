@@ -15,17 +15,34 @@ const poppins = Poppins({
 export default function TimPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hero, setHero] = useState({
+    imageUrl: "/image/tim-hero.png",
+    title: "Tim Hysteria",
+    subtitle: "Hysteria , Colaboratorium and Creative Impact Hub",
+  });
 
   useEffect(() => {
     let isMounted = true;
     const fetchTeam = async () => {
       try {
-        const res = await fetch("/api/team", { method: "GET" });
-        const json = await res.json().catch(() => null);
+        const [teamRes, heroRes] = await Promise.all([fetch("/api/team", { method: "GET" }), fetch("/api/page-hero/tim", { method: "GET" })]);
+        const json = await teamRes.json().catch(() => null);
+        const heroJson = await heroRes.json().catch(() => null);
+
         if (!isMounted) return;
+
         if (json?.success) {
           const list = Array.isArray(json.data?.categories) ? json.data.categories : [];
           setCategories(list);
+        }
+
+        if (heroJson?.success && heroJson?.data) {
+          const pageHero = heroJson.data;
+          setHero((prev) => ({
+            imageUrl: pageHero.imageUrl ?? null,
+            title: pageHero.title || prev.title,
+            subtitle: pageHero.subtitle || prev.subtitle,
+          }));
         }
       } catch (error) {
         console.error("Error fetching team data:", error);
@@ -49,17 +66,25 @@ export default function TimPage() {
 
   return (
     <main className={`${poppins.variable} font-sans bg-white min-h-screen pb-32`}>
-      <TimHero />
+      <TimHero
+        imageUrl={hero.imageUrl}
+        title={hero.title}
+        subtitle={hero.subtitle}
+      />
 
       {/* Section 1: Pengelola Hysteria (Grid) */}
       <section className="py-20 relative px-4 md:px-0">
         <div className="max-w-[1400px] mx-auto mt-12 md:mt-24">
-          <h2 className="text-center font-bold text-[32px] md:text-[40px] leading-[1.5] mb-16 text-black font-poppins">{primaryCategory?.name || "Pengelola Hysteria"}</h2>
+          <h2
+            className="text-center font-bold text-[32px] md:text-[40px] leading-[1.5] mb-16 text-black font-poppins"
+            id={primaryCategory?.slug}>
+            {primaryCategory?.name || "Pengelola Hysteria"}
+          </h2>
 
           {loading && !primaryCategory ? (
             <div className="text-center text-sm text-zinc-500">Memuat data tim...</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16 justify-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[35px] gap-y-16 justify-items-center">
               {(primaryCategory?.members || []).map((member) => (
                 <ProfileCard
                   key={member.id}
@@ -79,6 +104,7 @@ export default function TimPage() {
         <ProfileSlider
           key={category.id}
           title={category.name}
+          slug={category.slug}
           profiles={(category.members || []).map((member) => ({
             name: member.name,
             role: member.role,

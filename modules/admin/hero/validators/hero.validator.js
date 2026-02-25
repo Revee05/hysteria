@@ -8,45 +8,22 @@ const mediaUrlSchema = z
   .refine(
     (url) => {
       if (!url || typeof url !== 'string') return false;
-
-      // Allow local paths starting with '/'
+      // allow local media paths that end with common media extensions
       if (url.startsWith('/')) {
-        // must look like a media file path
         return /\.(mp4|webm|ogg|jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url);
       }
-
-      // For remote URLs, ensure it's a valid absolute URL
       try {
-        // eslint-disable-next-line no-new
-        new URL(url);
+        const u = new URL(url);
+        // accept only HTTPS remote URLs
+        return u.protocol === 'https:';
       } catch (e) {
         return false;
       }
-
-      // Check if it's a direct media file or a valid image CDN URL
-      const isDirectFile = /\.(mp4|webm|ogg|jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url);
-      const isImageCDN = /^https:\/\/(images\.pexels\.com|images\.unsplash\.com|.*cloudinary\.com|.*imgur\.com)/i.test(url);
-
-      // Also allow YouTube links (standard, short, embed, and nocookie domains)
-      const isYouTube = /^https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube-nocookie\.com\/embed\/)/i.test(url);
-
-      return isDirectFile || isImageCDN || isYouTube;
     },
     {
-      message: 'Gunakan URL media langsung, CDN yang didukung, atau link YouTube.',
+      message: 'Gunakan URL HTTPS atau path lokal ke file media.',
     }
   )
-  .refine(
-    (url) => {
-      // Explicitly reject Pexels/Unsplash page URLs
-      const isPexelsPage = /pexels\.com\/(video|photo)\/[^/]+-\d+\/?$/.test(url);
-      const isUnsplashPage = /unsplash\.com\/photos\//.test(url);
-      return !isPexelsPage && !isUnsplashPage;
-    },
-    {
-      message: 'Gunakan URL media langsung, bukan halaman.',
-    }
-  );
 
 // Max media upload size (bytes)
 export const MAX_MEDIA_SIZE = 5 * 1024 * 1024; // 5 MB

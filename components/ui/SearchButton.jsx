@@ -98,7 +98,7 @@ export default function SearchButton({
       <div className={`fixed inset-0 z-50 ${className}`}>
         <div className="bg-black/40 absolute inset-0" onClick={() => setOpen(false)} />
         <div className="relative p-4">
-          <div ref={containerRef} className={`mx-auto w-full bg-white dark:bg-black border border-gray-100 dark:border-gray-800 rounded-md px-3 py-2 flex items-center gap-2 ${openWrapperClassName}`}>
+          <div ref={containerRef} className={`mx-auto w-full bg-white dark:bg-pink-600 border border-transparent dark:border-transparent rounded-md px-3 py-2 flex items-center gap-2 ${openWrapperClassName}`}>
             {renderIconNode()}
             <input
               ref={inputRef}
@@ -123,7 +123,8 @@ export default function SearchButton({
       </div>
     );
   }
-
+  
+  // default mode (pc/tablet)
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       {!open ? (
@@ -135,7 +136,7 @@ export default function SearchButton({
           {renderIconNode()}
         </button>
       ) : (
-        <div className={`flex items-center gap-2 bg-white dark:bg-black border border-gray-100 dark:border-gray-800 rounded-md px-2 py-1 ${openWrapperClassName}`}>
+        <div className={`flex items-center gap-2 bg-white dark:bg-gray-500/10 border border-zinc-50 dark:border-zinc-50 rounded-md px-2 py-1 ${openWrapperClassName}`}>
           {renderIconNode()}
 
           <input

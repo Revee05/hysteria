@@ -332,6 +332,20 @@ module.exports = async function seed() {
         groupId: heroGroupId,
       },
 
+      // Page hero management
+      {
+        key: "team-about-hero.read",
+        name: "Read Team and About Page Hero",
+        description: "View team and about page hero settings",
+        groupId: teamGroupId,
+      },
+      {
+        key: "team-about-hero.update",
+        name: "Update Team and About Page Hero",
+        description: "Create or update team and about page hero settings",
+        groupId: teamGroupId,
+      },
+
       // Category management (general permissions only)
       {
         key: "categories.view",

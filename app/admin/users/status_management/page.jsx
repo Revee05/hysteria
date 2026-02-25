@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../../../lib/context/auth-context";
 import PermissionGate from '../../../../components/adminUI/PermissionGate.jsx';
 import SearchField from '../../../../components/adminUI/SearchField.jsx';
@@ -140,7 +140,7 @@ export default function StatusManagement() {
     }
   };
 
-  const handleDelete = async (status) => {
+  const handleDelete = useCallback(async (status) => {
     if (!confirm(`Are you sure to delete status "${status.name}"?\n\nThis action cannot be undone.`)) return;
     try {
       setLoading(true);
@@ -157,9 +157,9 @@ export default function StatusManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiCall]);
 
-  const openEditModal = (status) => {
+  const openEditModal = useCallback((status) => {
     setEditingStatus(status);
     setFormData({
       key: status.key,
@@ -167,14 +167,59 @@ export default function StatusManagement() {
       description: status.description || '',
     });
     setShowEditModal(true);
-  };
+  }, []);
 
-  const openCreateModal = () => {
+  const openCreateModal = useCallback(() => {
     setFormData({ key: '', name: '', description: '' });
     setShowCreateModal(true);
-  };
+  }, []);
 
-  const columns = [
+  const handleRowClick = useCallback(async (row) => {
+    await open({
+      title: row.name || row.key,
+      content: ({ onClose }) => (
+        <div className="space-y-4 text-sm text-zinc-800">
+          <div className="space-y-2">
+            <div>
+              <strong>Key:</strong> 
+              <span className="ml-2 font-mono bg-zinc-100 px-2 py-1 rounded">{row.key}</span>
+            </div>
+            <div><strong>Name:</strong> {row.name || '-'}</div>
+            <div><strong>Description:</strong> {row.description || '-'}</div>
+            <div>
+              <strong>Users with this status:</strong> 
+              <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                {row._count?.users || 0}
+              </span>
+            </div>
+            <div>
+              <strong>Created at:</strong> 
+              {row.createdAt ? new Date(row.createdAt).toLocaleString() : '-'}
+            </div>
+          </div>
+        </div>
+      ),
+      footer: ({ onClose }) => (
+        <div className="flex justify-end gap-2">
+          <PermissionGate requiredPermissions={"status.update"}>
+            <button 
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" 
+              onClick={() => {
+                onClose();
+                openEditModal(row);
+              }}
+            >
+              Edit
+            </button>
+          </PermissionGate>
+          <button className="px-3 py-1 text-sm" onClick={onClose}>Close</button>
+        </div>
+      ),
+      size: 'md',
+    });
+  }, [open, openEditModal]);
+
+  const columns = useMemo(() => ([
     { field: 'id', headerName: 'ID', freeze: true },
     { 
       field: 'key', 
@@ -242,52 +287,7 @@ export default function StatusManagement() {
         </div>
       ),
     },
-  ];
-
-  const handleRowClick = async (row) => {
-    await open({
-      title: row.name || row.key,
-      content: ({ onClose }) => (
-        <div className="space-y-4 text-sm text-zinc-800">
-          <div className="space-y-2">
-            <div>
-              <strong>Key:</strong> 
-              <span className="ml-2 font-mono bg-zinc-100 px-2 py-1 rounded">{row.key}</span>
-            </div>
-            <div><strong>Name:</strong> {row.name || '-'}</div>
-            <div><strong>Description:</strong> {row.description || '-'}</div>
-            <div>
-              <strong>Users with this status:</strong> 
-              <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                {row._count?.users || 0}
-              </span>
-            </div>
-            <div>
-              <strong>Created at:</strong> 
-              {row.createdAt ? new Date(row.createdAt).toLocaleString() : '-'}
-            </div>
-          </div>
-        </div>
-      ),
-      footer: ({ onClose }) => (
-        <div className="flex justify-end gap-2">
-          <PermissionGate requiredPermissions={"status.update"}>
-            <button 
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" 
-              onClick={() => {
-                onClose();
-                openEditModal(row);
-              }}
-            >
-              Edit
-            </button>
-          </PermissionGate>
-          <button className="px-3 py-1 text-sm" onClick={onClose}>Close</button>
-        </div>
-      ),
-      size: 'md',
-    });
-  };
+  ]), [openEditModal, handleDelete]);
 
   return (
     <PermissionGate requiredPermissions={["status.get"]}>

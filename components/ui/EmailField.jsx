@@ -4,6 +4,7 @@ import React from "react";
 import TextField from "@mui/material/TextField";
 
 export default function EmailField({
+  className = "",
   name = "email",
   label = "Email",
   register,
@@ -13,6 +14,7 @@ export default function EmailField({
 }) {
   return (
     <TextField
+      className={className}
       label={label}
       type="email"
       placeholder={placeholder}

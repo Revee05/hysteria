@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { IconSpeaker } from '../../components/ui/icon.jsx';
+import { driveToEmbed, isDriveEmbed } from "../../lib/utils/drive.js";
+import { isYouTube, getYouTubeId } from "../../lib/utils/youtube.js";
 
 export default function Hero() {
   const [heroData, setHeroData] = useState(null);
@@ -32,7 +34,7 @@ export default function Hero() {
 
   const defaultHero = {
     source:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "/image/ilustrasi-menu.png",
       // "image/ilustrasi-menu.png",
     title: "Media & Kolektif\nSeni-Budaya Alternatif",
     description:
@@ -54,38 +56,19 @@ export default function Hero() {
     return false;
   };
 
-  // Detect YouTube links and extract video id
-  const isYouTube = (url) => {
-    if (!url) return false;
-    return /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)/i.test(url);
-  };
-
-  const getYouTubeId = (url) => {
-    if (!url) return null;
-    const short = url.match(/youtu\.be\/([^?&/]+)/);
-    if (short && short[1]) return short[1];
-    const watch = url.match(/[?&]v=([^&]+)/);
-    if (watch && watch[1]) return watch[1];
-    const embed = url.match(/youtube\.com\/embed\/([^?&/]+)/);
-    if (embed && embed[1]) return embed[1];
-    return null;
-  };
-
-  // Convert Pexels page URL to direct media URL when possible
-  const processPexelsUrl = (url) => {
+  // Convert known providers (Pexels) and Google Drive to embedable sources
+  const processExternalSource = (url) => {
     if (!url) return url;
-
-    const videoMatch = url.match(/pexels\.com\/video\/[^/]+-([0-9]+)\/?/);
-    if (videoMatch) {
-      return url;
-    }
-
+    // pexels photo -> direct image
     const photoMatch = url.match(/pexels\.com\/photo\/[^/]+-([0-9]+)\/?$/);
     if (photoMatch) {
       const photoId = photoMatch[1];
       return `https://images.pexels.com/photos/${photoId}/pexels-photo-${photoId}.jpeg?auto=compress&cs=tinysrgb&w=1920`;
     }
-
+    // Google Drive -> convert to uc (images) or /preview (video)
+    if (/drive\.google\.com/i.test(url)) {
+      return driveToEmbed(url);
+    }
     return url;
   };
 
@@ -93,7 +76,7 @@ export default function Hero() {
     if (hero?.source) {
       // Reset media error so new source will be attempted
       setMediaError(false);
-      const processed = processPexelsUrl(hero.source);
+      const processed = processExternalSource(hero.source);
       setProcessedSource(processed);
     }
   }, [hero?.source]);
@@ -169,6 +152,27 @@ export default function Hero() {
               }}
             />
           </div>
+        ) : isDriveEmbed(src) && !mediaError ? (
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
+            <iframe
+              key={src}
+              src={src}
+              title={hero.title}
+              className="pointer-events-none"
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              onError={() => setMediaError(true)}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "100%",
+                height: "100%",
+                transform: "translate(-50%, -50%)",
+                border: 0,
+              }}
+            />
+          </div>
         ) : isVideo(src) && !mediaError ? (
           <video
             autoPlay
@@ -226,7 +230,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {(isVideo(src) || isYouTube(src)) && (
+      {(isVideo(src) || isYouTube(src) || isDriveEmbed(src)) && (
         <div className="absolute bottom-16 md:bottom-24 right-6 z-20">
           <IconSpeaker
             size={28}

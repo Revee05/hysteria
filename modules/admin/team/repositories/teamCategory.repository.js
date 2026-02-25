@@ -107,6 +107,32 @@ export async function createTeamCategory(data) {
 }
 
 /**
+ * Get max order value for team categories
+ * @returns {Promise<number>}
+ */
+export async function getMaxTeamCategoryOrder() {
+  const result = await prisma.teamCategory.aggregate({
+    _max: { order: true },
+  });
+  return Number.isFinite(result?._max?.order) ? result._max.order : -1;
+}
+
+/**
+ * Update orders for multiple team categories
+ * @param {Array<{id:number, order:number}>} items
+ * @returns {Promise<Array>}
+ */
+export async function updateTeamCategoryOrders(items) {
+  const updates = items.map((item) =>
+    prisma.teamCategory.update({
+      where: { id: item.id },
+      data: { order: item.order },
+    }),
+  );
+  return prisma.$transaction(updates);
+}
+
+/**
  * Update team category
  * @param {number} id
  * @param {Object} data
