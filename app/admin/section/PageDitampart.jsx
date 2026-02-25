@@ -10,16 +10,17 @@
 import React, { useState, useEffect } from "react";
 import FormMain from "./_component/form.main.jsx";
 import FormHero from "./_component/form.hero.jsx";
+import PermissionGate from "../../../components/adminUI/PermissionGate.jsx";
 
 /** Slug identifier platform di DB dan URL API. */
 const PLATFORM_SLUG = "ditampart";
 
 /** Slot cover image Ditampart. `apiKey` harus cocok dengan kolom `key` di tabel PlatformImage. */
 const COVER_ITEMS = [
-  { id: 2, apiKey: "cover-2", label: "Cover Foto Kegiatan*" },
-  { id: 3, apiKey: "cover-3", label: "Cover Mockup dan Poster*" },
-  { id: 4, apiKey: "cover-4", label: "Cover Short Film Dokumenter*" },
-  { id: 5, apiKey: "cover-5", label: "Cover Event Ditampart*" },
+  { id: 1, apiKey: "cover-2", label: "Cover Foto Kegiatan*" },
+  { id: 2, apiKey: "cover-3", label: "Cover Mockup dan Poster*" },
+  { id: 3, apiKey: "cover-4", label: "Cover Short Film Dokumenter*" },
+  { id: 4, apiKey: "cover-5", label: "Cover Event Ditampart*" },
 ];
 
 /** Slot hero image per sub-halaman Ditampart. title/subtitle adalah nilai default sebelum API dimuat. */
@@ -117,6 +118,88 @@ export default function PageDitampart() {
   };
 
   /**
+   * Menyimpan seluruh tab "Page Utama".
+   * Alur:
+   * 1. PATCH platform (teks + gambar utama) — multipart jika ada file baru, JSON jika tidak
+   * 2. Loop cover items: upload file baru (multipart) ATAU kirim null jika pendingClear
+   * 3. Reset state file & pendingClear setelah berhasil
+   */
+  async function handleSaveMain() {
+    setMainSaving(true);
+    try {
+      let res;
+      // Gunakan multipart hanya jika ada file gambar baru; otherwise JSON lebih ringan
+      if (mainFiles.length > 0) {
+        const fd = new FormData();
+        fd.append("headline",       mainForm.headline       || "");
+        fd.append("subHeadline",    mainForm.subHeadline    || "");
+        fd.append("instagram",      mainForm.instagram      || "");
+        fd.append("youtube",        mainForm.youtube        || "");
+        fd.append("youtubeProfile", mainForm.youtubeProfile || "");
+        fd.append("mainImageUrl",   mainFiles[0]);
+        res = await fetch(`/api/admin/platform/${PLATFORM_SLUG}`, { method: "PATCH", body: fd });
+      } else {
+        const body = {
+          headline:       mainForm.headline       || "",
+          subHeadline:    mainForm.subHeadline    || "",
+          instagram:      mainForm.instagram      || "",
+          youtube:        mainForm.youtube        || "",
+          youtubeProfile: mainForm.youtubeProfile || "",
+        };
+        // Kirim null hanya jika user memang sengaja menghapus gambar
+        if (mainPendingClear) body.mainImageUrl = null;
+        res = await fetch(`/api/admin/platform/${PLATFORM_SLUG}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      }
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload.error?.message || "Gagal menyimpan platform");
+      }
+
+      // Proses setiap slot cover yang berubah
+      for (const item of mainItems) {
+        if (item.files?.length > 0) {
+          // Upload file baru; server otomatis menghapus file lama
+          const coverFd = new FormData();
+          coverFd.append("imageUrl", item.files[0]);
+          const cRes = await fetch(`/api/admin/platform/${PLATFORM_SLUG}/images/${item.apiKey}`, {
+            method: "PATCH",
+            body: coverFd,
+          });
+          if (!cRes.ok) {
+            const payload = await cRes.json().catch(() => ({}));
+            throw new Error(payload.error?.message || `Gagal menyimpan cover: ${item.label}`);
+          }
+        } else if (item.pendingClear) {
+          // Hapus gambar cover tanpa mengunggah yang baru
+          const cRes = await fetch(`/api/admin/platform/${PLATFORM_SLUG}/images/${item.apiKey}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageUrl: null }),
+          });
+          if (!cRes.ok) {
+            const payload = await cRes.json().catch(() => ({}));
+            throw new Error(payload.error?.message || `Gagal menghapus gambar cover: ${item.label}`);
+          }
+        }
+      }
+
+      setMainFiles([]);
+      setMainPendingClear(false);
+      setMainItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
+      alert("Data halaman utama berhasil disimpan");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Terjadi kesalahan saat menyimpan");
+    } finally {
+      setMainSaving(false);
+    }
+  }
+
+  /**
    * Menyimpan seluruh tab "Bagian Hero".
    * Untuk tiap item:
    *  - Ada file baru → multipart PATCH (title + subtitle + imageUrl file)
@@ -167,6 +250,7 @@ export default function PageDitampart() {
   }
 
   return (
+    <PermissionGate requiredPermissions={["platform.read"]}>
     <section className="py-5 px-6 bg-white rounded-xl border border-gray-300">
       <div className="flex items-start justify-between gap-4">
         <div className="max-w-[78%]">
@@ -232,5 +316,6 @@ export default function PageDitampart() {
         )}
       </div>
     </section>
+    </PermissionGate>
   );
 }

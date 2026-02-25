@@ -3,6 +3,7 @@
 import React from "react";
 import UploadBox from "../../../../components/adminUI/UploadBox.jsx";
 import ListCover from "./_list.cover.jsx";
+import PermissionGate from "../../../../components/adminUI/PermissionGate.jsx";
 
 /**
  * FormMain — fully controlled. All state lives in the parent Page component.
@@ -127,13 +128,15 @@ export default function FormMain({
       </div>
 
       <div className="flex items-center justify-end gap-3">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="px-4 py-2 bg-pink-500 text-white rounded-md font-semibold disabled:opacity-60"
-        >
-          {submitting ? "Menyimpan..." : "Simpan"}
-        </button>
+        <PermissionGate requiredPermissions={"platform.update"} disableOnDenied>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="px-4 py-2 bg-pink-500 text-white rounded-md font-semibold disabled:opacity-60"
+          >
+            {submitting ? "Menyimpan..." : "Simpan"}
+          </button>
+        </PermissionGate>
       </div>
     </form>
   );

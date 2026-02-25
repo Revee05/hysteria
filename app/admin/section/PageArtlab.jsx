@@ -14,6 +14,7 @@
 import React, { useState, useEffect } from "react";
 import FormMain from "./_component/form.main.jsx";
 import FormHero from "./_component/form.hero.jsx";
+import PermissionGate from "../../../components/adminUI/PermissionGate.jsx";
 
 /** Slug yang dipakai sebagai identifier platform di DB dan di URL API. */
 const PLATFORM_SLUG = "artlab";
@@ -262,6 +263,7 @@ export default function PageArtlab() {
   }
 
   return (
+    <PermissionGate requiredPermissions={["platform.read"]}>
     <section className="py-5 px-6 bg-white rounded-xl border border-gray-300">
       <div className="flex items-start justify-between gap-4">
         <div className="max-w-[78%]">
@@ -327,5 +329,6 @@ export default function PageArtlab() {
         )}
       </div>
     </section>
+    </PermissionGate>
   );
 }

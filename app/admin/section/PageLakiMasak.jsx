@@ -10,6 +10,7 @@
 import React, { useState, useEffect } from "react";
 import FormMain from "./_component/form.main.jsx";
 import FormHero from "./_component/form.hero.jsx";
+import PermissionGate from "../../../components/adminUI/PermissionGate.jsx";
 
 /** Slug identifier platform di DB dan URL API. */
 const PLATFORM_SLUG = "laki-masak";
@@ -230,6 +231,7 @@ export default function PageLakiMasak() {
   }
 
   return (
+    <PermissionGate requiredPermissions={["platform.read"]}>
     <section className="py-5 px-6 bg-white rounded-xl border border-gray-300">
       <div className="flex items-start justify-between gap-4">
         <div className="max-w-[78%]">
@@ -295,5 +297,6 @@ export default function PageLakiMasak() {
         )}
       </div>
     </section>
+    </PermissionGate>
   );
 }
