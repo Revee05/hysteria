@@ -23,21 +23,21 @@ const isManagedUpload = (source) => {
 
 export async function getPageHeroBySlug(pageSlug) {
   const normalizedSlug = normalizeSlug(pageSlug);
-  logger.info("[PageHero][Service][GET] Start", { pageSlug: normalizedSlug });
+  // logger.info("[PageHero][Service][GET] Start", { pageSlug: normalizedSlug });
 
   let validated;
   try {
     validated = validatePageHeroData({ pageSlug: normalizedSlug }, pageHeroSlugSchema);
   } catch (error) {
-    logger.warn("[PageHero][Service][GET] Validation failed", {
-      pageSlug: normalizedSlug,
-      error: error?.errors,
-    });
+    // logger.warn("[PageHero][Service][GET] Validation failed", {
+    //   pageSlug: normalizedSlug,
+    //   error: error?.errors,
+    // });
     throw new AppError(error?.errors?.[0]?.message || "Invalid page slug", 400, "VALIDATION_ERROR");
   }
 
   const hero = await pageHeroRepository.findPageHeroBySlug(validated.pageSlug);
-  logger.info("[PageHero][Service][GET] Success", { pageSlug: validated.pageSlug, found: !!hero });
+  // logger.info("[PageHero][Service][GET] Success", { pageSlug: validated.pageSlug, found: !!hero });
   return hero;
 }
 

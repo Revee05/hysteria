@@ -9,7 +9,13 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
 
   const menus = [
     { key: "dashboard", label: "Dashboard", view: "dashboard", icon: IconDashboard, enabled: true },
-    { key: "users", label: "Users", view: "users", icon: IconUsers, enabled: true, children: [
+    {
+      key: "users",
+      label: "Users",
+      view: "users",
+      icon: IconUsers,
+      enabled: true,
+      children: [
         { key: "user_management", label: "User Management", view: "users.user_management", icon: IconUserManagement, enabled: true },
         { key: "permission", label: "Permission", view: "users.permission", icon: IconPermission, enabled: true },
         { key: "status_management", label: "Status", view: "users.status_management", icon: IconStatus, enabled: true },
@@ -25,16 +31,18 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
         { key: "laki-masak", label: "Page Laki Masak", view: "page.laki-masak", icon: IconHero, enabled: true },
       ],
     },
-    { key: "platform", label: "Platform", view: "platform", icon: IconPlatform, enabled: true, children: [
-       {key: "artlab", label: "Artlab", view: "platform.artlab", icon: IconSocial, enabled: true},
-       {key: "ditampart", label: "Ditampart", view: "platform.ditampart", icon: IconSocial, enabled: true},
-       {key: "laki-masak", label: "Laki Masak", view: "platform.laki-masak", icon: IconSocial, enabled: true},
-       {key: "thumbnail", label: "Thumbnail", view: "platform.thumbnail", icon: IconSocial, enabled: false},
-    ]},
     { key: "event", label: "Event", view: "event", icon: IconEvent, enabled: true },
     { key: "article", label: "Artikel", view: "article", icon: IconPost, enabled: true },
-    { key: "settings", label: "Settings", view: "settings", icon: IconSettings, enabled: true,
-      children: [{ key: "team", label: "Team", view: "team", icon: IconDiversity, enabled: true }],
+    {
+      key: "settings",
+      label: "Settings",
+      view: "settings",
+      icon: IconSettings,
+      enabled: true,
+      children: [
+        { key: "team", label: "Team", view: "team", icon: IconDiversity, enabled: true },
+        { key: "tentang", label: "Tentang", view: "tentang", icon: IconDiversity, enabled: true },
+      ],
     },
   ];
 

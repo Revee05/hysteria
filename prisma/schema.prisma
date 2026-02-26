@@ -347,6 +347,49 @@ model PlatformImage {
   @@index([type])
 }
 
+model TentangVisiMisi {
+  id       Int    @id @default(autoincrement())
+  pageSlug String @unique @default("tentang") @db.VarChar(100)
+
+  visi  String @db.Text
+  misi  String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pageSlug])
+}
+
+model TentangSejarahItem {
+  id Int @id @default(autoincrement())
+
+  title    String  @db.VarChar(255)
+  imageUrl String? @db.VarChar(500)
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@index([isActive])
+}
+
+model TentangPanduanVisual {
+  id Int @id @default(autoincrement())
+
+  title    String  @db.VarChar(255)
+  link     String? @db.VarChar(500)
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@index([isActive])
+}
+
 model Event {
   id            Int       @id @default(autoincrement())
   title         String    @db.VarChar(255)

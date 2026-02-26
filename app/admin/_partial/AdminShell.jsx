@@ -14,6 +14,7 @@ import PageLakiMasak from "../section/PageLakiMasak.jsx";
 import CategoriesPage from "../categories/page.jsx";
 import TeamManagementPage from "../team/page.jsx";
 import EventPage from "../events/page.jsx";
+import TentangSettingsPage from "../tentang/page.jsx";
 import { usePathname } from "next/navigation";
 import ArticlesPage from "../articles/page.jsx";
 import CreateArticlePage from "../articles/create/page.jsx";
@@ -65,9 +66,11 @@ export default function AdminShell({ children }) {
         return <ArticlesPage onNavigate={handleNavigate} />;
       case "article.create":
         return <CreateArticlePage onNavigate={handleNavigate} />;
-      case 'event':
+      case "tentang":
+        return <TentangSettingsPage />;
+      case "event":
         return <EventPage />;
-      case 'dashboard':
+      case "dashboard":
       default:
         return children;
     }
@@ -95,9 +98,7 @@ export default function AdminShell({ children }) {
               <AdminTopbar onOpenSidebar={() => setOpen(true)} />
             </div>
 
-            <main className="mx-auto w-full max-w-5xl px-6 py-8">
-            {isDashboard ? renderContent() : children}
-          </main>
+            <main className="mx-auto w-full max-w-5xl px-6 py-8">{isDashboard ? renderContent() : children}</main>
           </div>
 
           {open && (

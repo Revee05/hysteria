@@ -5,9 +5,9 @@ import { getPageHeroBySlug } from "../../../../modules/admin/pageHero/index.js";
 export async function GET(request, { params }) {
   try {
     const { slug } = await params;
-    logger.info("[PageHero][Public][GET] Start", { slug });
+    // logger.info("[PageHero][Public][GET] Start", { slug });
     const hero = await getPageHeroBySlug(slug);
-    logger.info("[PageHero][Public][GET] Success", { slug, found: !!hero });
+    // logger.info("[PageHero][Public][GET] Success", { slug, found: !!hero });
 
     return respondSuccess(hero, 200);
   } catch (error) {

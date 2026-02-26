@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
-import slugify from "slugify";
+import { slugify } from "zod";
 
 export async function POST(req) {
   try {
