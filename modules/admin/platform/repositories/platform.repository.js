@@ -41,7 +41,23 @@ export async function findPlatformBySlugWithImages(slug) {
     ORDER BY "order" ASC, id ASC
   `;
 
-  return { ...platform, images: Array.isArray(images) ? images : [] };
+  // Ambil semua kategori platform, JOIN ke CategoryItem untuk title/slug/url
+  const categories = await prisma.$queryRaw`
+    SELECT pc.id, pc."platformId", pc."categoryItemId",
+           ci.title, ci.slug, ci.url,
+           pc.layout, pc.description, pc.filters, pc."order", pc."isActive",
+           pc."createdAt", pc."updatedAt"
+    FROM "PlatformCategory" pc
+    JOIN "CategoryItem" ci ON ci.id = pc."categoryItemId"
+    WHERE pc."platformId" = ${platform.id} AND pc."isActive" = true
+    ORDER BY pc."order" ASC, pc.id ASC
+  `;
+
+  return {
+    ...platform,
+    images: Array.isArray(images) ? images : [],
+    categories: Array.isArray(categories) ? categories : [],
+  };
 }
 
 /**

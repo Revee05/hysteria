@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function MediaSection({ mediaURL }) {
+export default function MediaSection({ youtubeProfile }) {
   return (
     <section className=" sm:py-12 md:py-16 lg:py-20 text-black">
       {/* Container: responsive max-width and padding for small/medium/large screens */}
@@ -11,7 +11,7 @@ export default function MediaSection({ mediaURL }) {
           <div className="relative rounded-lg overflow-hidden shadow-lg" style={{ paddingTop: '56.25%' }}>
             <iframe
               className="absolute left-0 top-0 w-full h-full"
-              src={mediaURL}
+              src={youtubeProfile}
               title="YouTube video player"
               frameBorder="0"
               allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

@@ -9,17 +9,16 @@ import Image from 'next/image'
  * Layout responsif dan dikontrol penuh via props.
  */
 export default function HeadSection({
-  title,                 // Judul utama section
-  description,           // Deskripsi pendukung
-  instagramUrl,          // URL Instagram (opsional)
-  youtubeUrl,            // URL YouTube (opsional)
-  images = [],           // Array data gambar
-  showSocialButtons = true, // Toggle tampil/tidak tombol sosial
-  multyImages = false    // Mode tampilan gambar besar / multiple
+  headline,              // Platform.headline — judul utama
+  subHeadline,           // Platform.subHeadline — deskripsi pendukung
+  instagram,             // Platform.instagram — URL Instagram (opsional)
+  youtube,               // Platform.youtube — URL YouTube channel (opsional)
+  images = [],           // PlatformImage type=main — array { src, alt }
+  multyImages = false    // derived: images.length > 1
 }) {
 
   return (
-    <section className="py-8 sm:py-12 md:py-12 lg:py-16 text-black">
+    <section className="py-8 sm:py-12 md:py-20 text-black">
       
       <div className="mx-auto w-full max-w-[1100px] sm:max-w-[1200px] md:max-w-[1400px] lg:max-w-[1800px] px-4 sm:px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-8 md:gap-10 lg:gap-12">
 
@@ -27,20 +26,20 @@ export default function HeadSection({
         <div>
           {/* Title */}
           <h1 className="text-[28px] sm:text-[40px] md:text-[50px] font-bold leading-[150%] mb-4">
-            {title}
+            {headline}
           </h1>
 
           {/* Description */}
           <h2 className="text-black mb-6 max-w-full sm:max-w-xl text-[14px] sm:text-[16px] md:text-[20px] font-normal leading-[150%]">
-            {description}
+            {subHeadline}
           </h2>
 
-          {/* Social buttons: render only when enabled and URL exists */}
-          {showSocialButtons && (instagramUrl || youtubeUrl) && (
+          {/* Social buttons: render only when at least one URL exists */}
+          {(instagram || youtube) && (
             <div className="flex gap-3 flex-wrap">
-              {instagramUrl && (
+              {instagram && (
                 <a
-                  href={instagramUrl}
+                  href={instagram}
                   className="
                     inline-block bg-white text-pink-600 px-4 py-2 rounded-md 
                     border border-pink-400 shadow-sm 
@@ -52,9 +51,9 @@ export default function HeadSection({
                 </a>
               )}
 
-              {youtubeUrl && (
+              {youtube && (
                 <a
-                  href={youtubeUrl}
+                  href={youtube}
                   className="
                     inline-block bg-white text-pink-600 px-4 py-2 rounded-md
                     border border-pink-400 shadow-sm
@@ -80,7 +79,7 @@ export default function HeadSection({
                * - Small screens: full width but limited max-height to avoid oversized hero
                * - Larger screens: constrained max-width and taller max-height
                */
-              className={`w-full relative overflow-hidden bg-white rounded-lg p-2 sm:p-3 mx-auto
+              className={`w-full relative overflow-hidden bg-white rounded-lg p-2 sm:p-3 mx-auto md:mr-10
                 ${multyImages
                   ? 'max-w-[92%] sm:max-w-[720px]'
                   : 'max-w-[70%] sm:max-w-[360px]'}

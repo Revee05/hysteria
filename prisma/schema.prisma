@@ -219,6 +219,7 @@ model CategoryItem {
   isActive Boolean @default(true)
 
   events Event[]
+  platformCategories PlatformCategory[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -294,9 +295,35 @@ model Platform {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  images PlatformImage[]
+  images     PlatformImage[]
+  categories PlatformCategory[]
 
   @@index([slug])
+}
+
+model PlatformCategory {
+  id         Int      @id @default(autoincrement())
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  // Sumber title, slug, url diambil dari CategoryItem (nav tree)
+  categoryItem   CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
+  categoryItemId Int
+
+  // Metadata visual khusus halaman platform
+  layout      String  @default("grid") @db.VarChar(50) // 'grid' | 'carousel'
+  description String? @db.Text
+  filters     Json?   @db.JsonB // string[] untuk filter grid
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([platformId, categoryItemId])
+  @@index([platformId])
+  @@index([categoryItemId])
+  @@index([order])
 }
 
 model PlatformImage {

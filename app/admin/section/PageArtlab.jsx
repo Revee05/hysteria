@@ -18,7 +18,7 @@ import PermissionGate from "../../../components/adminUI/PermissionGate.jsx";
 import Toast from "../../../components/ui/Toast.jsx";
 
 /** Slug yang dipakai sebagai identifier platform di DB dan di URL API. */
-const PLATFORM_SLUG = "artlab";
+const PLATFORM_SLUG = "hysteria-artlab";
 
 /**
  * Daftar slot cover image platform Artlab.
@@ -215,7 +215,7 @@ export default function PageArtlab() {
       setMainFiles([]);
       setMainPendingClear(false);
       setMainItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
-      showToast("Data halaman utama berhasil disimpan");
+      showToast("Data halaman utama berhasil disimpan", "success");
     } catch (err) {
       console.error(err);
       showToast(err.message || "Terjadi kesalahan saat menyimpan", "error");
@@ -258,7 +258,7 @@ export default function PageArtlab() {
       }
 
       setHeroItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
-      showToast("Hero berhasil disimpan");
+      showToast("Hero berhasil disimpan", "success");
     } catch (err) {
       console.error(err);
       showToast(err.message || "Terjadi kesalahan saat menyimpan", "error");

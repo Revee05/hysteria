@@ -3,7 +3,7 @@ const logger = require("../../lib/logger");
 
 const PLATFORMS = [
   {
-    slug: "artlab",
+    slug: "hysteria-artlab",
     name: "Hysteria Artlab",
     headline: "Ruang Ekspresi Seni & Budaya",
     subHeadline: "Artlab adalah platform Hysteria yang mendedikasikan dirinya untuk eksplorasi seni, musik, film, dan workshop kreatif.",
@@ -36,7 +36,7 @@ const PLATFORMS = [
     instagram: "https://www.instagram.com/hysteria.ditampart",
     youtube: null,
     youtubeProfile: null,
-    mainImageUrl: "https://picsum.photos/seed/ditampart-main/1600/600",
+    mainImageUrl: null,
     mainImageItems: [
       { key: "main-1", label: "Gambar Utama 1", imageUrl: "https://picsum.photos/seed/ditampart1/800/900", order: 1 },
       { key: "main-2", label: "Gambar Utama 2", imageUrl: "https://picsum.photos/seed/ditampart2/800/900", order: 2 },

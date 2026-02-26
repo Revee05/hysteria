@@ -3,6 +3,8 @@
 // to enable/disable specific seed files. This keeps the runner explicit
 // and easy to review in PRs.
 
+require("dotenv").config(); // load .env so DATABASE_URL is available to all seeders
+
 const logger = require("../../lib/logger");
 
 const seeds = [
@@ -13,7 +15,8 @@ const seeds = [
   // require('./009-nav-category.js'),
   // require("./010-team.js"),
   // require("./011-platform-permissions.js"),
-  require("./012-platform-seed.js"),
+  // require("./012-platform-seed.js"),
+  require("./013-platform-categories-seed.js"),
 ];
 
 async function main() {
