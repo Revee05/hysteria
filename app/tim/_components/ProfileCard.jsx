@@ -65,13 +65,13 @@ export default function ProfileCard({ name, role, imageUrl, email, instagram }) 
   const imgSrc = imageUrl || "/image/team-placeholder.webp";
 
   return (
-    <div className="flex flex-col items-start bg-white rounded-[10px] shadow-[0px_0px_20px_-3px_rgba(0,0,0,0.25)] overflow-hidden w-full max-w-[320px] h-full min-h-[500px] hover:shadow-xl transition-shadow duration-300">
-      <div className="w-full aspect-[321/321] relative bg-gray-200 overflow-hidden">
+    <div className="flex flex-col items-start bg-white rounded-[10px] shadow-[0px_0px_20px_-3px_rgba(0,0,0,0.25)] overflow-hidden w-full max-w-[285px] h-full min-h-[445px] hover:shadow-xl transition-shadow duration-300">
+      <div className="w-full aspect-[285/285] relative bg-gray-200 overflow-hidden">
         <Image
           src={imgSrc}
           alt={name}
-          width={320}
-          height={320}
+          width={285}
+          height={285}
           className="w-full h-full object-cover"
         />
       </div>
