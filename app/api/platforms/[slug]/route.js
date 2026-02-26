@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getPlatformBySlug } from '../../../../modules/admin/platform/services/platform.service'
+import { withApiLogging } from '../../../../lib/api-logger.js'
 
 /**
  * GET /api/platforms/[slug]
@@ -58,7 +59,7 @@ function buildResponse(slug, db) {
   }
 }
 
-export async function GET(req, { params }) {
+const handler = async (req, { params }) => {
   try {
     const { slug } = (await params) || {}
 
@@ -73,3 +74,5 @@ export async function GET(req, { params }) {
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withApiLogging(handler, 'api/platforms/[slug]')

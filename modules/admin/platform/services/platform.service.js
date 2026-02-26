@@ -11,7 +11,7 @@
  * - Melempar AppError yang akan ditangkap oleh route handler
  */
 import { AppError } from "../../../../lib/response.js";
-import logger from "../../../../lib/logger.js";
+import { logInfo, logWarning, logError } from "../../../../lib/api-logger.js";
 import Uploads from "../../../../lib/upload/uploads.js";
 import * as platformRepository from "../repositories/platform.repository.js";
 import * as platformImageRepository from "../repositories/platformImage.repository.js";
@@ -46,7 +46,7 @@ const isManagedUpload = (source) => {
  */
 export async function getPlatformBySlug(slug) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][GET] Start", { slug: normalizedSlug });
+  logInfo("[Platform][Service][GET] Start", { slug: normalizedSlug });
 
   let validated;
   try {
@@ -57,7 +57,7 @@ export async function getPlatformBySlug(slug) {
 
   // Eager-load gambar sekaligus supaya tidak perlu query kedua di caller
   const platform = await platformRepository.findPlatformBySlugWithImages(validated.slug);
-  logger.info("[Platform][Service][GET] Success", { slug: validated.slug, found: !!platform });
+  logInfo("[Platform][Service][GET] Success", { slug: validated.slug, found: !!platform });
   return platform;
 }
 
@@ -66,9 +66,9 @@ export async function getPlatformBySlug(slug) {
  * Tidak meng-include daftar gambar — gunakan getPlatformBySlug untuk data lengkap.
  */
 export async function listPlatforms() {
-  logger.info("[Platform][Service][LIST] Start");
+  logInfo("[Platform][Service][LIST] Start");
   const platforms = await platformRepository.listAllPlatforms(true);
-  logger.info("[Platform][Service][LIST] Success", { count: Array.isArray(platforms) ? platforms.length : 0 });
+  logInfo("[Platform][Service][LIST] Success", { count: Array.isArray(platforms) ? platforms.length : 0 });
   return Array.isArray(platforms) ? platforms : [];
 }
 
@@ -79,7 +79,7 @@ export async function listPlatforms() {
  */
 export async function updatePlatformBySlug(slug, data = {}) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][UPDATE] Start", {
+  logInfo("[Platform][Service][UPDATE] Start", {
     slug: normalizedSlug,
     dataKeys: Object.keys(data || {}),
   });
@@ -88,7 +88,7 @@ export async function updatePlatformBySlug(slug, data = {}) {
   try {
     validated = validatePlatformData({ ...data, slug: normalizedSlug }, updatePlatformSchema);
   } catch (error) {
-    logger.warn("[Platform][Service][UPDATE] Validation failed", { slug: normalizedSlug, error: error?.errors });
+    logWarning("[Platform][Service][UPDATE] Validation failed", { slug: normalizedSlug, error: error?.errors });
     throw new AppError(error?.errors?.[0]?.message || "Invalid platform data", 400, "VALIDATION_ERROR");
   }
 
@@ -101,7 +101,7 @@ export async function updatePlatformBySlug(slug, data = {}) {
   }
 
   const platform = await platformRepository.upsertPlatformBySlug(validatedSlug, payload);
-  logger.info("[Platform][Service][UPDATE] Success", { slug: validatedSlug, id: platform?.id });
+  logInfo("[Platform][Service][UPDATE] Success", { slug: validatedSlug, id: platform?.id });
   return platform;
 }
 
@@ -119,7 +119,7 @@ export async function updatePlatformBySlug(slug, data = {}) {
  */
 export async function updatePlatformWithMainImage(slug, data = {}, file) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][UPLOAD] Start", {
+  logInfo("[Platform][Service][UPLOAD] Start", {
     slug: normalizedSlug,
     fileName: file?.originalname || file?.filename || null,
     fileType: file?.mimetype || null,
@@ -133,7 +133,7 @@ export async function updatePlatformWithMainImage(slug, data = {}, file) {
       updatePlatformSchema.omit({ mainImageUrl: true }),
     );
   } catch (error) {
-    logger.warn("[Platform][Service][UPLOAD] Validation failed", { slug: normalizedSlug, error: error?.errors });
+    logWarning("[Platform][Service][UPLOAD] Validation failed", { slug: normalizedSlug, error: error?.errors });
     throw new AppError(error?.errors?.[0]?.message || "Invalid platform data", 400, "VALIDATION_ERROR");
   }
 
@@ -146,7 +146,7 @@ export async function updatePlatformWithMainImage(slug, data = {}, file) {
   let uploadedUrl = null; // disimpan di luar try agar bisa di-cleanup jika error setelah upload
 
   try {
-    logger.info("[Platform][Service][UPLOAD] Uploading main image", { slug: validated.slug });
+    logInfo("[Platform][Service][UPLOAD] Uploading main image", { slug: validated.slug });
     const uploadResult = await uploads.handleUpload(file);
     uploadedUrl = uploadResult?.url;
 
@@ -158,7 +158,7 @@ export async function updatePlatformWithMainImage(slug, data = {}, file) {
     const payload = { ...textFields, mainImageUrl: uploadedUrl };
     const platform = await platformRepository.upsertPlatformBySlug(validatedSlug, payload);
 
-    logger.info("[Platform][Service][UPLOAD] Persisted", { slug: validatedSlug, id: platform?.id });
+    logInfo("[Platform][Service][UPLOAD] Persisted", { slug: validatedSlug, id: platform?.id });
 
     // Hapus file lama SETELAH berhasil disimpan ke DB — urutan penting untuk menghindari data orphan
     if (existing.mainImageUrl && existing.mainImageUrl !== uploadedUrl && isManagedUpload(existing.mainImageUrl)) {
@@ -166,7 +166,7 @@ export async function updatePlatformWithMainImage(slug, data = {}, file) {
         await uploads.deleteFile(existing.mainImageUrl);
       } catch (cleanupError) {
         // Gagal hapus file lama bukan error fatal — log saja, data DB sudah benar
-        logger.warn("[Platform][Service][UPLOAD] Failed to delete old main image", {
+        logWarning("[Platform][Service][UPLOAD] Failed to delete old main image", {
           slug: validatedSlug,
           oldImage: existing.mainImageUrl,
           error: cleanupError?.message,
@@ -176,13 +176,13 @@ export async function updatePlatformWithMainImage(slug, data = {}, file) {
 
     return platform;
   } catch (error) {
-    logger.error("[Platform][Service][UPLOAD] Failed", { slug: normalizedSlug, error: error?.message });
+    logError("[Platform][Service][UPLOAD] Failed", error, { slug: normalizedSlug });
     // Rollback: hapus file yang sudah ter-upload jika proses selanjutnya (DB save) gagal
     if (uploadedUrl) {
       try {
         await uploads.deleteFile(uploadedUrl);
       } catch (cleanupError) {
-        logger.warn("[Platform][Service][UPLOAD] Cleanup failed", { uploadedUrl, error: cleanupError?.message });
+        logWarning("[Platform][Service][UPLOAD] Cleanup failed", { uploadedUrl, error: cleanupError?.message });
       }
     }
     if (error instanceof AppError) throw error;
@@ -197,7 +197,7 @@ export async function updatePlatformWithMainImage(slug, data = {}, file) {
  */
 export async function getPlatformImages(slug, type = null) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][IMAGES] Start", { slug: normalizedSlug, type });
+  logInfo("[Platform][Service][IMAGES] Start", { slug: normalizedSlug, type });
 
   const platform = await platformRepository.findPlatformBySlug(normalizedSlug);
   if (!platform) {
@@ -211,7 +211,7 @@ export async function getPlatformImages(slug, type = null) {
 /** Mengambil satu slot gambar berdasarkan slug platform + key gambar. */
 export async function getPlatformImage(slug, key) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][IMAGE-GET] Start", { slug: normalizedSlug, key });
+  logInfo("[Platform][Service][IMAGE-GET] Start", { slug: normalizedSlug, key });
 
   const platform = await platformRepository.findPlatformBySlug(normalizedSlug);
   if (!platform) {
@@ -223,7 +223,7 @@ export async function getPlatformImage(slug, key) {
     throw new AppError(`Image '${key}' not found for platform '${normalizedSlug}'`, 404, "NOT_FOUND");
   }
 
-  logger.info("[Platform][Service][IMAGE-GET] Success", { slug: normalizedSlug, key, id: image.id });
+  logInfo("[Platform][Service][IMAGE-GET] Success", { slug: normalizedSlug, key, id: image.id });
   return image;
 }
 
@@ -234,7 +234,7 @@ export async function getPlatformImage(slug, key) {
  */
 export async function updatePlatformImage(slug, key, data = {}) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][IMAGE-UPDATE] Start", { slug: normalizedSlug, key });
+  logInfo("[Platform][Service][IMAGE-UPDATE] Start", { slug: normalizedSlug, key });
 
   const platform = await platformRepository.findPlatformBySlug(normalizedSlug);
   if (!platform) {
@@ -254,7 +254,7 @@ export async function updatePlatformImage(slug, key, data = {}) {
   if (Object.prototype.hasOwnProperty.call(data || {}, "imageUrl")) payload.imageUrl = data.imageUrl;
 
   const image = await platformImageRepository.upsertImageByKey(platform.id, key, payload);
-  logger.info("[Platform][Service][IMAGE-UPDATE] Success", { slug: normalizedSlug, key, id: image?.id });
+  logInfo("[Platform][Service][IMAGE-UPDATE] Success", { slug: normalizedSlug, key, id: image?.id });
   return image;
 }
 
@@ -270,7 +270,7 @@ export async function updatePlatformImage(slug, key, data = {}) {
  */
 export async function updatePlatformImageWithFile(slug, key, data = {}, file) {
   const normalizedSlug = normalizeSlug(slug);
-  logger.info("[Platform][Service][IMAGE-UPLOAD] Start", {
+  logInfo("[Platform][Service][IMAGE-UPLOAD] Start", {
     slug: normalizedSlug,
     key,
     fileName: file?.originalname || file?.filename || null,
@@ -304,7 +304,7 @@ export async function updatePlatformImageWithFile(slug, key, data = {}, file) {
     if (data?.subtitle !== undefined) payload.subtitle = data.subtitle;
 
     const image = await platformImageRepository.upsertImageByKey(platform.id, key, payload);
-    logger.info("[Platform][Service][IMAGE-UPLOAD] Persisted", { slug: normalizedSlug, key, id: image?.id });
+    logInfo("[Platform][Service][IMAGE-UPLOAD] Persisted", { slug: normalizedSlug, key, id: image?.id });
 
     // Hapus file lama SETELAH DB berhasil disimpan
     if (existing.imageUrl && existing.imageUrl !== uploadedUrl && isManagedUpload(existing.imageUrl)) {
@@ -312,7 +312,7 @@ export async function updatePlatformImageWithFile(slug, key, data = {}, file) {
         await uploads.deleteFile(existing.imageUrl);
       } catch (cleanupError) {
         // Log warning, tapi jangan throw — proses utama sudah sukses
-        logger.warn("[Platform][Service][IMAGE-UPLOAD] Failed to delete old image", {
+        logWarning("[Platform][Service][IMAGE-UPLOAD] Failed to delete old image", {
           slug: normalizedSlug,
           key,
           oldImage: existing.imageUrl,
@@ -323,13 +323,13 @@ export async function updatePlatformImageWithFile(slug, key, data = {}, file) {
 
     return image;
   } catch (error) {
-    logger.error("[Platform][Service][IMAGE-UPLOAD] Failed", { slug: normalizedSlug, key, error: error?.message });
+    logError("[Platform][Service][IMAGE-UPLOAD] Failed", error, { slug: normalizedSlug, key });
     // Rollback: hapus file yang sudah ter-upload jika proses DB gagal
     if (uploadedUrl) {
       try {
         await uploads.deleteFile(uploadedUrl);
       } catch (cleanupError) {
-        logger.warn("[Platform][Service][IMAGE-UPLOAD] Cleanup failed", { uploadedUrl, error: cleanupError?.message });
+        logWarning("[Platform][Service][IMAGE-UPLOAD] Cleanup failed", { uploadedUrl, error: cleanupError?.message });
       }
     }
     if (error instanceof AppError) throw error;

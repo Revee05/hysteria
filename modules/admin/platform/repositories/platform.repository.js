@@ -14,8 +14,7 @@ import { prisma } from "../../../../lib/prisma.js";
 export async function findPlatformBySlug(slug) {
   const rows = await prisma.$queryRaw`
     SELECT id, slug, name, headline, "subHeadline",
-           instagram, youtube, "youtubeProfile", "mainImageUrl", "isActive",
-           "createdAt", "updatedAt"
+           instagram, youtube, "youtubeProfile", "mainImageUrl", "isActive"
     FROM "Platform"
     WHERE slug = ${slug}
     LIMIT 1
@@ -35,7 +34,7 @@ export async function findPlatformBySlugWithImages(slug) {
   // Ambil semua slot gambar yang terhubung ke platform ini
   const images = await prisma.$queryRaw`
     SELECT id, "platformId", key, type, label, title, subtitle,
-           "imageUrl", "order", "createdAt", "updatedAt"
+           "imageUrl"
     FROM "PlatformImage"
     WHERE "platformId" = ${platform.id}
     ORDER BY "order" ASC, id ASC
@@ -45,11 +44,10 @@ export async function findPlatformBySlugWithImages(slug) {
   const categories = await prisma.$queryRaw`
     SELECT pc.id, pc."platformId", pc."categoryItemId",
            ci.title, ci.slug, ci.url,
-           pc.layout, pc.description, pc.filters, pc."order", pc."isActive",
-           pc."createdAt", pc."updatedAt"
+           pc.layout, pc.filters
     FROM "PlatformCategory" pc
     JOIN "CategoryItem" ci ON ci.id = pc."categoryItemId"
-    WHERE pc."platformId" = ${platform.id} AND pc."isActive" = true
+    WHERE pc."platformId" = ${platform.id}
     ORDER BY pc."order" ASC, pc.id ASC
   `;
 
@@ -68,8 +66,7 @@ export async function listAllPlatforms(onlyActive = true) {
   if (onlyActive) {
     return prisma.$queryRaw`
       SELECT id, slug, name, headline, "subHeadline",
-             instagram, youtube, "youtubeProfile", "mainImageUrl", "isActive",
-             "createdAt", "updatedAt"
+             instagram, youtube, "youtubeProfile", "mainImageUrl"
       FROM "Platform"
       WHERE "isActive" = true
       ORDER BY id ASC
@@ -78,8 +75,7 @@ export async function listAllPlatforms(onlyActive = true) {
   // Tanpa filter isActive — digunakan jika perlu menampilkan semua platform termasuk yang nonaktif
   return prisma.$queryRaw`
     SELECT id, slug, name, headline, "subHeadline",
-           instagram, youtube, "youtubeProfile", "mainImageUrl", "isActive",
-           "createdAt", "updatedAt"
+           instagram, youtube, "youtubeProfile", "mainImageUrl"
     FROM "Platform"
     ORDER BY id ASC
   `;
