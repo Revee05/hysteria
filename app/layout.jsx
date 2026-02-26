@@ -7,6 +7,14 @@ import Providers from "./providers";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import MobileMenu from "../components/layout/MobileMenu";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -27,8 +35,8 @@ export default function RootLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col">
+    <html lang="en" className={poppins.variable}>
+      <body className="min-h-screen flex flex-col font-sans">
         <Providers>
           <Header onMenuToggle={() => setMenuOpen(!menuOpen)} />
             <main>

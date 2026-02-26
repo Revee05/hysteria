@@ -223,6 +223,8 @@ model CategoryItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  articles ArticleCategory[]
+
   @@index([categoryId])
   @@index([parentId])
   @@index([order])
@@ -271,6 +273,51 @@ model TeamMember {
   @@unique([slug, name])
   @@index([categoryId])
   @@index([order])
+}
+
+// ====================================
+// PLATFORM
+// ====================================
+
+model Platform {
+  id             Int     @id @default(autoincrement())
+  slug           String  @unique @db.VarChar(100)
+  name           String  @db.VarChar(255)
+  headline       String? @db.VarChar(500)
+  subHeadline    String? @db.Text
+  instagram      String? @db.VarChar(500)
+  youtube        String? @db.VarChar(500)
+  youtubeProfile String? @db.VarChar(500)
+  mainImageUrl   String? @db.VarChar(500)
+  isActive       Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images PlatformImage[]
+
+  @@index([slug])
+}
+
+model PlatformImage {
+  id         Int      @id @default(autoincrement())
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  key      String  @db.VarChar(100)
+  type     String  @db.VarChar(50)
+  label    String  @db.VarChar(255)
+  title    String? @db.VarChar(500)
+  subtitle String? @db.Text
+  imageUrl String? @db.VarChar(500)
+  order    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([platformId, key])
+  @@index([platformId])
+  @@index([type])
 }
 
 model TentangVisiMisi {
@@ -350,4 +397,112 @@ model Event {
   @@index([categoryItemId])
   @@index([startAt])
   @@index([isPublished])
+}
+
+// ====================================
+// ARTICLES / BLOG / NEWS SYSTEM
+// ====================================
+
+model Article {
+  id Int @id @default(autoincrement())
+
+  title String @db.VarChar(255)
+  slug  String @unique @db.VarChar(255)
+
+  content       String  @db.Text
+  excerpt       String? @db.Text
+  featuredImage String? @db.VarChar(500)
+
+   // ================= AUTHOR (MANUAL) =================
+  authorName String  @db.VarChar(255)
+  editorName String? @db.VarChar(255)
+
+  // ================= RELATIONS =================
+
+  // Category (pakai tabel Category)
+  categories ArticleCategory[]
+
+  // Tags
+  tags ArticleTag[]
+  // Media
+  media ArticleMedia[]
+
+  // ================= PUBLISHING =================
+
+  status      ArticleStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  // ================= SYSTEM =================
+
+  views     Int     @default(0)
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model ArticleCategory {
+  articleId  Int
+  categoryId Int
+
+  article  Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  category CategoryItem @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, categoryId])
+  @@index([categoryId])
+}
+
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+  slug String @unique @db.VarChar(100)
+
+  articles ArticleTag[]
+}
+
+model ArticleTag {
+  articleId Int
+  tagId     Int
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+}
+
+model ArticleMedia {
+  id Int @id @default(autoincrement())
+
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId Int
+
+  type  MediaType
+  url   String @db.VarChar(500)
+  title String? @db.VarChar(255)
+
+  order Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
+}
+
+enum MediaType {
+  YOUTUBE
+  GOOGLE_DRIVE
+  IMAGE
+  FILE
+  EMBED
 }
