@@ -1,3 +1,16 @@
+/**
+ * PageHome.jsx
+ *
+ * Halaman admin untuk mengelola Hero Section halaman utama (homepage).
+ * Fitur: tambah, edit, hapus, toggle aktif/nonaktif hero.
+ *
+ * Catatan penting: hanya 1 hero yang boleh aktif (isActive=true) dalam satu waktu.
+ * Validasi ini dilakukan di sisi UI (peringatan) dan harus dijaga juga di API.
+ *
+ * Menggunakan:
+ *  - `apiCall` dari useAuth untuk request yang membutuhkan auth + CSRF otomatis
+ *  - `fetch` langsung untuk multipart upload (apiCall tidak support FormData)
+ */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -17,13 +30,13 @@ import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import { Help } from "@mui/icons-material";
 
-export default function HeroManagement() {
+export default function PageHome() {
   const { apiCall, csrfToken } = useAuth();
   const [heroes, setHeroes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState("create");
-  const [editingHero, setEditingHero] = useState(null);
+  const [modalMode, setModalMode] = useState("create");  // "create" | "edit" | "delete"
+  const [editingHero, setEditingHero] = useState(null);   // hero yang sedang diedit/dihapus
   const [formData, setFormData] = useState({
     source: "",
     title: "",
@@ -32,7 +45,10 @@ export default function HeroManagement() {
   });
   const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
 
-  // Helpers to update local heroes state without re-fetching all items
+  /**
+   * Update atau insert hero ke state lokal berdasarkan ID.
+   * Dipakai setelah create/edit supaya tidak perlu refetch semua data dari server.
+   */
   const upsertHeroInState = (hero) => {
     if (!hero) return;
     setHeroes((prev) => {
@@ -44,18 +60,20 @@ export default function HeroManagement() {
     });
   };
 
+  /** Hapus satu hero dari state lokal berdasarkan ID. */
   const removeHeroFromState = (id) => {
     if (id === undefined || id === null) return;
     setHeroes((prev) => prev.filter((h) => String(h.id) !== String(id)));
   };
 
+  /** Ambil semua hero dari API dan sinkronkan ke state lokal. */
   const fetchHeroes = useCallback(async () => {
     setLoading(true);
     try {
       const res = await apiCall("/api/admin/hero", { method: "GET" });
       const json = await res.json().catch(() => null);
       if (json?.success) {
-        // API may return either an array or an object { heroes, nextCursor, hasMore }
+        // API bisa kembalikan array langsung, atau { heroes, nextCursor, hasMore }
         const payload = json.data;
         if (Array.isArray(payload)) {
           setHeroes(payload);
@@ -115,6 +133,10 @@ export default function HeroManagement() {
     }
   };
 
+  /**
+   * Toggle isActive sebuah hero.
+   * Strategi: utamakan data yang dikembalikan server; jika tidak ada, toggle secara optimistik di state lokal.
+   */
   const handleToggleStatus = async (hero) => {
     try {
       const res = await apiCall(`/api/admin/hero/${hero.id}/status`, {
@@ -210,6 +232,11 @@ export default function HeroManagement() {
     }
   };
 
+  /**
+   * Validasi data form sebelum dikirim ke API.
+   * Mengembalikan array string error; array kosong = valid.
+   * Mode "delete" selalu valid (tidak perlu validasi field).
+   */
   function validateForm(data, mode = "create") {
     if (mode === "delete") return [];
     const errs = [];
@@ -220,13 +247,13 @@ export default function HeroManagement() {
     if (!data.description || String(data.description).trim() === "") errs.push("Deskripsi wajib");
     else if (String(data.description).trim().length < 10) errs.push("Deskripsi ≥10 karakter");
 
-    // Require either a source URL or an uploaded media file
+    // Wajib salah satu: URL sumber atau file upload
     if ((!data.source || String(data.source).trim() === "") && !data.media) errs.push("Masukkan URL atau unggah file");
 
-    // If a media file is provided, skip URL validation (upload overrides URL)
+    // Jika ada file upload, URL tidak perlu divalidasi (file menggantikan URL)
     if (data.media) return errs;
 
-    // If source provided, validate URL format (http/https) OR allow stored/local paths
+    // Jika hanya ada source URL, validasi formatnya
     if (data.source && String(data.source).trim() !== "") {
       const src = String(data.source).trim();
       try {
@@ -235,7 +262,7 @@ export default function HeroManagement() {
           errs.push("Gunakan https:// atau path lokal");
         }
       } catch (e) {
-        // If URL parsing fails, permit relative/local stored paths like '/uploads/...' or paths without scheme
+        // Izinkan path lokal/relatif seperti '/uploads/...' meski bukan URL absolut
         const looksLikeLocal = src.startsWith("/") || src.startsWith("uploads/") || !src.includes(":");
         if (!looksLikeLocal) {
           errs.push("URL tidak valid. Gunakan https:// atau path lokal");
@@ -245,6 +272,7 @@ export default function HeroManagement() {
     return errs;
   }
 
+  /** Definisi kolom DataTable. Setiap kolom memiliki renderer custom (render prop). */
   const columns = [
     { field: "id", headerName: "ID", freeze: true, render: hero => <div className="text-sm text-zinc-700">{hero.id}</div> },
 

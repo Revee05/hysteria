@@ -45,8 +45,8 @@ export async function upsertPageHeroBySlug(pageSlug, data) {
   }
 
   const createdRows = await prisma.$queryRaw`
-    INSERT INTO "PageHero" ("pageSlug", "imageUrl", "title", "subtitle")
-    VALUES (${pageSlug}, ${imageUrl}, ${title}, ${subtitle})
+    INSERT INTO "PageHero" ("pageSlug", "imageUrl", "title", "subtitle", "createdAt", "updatedAt")
+    VALUES (${pageSlug}, ${imageUrl}, ${title}, ${subtitle}, NOW(), NOW())
     RETURNING "id", "pageSlug", "imageUrl", "title", "subtitle", "createdAt", "updatedAt"
   `;
 

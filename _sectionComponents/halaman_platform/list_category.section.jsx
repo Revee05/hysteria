@@ -20,7 +20,7 @@ export default function ListCategorySection({
           {items.map((it, idx) => (
             <a
               key={idx}
-              href={it.href}
+              href={it.url}
               className="py-3 group block bg-white overflow-hidden border-b border-zinc-400"
             >
               {/* item image: adjust visible heights per breakpoint here */}

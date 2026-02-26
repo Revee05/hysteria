@@ -52,12 +52,12 @@ export default function ProfileSlider({ profiles, title, slug }) {
       <div className="relative w-full max-w-[1920px] mx-auto">
         <div
           ref={scrollContainerRef}
-          className="flex gap-[35px] overflow-x-auto snap-x snap-mandatory pb-12 px-4 md:px-24 no-scrollbar scroll-smooth"
+          className="flex gap-[44px] overflow-x-auto snap-x snap-mandatory pb-12 px-4 md:px-24 no-scrollbar scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {profiles.map((profile, index) => (
             <div
               key={index}
-              className="flex-none w-[300px] md:w-[320px] snap-center">
+              className="flex-none w-[300px] md:w-[285px] snap-center">
               <ProfileCard {...profile} />
             </div>
           ))}

@@ -42,7 +42,7 @@ module.exports = async function seed() {
 				{ categorySlug: 'program-hysteria', title: 'Dokumentaria', slug: 'dokumentaria', url: '/program/festival-kota/dokumentaria', order: 3, parentSlug: 'festival-kota' },
 
 			{ categorySlug: 'program-hysteria', title: 'Biennale', slug: 'biennale', url: '/program/festival-biennale', order: 2, parentSlug: 'festival-dan-pameran' },
-				{ categorySlug: 'program-hysteria', title: 'Pentak Labs', slug: 'pentak-labs', url: '/program/festival-biennale/pentak-labs', order: 0, parentSlug: 'biennale' },
+				{ categorySlug: 'program-hysteria', title: 'Penta K Labs', slug: 'penta-k-labs', url: '/program/festival-biennale/penta-k-labs', order: 0, parentSlug: 'biennale' },
 				{ categorySlug: 'program-hysteria', title: 'Tengok Bustaman', slug: 'tengok-bustaman', url: '/program/festival-biennale/tengok-bustaman', order: 1, parentSlug: 'biennale' },
 
 		{ categorySlug: 'program-hysteria', title: 'Forum', slug: 'forum', url: '/program/forum', order: 1, parentSlug: null },
@@ -69,32 +69,33 @@ module.exports = async function seed() {
 
 		{ categorySlug: 'program-hysteria', title: 'Pemutaran Film', slug: 'pemutaran-film', url: '/program/pemutaran-film', order: 5, parentSlug: null },
 			{ categorySlug: 'program-hysteria', title: 'Screening AM', slug: 'screening-am-film', url: '/program/pemutaran-film/screening-am', order: 0, parentSlug: 'pemutaran-film' },
-			{ categorySlug: 'program-hysteria', title: 'Lawatan Bandeng Keliling', slug: 'lawatan-bandeng-keliling-film', url: '/program/pemutaran-film/lawatan-bandeng-keliling', order: 1, parentSlug: 'pemutaran-film' },
+			{ categorySlug: 'program-hysteria', title: 'Lawatan Bandeng Keliling', slug: 'lawatan-bandeng-keliling', url: '/program/pemutaran-film/lawatan-bandeng-keliling', order: 1, parentSlug: 'pemutaran-film' },
 
 		{ categorySlug: 'program-hysteria', title: 'Video Series', slug: 'video-series', url: '/program/video-series', order: 6, parentSlug: null },
 			{ categorySlug: 'program-hysteria', title: 'Sapa Warga', slug: 'sapa-warga', url: '/program/video-series/sapa-warga', order: 0, parentSlug: 'video-series' },
 			{ categorySlug: 'program-hysteria', title: 'Hysteria Berkelana', slug: 'hysteria-berkelana', url: '/program/video-series/hysteria-berkelana', order: 1, parentSlug: 'video-series' },
 
 		// Platform (category: platform)
-		{ categorySlug: 'platform', title: 'Hysteria Artlab', slug: 'hysteria-artlab', url: '/platform/artlab', order: 0, parentSlug: null },
-			{ categorySlug: 'platform', title: 'Merchandise', slug: 'merchandise', url: '/platform/artlab/merchandise', order: 0, parentSlug: 'hysteria-artlab' },
-			{ categorySlug: 'platform', title: 'Podcast Artlab', slug: 'podcast-artlab', url: '/platform/artlab/podcast-artlab', order: 1, parentSlug: 'hysteria-artlab' },
-				{ categorySlug: 'platform', title: 'Stonen 29 Radio Show', slug: 'stonen-29-radio-show', url: '/platform/artlab/podcast-artlab/stonen-29-radio-show', order: 0, parentSlug: 'podcast-artlab' },
-				{ categorySlug: 'platform', title: 'Anitalk', slug: 'anitalk', url: '/platform/artlab/podcast-artlab/anitalk', order: 1, parentSlug: 'podcast-artlab' },
-				{ categorySlug: 'platform', title: 'Artist Radar', slug: 'artist-radar', url: '/platform/artlab/podcast-artlab/artist-radar', order: 2, parentSlug: 'podcast-artlab' },
-			{ categorySlug: 'platform', title: 'Workshop', slug: 'workshop', url: '/platform/artlab/workshop', order: 2, parentSlug: 'hysteria-artlab' },
-				{ categorySlug: 'platform', title: 'Having Fun Artlab', slug: 'having-fun-artlab', url: '/platform/artlab/workshop/having-fun-artlab', order: 0, parentSlug: 'workshop' },
-				{ categorySlug: 'platform', title: 'Peltoe', slug: 'peltoe', url: '/platform/artlab/workshop/peltoe', order: 1, parentSlug: 'workshop' },
-			{ categorySlug: 'platform', title: 'Screening Film', slug: 'screening-film', url: '/platform/artlab/screening-film', order: 2, parentSlug: 'hysteria-artlab' },
-				{ categorySlug: 'platform', title: 'Making Artist', slug: 'making-artist', url: '/platform/artlab/screening-film/making-artist', order: 0, parentSlug: 'screening-film' },
-				{ categorySlug: 'platform', title: 'Usil', slug: 'usil', url: '/platform/artlab/screening-film/usil', order: 1, parentSlug: 'screening-film' },
-			{ categorySlug: 'platform', title: 'Untuk Perhatian', slug: 'untuk-perhatian', url: '/platform/artlab/untuk-perhatian', order: 3, parentSlug: 'hysteria-artlab' },
+		{ categorySlug: 'platform', title: 'Hysteria Artlab', slug: 'hysteria-artlab', url: '/platform/hysteria-artlab', order: 0, parentSlug: null },
+			{ categorySlug: 'platform', title: 'Merchandise', slug: 'merchandise', url: '/platform/hysteria-artlab/merchandise', order: 0, parentSlug: 'hysteria-artlab' },
+			{ categorySlug: 'platform', title: 'Podcast Artlab', slug: 'podcast-artlab', url: '/platform/hysteria-artlab/podcast-artlab', order: 1, parentSlug: 'hysteria-artlab' },
+				{ categorySlug: 'platform', title: 'Stonen 29 Radio Show', slug: 'stonen-29-radio-show', url: '/platform/hysteria-artlab/podcast-artlab/stonen-29-radio-show', order: 0, parentSlug: 'podcast-artlab' },
+				{ categorySlug: 'platform', title: 'Anitalk', slug: 'anitalk', url: '/platform/hysteria-artlab/podcast-artlab/anitalk', order: 1, parentSlug: 'podcast-artlab' },
+				{ categorySlug: 'platform', title: 'Artist Radar', slug: 'artist-radar', url: '/platform/hysteria-artlab/podcast-artlab/artist-radar', order: 2, parentSlug: 'podcast-artlab' },
+			{ categorySlug: 'platform', title: 'Workshop', slug: 'workshop', url: '/platform/hysteria-artlab/workshop', order: 2, parentSlug: 'hysteria-artlab' },
+				{ categorySlug: 'platform', title: 'Having Fun Artlab', slug: 'having-fun-artlab', url: '/platform/hysteria-artlab/workshop/having-fun-artlab', order: 0, parentSlug: 'workshop' },
+				{ categorySlug: 'platform', title: 'Peltoe', slug: 'peltoe', url: '/platform/hysteria-artlab/workshop/peltoe', order: 1, parentSlug: 'workshop' },
+			{ categorySlug: 'platform', title: 'Screening Film', slug: 'screening-film', url: '/platform/hysteria-artlab/screening-film', order: 2, parentSlug: 'hysteria-artlab' },
+				{ categorySlug: 'platform', title: 'Making Artist', slug: 'making-artist', url: '/platform/hysteria-artlab/screening-film/making-artist', order: 0, parentSlug: 'screening-film' },
+				{ categorySlug: 'platform', title: 'Usil', slug: 'usil', url: '/platform/hysteria-artlab/screening-film/usil', order: 1, parentSlug: 'screening-film' },
+			{ categorySlug: 'platform', title: 'Untuk Perhatian', slug: 'untuk-perhatian', url: '/platform/hysteria-artlab/untuk-perhatian', order: 3, parentSlug: 'hysteria-artlab' },
 
 		{ categorySlug: 'platform', title: 'Ditampart', slug: 'ditampart', url: '/platform/ditampart', order: 1, parentSlug: null },
 			{ categorySlug: 'platform', title: '3D', slug: '3d', url: '/platform/ditampart/3d', order: 0, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Mockup dan Poster', slug: 'mockup-dan-poster', url: '/platform/ditampart/mockup-dan-poster', order: 1, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Short Dokumentasi', slug: 'short-dokumentasi', url: '/platform/ditampart/short-dokumentasi', order: 2, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Dokumentasi ditampart', slug: 'dokumentasi-ditampart', url: '/platform/ditampart/dokumentasi-ditampart', order: 3, parentSlug: 'ditampart' },
+			{ categorySlug: 'platform', title: 'Foto Kegiatan', slug: 'foto-kegiatan', url: '/platform/ditampart/foto-kegiatan', order: 1, parentSlug: 'ditampart' },
+			{ categorySlug: 'platform', title: 'Mockup dan Poster', slug: 'mockup-dan-poster', url: '/platform/ditampart/mockup-dan-poster', order: 2, parentSlug: 'ditampart' },
+			{ categorySlug: 'platform', title: 'Short Film Dokumenter', slug: 'short-film-dokumenter', url: '/platform/ditampart/short-film-dokumenter', order: 3, parentSlug: 'ditampart' },
+			{ categorySlug: 'platform', title: 'Event Ditampart', slug: 'event-ditampart', url: '/platform/ditampart/event-ditampart', order: 4, parentSlug: 'ditampart' },
 
 		{ categorySlug: 'platform', title: 'Laki Masak', slug: 'laki-masak', url: '/platform/laki-masak', order: 2, parentSlug: null },
 			{ categorySlug: 'platform', title: 'Meramu', slug: 'meramu', url: '/platform/laki-masak/meramu', order: 0, parentSlug: 'laki-masak' },
@@ -110,7 +111,8 @@ module.exports = async function seed() {
 		{ categorySlug: 'artikel', title: 'Bedah Buku', slug: 'bedah-buku', url: '/artikel/bedah-buku', order: 1, parentSlug: null },
 		{ categorySlug: 'artikel', title: 'Zine', slug: 'zine', url: '/artikel/zine', order: 2, parentSlug: null },
 		{ categorySlug: 'artikel', title: 'Media Partner', slug: 'media-partner', url: '/artikel/media-partner', order: 3, parentSlug: null },
-		{ categorySlug: 'artikel', title: 'Rilisan Buku', slug: 'rilisan-buku', url: '/artikel/rilisan-buku', order: 4, parentSlug: null }
+		{ categorySlug: 'artikel', title: 'Rilisan Buku', slug: 'rilisan-buku', url: '/artikel/rilisan-buku', order: 4, parentSlug: null },
+		{ categorySlug: 'artikel', title: 'Rilisan lainnya', slug: 'rilisan-lainnya', url: '/artikel/rilisan-lainnya', order: 5, parentSlug: null },
 	]
 
 	try {
