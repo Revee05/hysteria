@@ -1,34 +1,72 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ImageUpload from "./ImageUpload";
 import EventDescriptionEditor from "./EventDescriptionEditor";
+import TagInput from "./TagInput";
+
+function Card({ title, children }) {
+  return (
+    <div className="bg-white rounded-xl border shadow-sm p-5">
+      {title && (
+        <h3 className="font-medium text-black mb-3">{title}</h3>
+      )}
+      {children}
+    </div>
+  );
+}
 
 export default function EventForm({ initialData = null, isEdit = false, eventId = null }) {
   const router = useRouter();
-  const [categoryItems, setCategoryItems] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  // Track field error
+  const [organizerItems, setOrganizerItems] = useState([]);
+  const [programTree, setProgramTree] = useState([]);
+  const [platformTree, setPlatformTree] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [organizerOpen, setOrganizerOpen] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const organizerRef = useRef(null);
+  const categoryRef = useRef(null);
+  
+  const HYSTERIA_ORGANIZER = {
+    id: "__HYSTERIA__",
+    title: "Hysteria",
+    isVirtual: true,
+  };
+
+  const getOrganizerTitle = (id) => {
+    if (id === "__HYSTERIA__") return "Hysteria";
+    return organizerItems.find(o => o.id === id)?.title || id;
+  };
+
+  const getCategoryTitle = (id) =>
+    filteredCategoryItems.find(c => c.id === id)?.title || id;
 
   const [form, setForm] = useState({
     title: "",
-    categoryItemId: "",
-    organizer: "",
+    categoryItemIds: [],
+    organizerIds: [],
     description: "",
     startDate: "",
     startTime: "",
     endDate: "",
     endTime: "",
     location: "",
+    address: "",
     registerLink: "",
     mapsEmbed: "",
     poster: "",
     status: "PUBLISHED",      
     driveLink: "",            
     youtubeLink: "", 
+    instagramLink: "",
+    drivebukuLink: "",
+    tags: [],
+    isFlexibleTime : false,
   });
 
   // PREFILL EDIT
@@ -39,72 +77,148 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     const end = initialData.endAt ? new Date(initialData.endAt) : null;
 
     setForm({
-      title: initialData.title || "",
-      categoryItemId: initialData.categoryItemId?.toString() || "",
-      organizer: initialData.organizer || "",
-      description: initialData.description || "",
-      startDate: start.toISOString().slice(0, 10),
-      startTime: start.toTimeString().slice(0, 5),
-      endDate: end ? end.toISOString().slice(0, 10) : "",
-      endTime: end ? end.toTimeString().slice(0, 5) : "",
-      location: initialData.location || "",
-      registerLink: initialData.registerLink || "",
-      poster: initialData.poster || "",
-      status: initialData.isPublished ? "PUBLISHED" : "DRAFT",
-      driveLink: initialData.driveLink || "",                 
-      youtubeLink: initialData.youtubeLink || "",  
-
-      mapsEmbed: initialData.mapsEmbedSrc
+      title           : initialData.title || "",
+      categoryItemIds : initialData.categories?.map(c => c.categoryItemId) || [],
+      organizerIds    : initialData.organizers?.map(o => Number(o.categoryItemId)) || [],
+      description     : initialData.description || "",
+      startDate       : start.toISOString().slice(0, 10),
+      startTime       : start.toTimeString().slice(0, 5),
+      endDate         : end ? end.toISOString().slice(0, 10) : "",
+      endTime         : end ? end.toTimeString().slice(0, 5) : "",
+      location        : initialData.location || "",
+      registerLink    : initialData.registerLink || "",
+      poster          : initialData.poster || "",
+      status          : initialData.isPublished ? "PUBLISHED" : "DRAFT",
+      driveLink       : initialData.driveLink || "",                 
+      youtubeLink     : initialData.youtubeLink || "",  
+      instagramLink   : initialData.instagramLink || "",  
+      drivebukuLink   : initialData.drivebukuLink || "",  
+      tags: initialData.eventTags?.map(et => et.tag?.name).filter(Boolean) || [],
+      mapsEmbed       : initialData.mapsEmbedSrc
         ? `<iframe src="${initialData.mapsEmbedSrc}" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>`
         : "",
-
+      isFlexibleTime  : false,
     });
   }, [initialData]);
 
-  const flattenCategoryItems = (items = [], parentPath = "") => {
-    let result = [];
-
-    for (const item of items) {
-      const label = parentPath
-        ? `${parentPath} › ${item.title}`
-        : item.title;
-
-      result.push({
-        id: item.id,
-        title: label,
-      });
-
-      if (item.children?.length) {
-        result = result.concat(
-          flattenCategoryItems(item.children, label)
-        );
-      }
-    }
-
-    return result;
-  };
+  // CLOSE DROPDOWN ON OUTSIDE CLICK
+  useEffect(() => {
+    const handler = (e) => {
+      if (organizerRef.current && !organizerRef.current.contains(e.target))
+        setOrganizerOpen(false);
+      if (categoryRef.current && !categoryRef.current.contains(e.target))
+        setCategoryOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   // FETCH CATEGORIES
   useEffect(() => {
-    const fetchCategoryItems = async () => {
-      const res = await fetch("/api/categories/platform");
-      const json = await res.json();
+    const fetchData = async () => {
+      const [platformRes, programRes] = await Promise.all([
+        fetch("/api/categories/platform"),
+        fetch("/api/categories/program-hysteria"),
+      ]);
 
-      const items = json?.data?.items || [];
-      const flatItems = flattenCategoryItems(items);
+      const platformItems = (await platformRes.json())?.data?.items || [];
+      const programItems = (await programRes.json())?.data?.items || [];
 
-      setCategoryItems(flatItems);
+      const sortAZ = (a, b) =>
+        a.title.localeCompare(b.title, "id-ID", { sensitivity: "base" });
+
+      setPlatformTree(platformItems);
+      setProgramTree(programItems);
+
+      const organizers = platformItems
+        .map(p => ({ id: p.id, title: p.title }))
+        .sort(sortAZ);
+      
+      setOrganizerItems([
+        ...organizers,
+        HYSTERIA_ORGANIZER,
+      ]);
     };
 
-    fetchCategoryItems();
+    fetchData();
   }, []);
+
+  // SUB CATEGORY LOGIC
+  const getPlatformSubCategories = () => {
+    const subs = [];
+
+    for (const organizer of platformTree) {
+      if (!form.organizerIds.includes(Number(organizer.id))) continue;
+
+      for (const child of organizer.children || []) {
+        subs.push({
+          id: child.id,
+          title: child.title,
+          source: organizer.title,
+        });
+      }
+    }
+    return subs;
+  };
+
+  const getHysteriaSubCategories = () => {
+    if (!form.organizerIds.includes("__HYSTERIA__")) return [];
+
+    const result = [];
+
+    for (const group of programTree) {
+      for (const child of group.children || []) {
+        result.push({
+          id: child.id,
+          title: child.title,
+          source: "Hysteria",
+        });
+      }
+    }
+    return result;
+  };
+  
+  const filteredCategoryItems = [
+    ...getPlatformSubCategories(),
+    ...getHysteriaSubCategories(),
+  ];
+  
+  // CLEAN CATEGORY WHEN ORGANIZER CHANGES
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      categoryItemIds: prev.categoryItemIds.filter((id) =>
+        filteredCategoryItems.some(c => c.id === id)
+      ),
+    }));
+  }, [form.organizerIds]);
+
+  const toggleOrganizer = (id) => {
+    const numId = Number(id);
+
+    setForm((prev) => ({
+      ...prev,
+      organizerIds: prev.organizerIds.includes(numId)
+        ? prev.organizerIds.filter(x => x !== numId)
+        : [...prev.organizerIds, numId],
+    }));
+  };
+
+  const toggleCategory = (id) => {
+    setForm(prev => ({
+      ...prev,
+      categoryItemIds: prev.categoryItemIds.includes(id)
+        ? prev.categoryItemIds.filter(x => x !== id)
+        : [...prev.categoryItemIds, id],
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     setForm((prev) => ({
       ...prev,
-      [name]: name === "categoryItemId" ? Number(value) : value,
+      [name]: value,
     }));
 
     setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -123,9 +237,12 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
 
     // Validasi
     const missingFields = [];
+
     if (!form.title) missingFields.push("Judul Event");
-    if (!form.categoryItemId) missingFields.push("Kategori");
-    if (!form.startDate || !form.startTime) missingFields.push("Tanggal & Waktu Mulai");
+    if (!Array.isArray(form.categoryItemIds) || form.categoryItemIds.length === 0)
+      missingFields.push("Kategori");
+    if (!form.startDate || !form.startTime)
+      missingFields.push("Tanggal & Waktu Mulai");
     if (!form.poster) missingFields.push("Poster Event");
     if (!form.location) missingFields.push("Lokasi");
 
@@ -136,46 +253,50 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     }
 
     const payload = {
-      title: form.title,
-      categoryItemId: Number(form.categoryItemId),
-      organizer: form.organizer,
-      description: form.description,
-      startAt: new Date(`${form.startDate}T${form.startTime}`).toISOString(),
-      endAt: form.endDate && form.endTime
+      title           : form.title,
+      categoryItemIds : form.categoryItemIds,
+
+      organizerItemIds: form.organizerIds.filter(
+        (id) => id !== "__HYSTERIA__"
+      ),
+      
+      description     : form.description,
+
+      startAt         : new Date(`${form.startDate}T${form.startTime}`).toISOString(),
+      endAt           : form.endDate && form.endTime
         ? new Date(`${form.endDate}T${form.endTime}`).toISOString()
         : null, // optional
-      location: form.location,
-      registerLink: form.registerLink,
-      mapsEmbedSrc: extractMapSrc(form.mapsEmbed),
-      poster: form.poster,
-      isPublished: form.status === "PUBLISHED", 
-      driveLink: form.driveLink,                
-      youtubeLink: form.youtubeLink,
+      
+      location        : form.location,
+      registerLink    : form.registerLink,
+      mapsEmbedSrc    : extractMapSrc(form.mapsEmbed),
+      poster          : form.poster,
+      isPublished     : form.status === "PUBLISHED", 
+      driveLink       : form.driveLink,                
+      youtubeLink     : form.youtubeLink,
+      instagramLink   : form.instagramLink,
+      drivebukuLink   : form.drivebukuLink,
+      tagNames        : Array.isArray(form.tags)
+        ? form.tags
+        : form.tags.split(",").map(t => t.trim()).filter(Boolean),
     };
 
-    try {
-      const res = await fetch(
-        isEdit ? `/api/admin/events/${eventId}` : "/api/admin/events",
-        {
-          method: isEdit ? "PUT" : "POST",
-          credentials: "include", 
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.message || "Gagal menyimpan event");
-        return;
+    const res = await fetch(
+      isEdit ? `/api/admin/events/${eventId}` : "/api/admin/events",
+      {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       }
-      window.location.href = "/admin/events";
-    } catch (err) {
-      alert("Server error");
-      console.error(err);
-    } finally {
-      setLoading(false);
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.message);
+      return;
     }
+
+    router.push("/admin/events");
   };
 
   const inputClass =
@@ -184,157 +305,385 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
   const errorClass = "text-red-600 text-sm mt-1";
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-6 space-y-6">
-      {/* POSTER */}
-      <div>
-        <label className="block font-medium mb-2 text-black">Poster Event</label>
-        <ImageUpload value={form.poster} onChange={(url) => setForm({ ...form, poster: url })} />
-      </div>
-
-      {/* TITLE */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Judul Event</label>
-        <input name="title" value={form.title} onChange={handleChange} className={inputClass} required />
-      </div>
-
-      {/* CATEGORY */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Kategori</label>
-        <select
-          name="categoryItemId"
-          value={form.categoryItemId}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        >
-          <option value="">-- Pilih Program --</option>
-
-          {categoryItems.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.title}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* ORGANIZER */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Diselenggarakan oleh</label>
-        <input name="organizer" value={form.organizer} onChange={handleChange} className={inputClass} />
-      </div>
-
-      {/* DESCRIPTION */}
-      <div>
-        <label className="block font-medium mb-1 text-black">
-          Deskripsi Event
-        </label>
-
-        <EventDescriptionEditor
-          value={form.description}
-          onChange={(html) =>
-            setForm((prev) => ({ ...prev, description: html }))
-          }
-        />
-      </div>
-
-      {/* START & END */}
-      <div>
-        <label className="block font-medium mb-2 text-black">Tanggal & Waktu</label>
-        <label className="block font-medium mb-1 text-black">Mulai</label>
-        <div className="grid grid-cols-2 gap-4">
-          <input type="date" name="startDate" value={form.startDate} onChange={handleChange} className={inputClass} required />
-          <input type="time" name="startTime" value={form.startTime} onChange={handleChange} className={inputClass} required />
-        </div>
-        <label className="block font-medium mb-1 text-black">Hingga (Opsional)</label>
-        <div className="grid grid-cols-2 gap-4">
-          <input type="date" name="endDate" value={form.endDate} onChange={handleChange} className={inputClass} />
-          <input type="time" name="endTime" value={form.endTime} onChange={handleChange} className={inputClass} />
+    <form onSubmit={handleSubmit} className="font-poppins space-y-6">
+      {/* HEADER */}
+      <div className="right items-right justify-between">
+        {/* ACTION */}
+        <div className="flex justify-end">
+          <button type="submit">
+            {loading ? "Menyimpan..." : "Simpan Event"}
+          </button>
         </div>
       </div>
 
-      {/* REGISTER LINK */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Link Pendaftaran</label>
-        <input type="url" name="registerLink" value={form.registerLink} onChange={handleChange} className={inputClass} />
-      </div>
+      {/* GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* TITLE */}
+          <Card title="Judul Postingan *">
+            <input name="title" value={form.title} onChange={handleChange} className={inputClass} required />
+            <p className="text-xs text-gray-500 mt-2">Masukkan judul yang jelas dan deskriptif</p>
+          </Card>
 
-      {/* LOCATION */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Nama Lokasi (Opsional)</label>
-        <input name="location" value={form.locationname} onChange={handleChange} className={inputClass} />
-      </div>
+          {/* DESCRIPTION */}
+          <Card title="Deskripsi *">
+            <EventDescriptionEditor
+              value={form.description}
+              onChange={(html) =>
+                setForm((prev) => ({ ...prev, description: html }))
+              }
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Isi deskripsi disarankan lebih dari 300 kata
+            </p>
+          </Card>
+
+          {/* REGISTER LINK */}
+          <Card title="Link Pendaftaran/Tiket/Formulir">
+            <input
+              type="url"
+              name="registerLink"
+              value={form.registerLink}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </Card>
+
+          <Card title="Lokasi">
+            <p className="text-xs text-gray-500 mt-2">Tulis alamat pelaksanaan acara secara lengkap</p>
+            <input
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              className={inputClass}
+            />
+            
+            <p className="text-xs text-gray-500 mt-2">Tambahkan detail lokasi mengguanakan Google Maps</p>
+            <textarea
+              name="mapsEmbed"
+              value={form.mapsEmbed}
+              onChange={handleChange}
+              rows={3}
+              className={`${inputClass} mt-3`}
+            />
+            
+            {mapSrc && (
+              <div className="mt-3 rounded-lg overflow-hidden border">
+                <iframe
+                  src={mapSrc}
+                  width="100%"
+                  height="220"
+                  loading="lazy"
+                />
+              </div>
+            )}
+          </Card>
+
+          <Card title="Arsip Kegiatan">
+            <div className="space-y-3">
+              <p className="text-xs text-gray-500 mt-2">Link Drive Dokumentasi</p>
+              <input
+                type="url"
+                name="driveLink"
+                value={form.driveLink}
+                onChange={handleChange}
+                placeholder="https://drive.google.com/drive/folders/..."
+                className={inputClass}
+              />
+
+              <p className="text-xs text-gray-500 mt-2">Link Dokumentasi YouTube</p>
+              <input
+                type="url"
+                name="youtubeLink"
+                value={form.youtubeLink}
+                onChange={handleChange}
+                placeholder="https://www.youtube.com/..."
+                className={inputClass}
+              />
+
+              <p className="text-xs text-gray-500 mt-2">Link Dokumentasi Instagram</p>
+              <input
+                type="url"
+                name="instagramLink"
+                value={form.instagramLink}
+                onChange={handleChange}
+                placeholder="https://www.instagram.com/..."
+                className={inputClass}
+              />
+
+              <p className="text-xs text-gray-500 mt-2">Link Drive Buku</p>
+              <input
+                type="url"
+                name="drivebukuLink"
+                value={form.drivebukuLink}
+                onChange={handleChange}
+                placeholder="https://drive.google.com/drive/folders/..."
+                className={inputClass}
+              />
+
+              <p className="text-xs text-pink-600">
+                Lakukan pengisian link sesuai dengan kebutuhan
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        {/* RIGHT */}
+        <div className="space-y-6">
+          {/* ORGANIZER MULTI SELECT */}
+          <Card title="Penyelenggara *">
+            <div ref={organizerRef} className="relative space-y-2">
+              {/* CHIPS */}
+              {form.organizerIds.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {form.organizerIds.map((id) => (
+                    <span
+                      key={id}
+                      className="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    >
+                      {getOrganizerTitle(id)}
+                      <button
+                        type="button"
+                        onClick={() => toggleOrganizer(id)}
+                        className="hover:text-pink-900"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* BUTTON */}
+              <button
+                type="button"
+                onClick={() => setOrganizerOpen(!organizerOpen)}
+                className={`${inputClass} flex justify-between items-center`}
+              >
+                <span>
+                  {form.organizerIds.length > 0
+                    ? `${form.organizerIds.length} penyelenggara dipilih`
+                    : "Pilih penyelenggara"}
+                </span>
+                <span className="text-gray-500">▾</span>
+              </button>
+
+              {/* DROPDOWN */}
+              {organizerOpen && (
+                <div className="absolute z-20 mt-2 w-full max-h-64 overflow-auto rounded-lg border bg-white shadow">
+                  {organizerItems.map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.organizerIds.includes(item.id)}
+                        onChange={() => toggleOrganizer(item.id)}
+                        className="accent-pink-600"
+                      />
+                      <span className="text-sm text-black">{item.title}</span>
+                    </label>
+                  ))}
+
+                  {organizerItems.length === 0 && (
+                    <p className="px-3 py-2 text-sm text-gray-500">
+                      Tidak ada penyelenggara
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </Card>
+        
+          {/* CATEGORY MULTISELECT */}
+          <Card title="Sub Kategori *">
+            <div ref={categoryRef} className="relative space-y-2">
+              {/* CHIPS */}
+              {form.categoryItemIds.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {form.categoryItemIds.map((id) => (
+                    <span
+                      key={id}
+                      className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    >
+                      {getCategoryTitle(id)}
+                      <button
+                        type="button"
+                        onClick={() => toggleCategory(id)}
+                        className="hover:text-gray-900"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* BUTTON */}
+              <button
+                type="button"
+                onClick={() => setCategoryOpen(!categoryOpen)}
+                className={`${inputClass} flex justify-between items-center`}
+              >
+                <span>
+                  {form.categoryItemIds.length > 0
+                    ? `${form.categoryItemIds.length} kategori dipilih`
+                    : "Pilih kategori"}
+                </span>
+                <span className="text-gray-500">▾</span>
+              </button>
+
+              {/* DROPDOWN */}
+              {categoryOpen && (
+                <div className="absolute z-20 mt-2 w-full max-h-64 overflow-auto rounded-lg border bg-white shadow">
+                  {filteredCategoryItems.map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex items-start gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.categoryItemIds.includes(item.id)}
+                        onChange={() => toggleCategory(item.id)}
+                        className="mt-1 accent-pink-600"
+                      />
+                      <div>
+                        <p className="text-sm text-black">{item.title}</p>
+                        <p className="text-xs text-gray-500">{item.source}</p>
+                      </div>
+                    </label>
+                  ))}
+
+                  {filteredCategoryItems.length === 0 && (
+                    <p className="px-3 py-2 text-sm text-gray-500">
+                      Tidak ada kategori
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            
+          </Card>
+          
+          {/* POSTER */}
+          <Card title="Foto Utama *">
+            <ImageUpload
+              value={form.poster}
+              onChange={(url) => setForm({ ...form, poster: url })}
+            />
+
+            <p className="text-xs text-pink-600 mt-2">
+              Recommended: 800 × 1000px (Ratio 4:5)
+              <br />
+              Maksimal Size: 3 MB
+            </p>
+          </Card>
+
+          <Card title="Durasi Acara *">
+            <div className="space-y-3">
+              <Card title="Tanggal Mulai">
+                <input
+                  type="date"
+                  name="startDate"
+                  value={form.startDate}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </Card>
+              
+              <Card title="Tanggal Selesai">
+                <input
+                  type="date"
+                  name="endDate"
+                  value={form.endDate}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </Card>
+              
+              <Card title="Waktu Acara">
+                {/* TIME INPUT */}
+                {!form.isFlexibleTime && (
+                  <div className="flex gap-2">
+                    <input
+                      type="time"
+                      name="startTime"
+                      value={form.startTime}
+                      onChange={handleChange}
+                      className={inputClass}
+                    />
+                    <span className="text-xs text-gray-500 self-center">Hingga</span>
+                    <input
+                      type="time"
+                      name="endTime"
+                      value={form.endTime}
+                      onChange={handleChange}
+                      className={inputClass}
+                    />
+                  </div>
+                )}
       
-      {/* LOCATION */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Alamat Lokasi</label>
-        <input name="location" value={form.location} onChange={handleChange} className={inputClass} />
-      </div>
+                {/* CHECKBOX */}
+                <label className="flex items-start gap-2 mt-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.isFlexibleTime}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        isFlexibleTime: e.target.checked,
+                      }))
+                    }
+                    className="mt-1 accent-pink-600"
+                  />
+                  <div>
+                    <p className="text-sm text-black font-medium">
+                      Menyesuaikan
+                    </p>
+                    <p className="text-xs text-pink-600">
+                      Centang jika waktu pelaksanaan lebih dari 1 waktu dan atau 1 hari
+                    </p>
+                  </div>
+                </label>
 
-      {/* MAPS */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Google Maps</label>
-        <textarea name="mapsEmbed" value={form.mapsEmbed} onChange={handleChange} rows={3} className={inputClass} />
-        {mapSrc && (
-          <div className="mt-3 rounded-lg overflow-hidden border">
-            <iframe src={mapSrc} width="100%" height="300" style={{ border: 0 }} loading="lazy" allowFullScreen />
-          </div>
-        )}
-      </div>
+                {form.isFlexibleTime && (
+                  <p className="text-xs text-pink-600">
+                    Waktu acara akan ditampilkan sebagai <b>“Menyesuaikan”</b>
+                  </p>
+                )}
+              </Card>
+            </div>
+          </Card>
 
-      {/* Dokumentasi */}
-      <div>
-        <label className="block font-medium mb-1 text-black">
-          Link Google Drive (Opsional)
-        </label>
-        <input
-          type="url"
-          name="driveLink"
-          value={form.driveLink}
-          onChange={handleChange}
-          placeholder="https://drive.google.com/..."
-          className={inputClass}
-        />
-      </div>
+          {/* TAGS */}
+          <TagInput
+            value={form.tags}
+            onChange={(tags) =>
+              setForm((prev) => ({ ...prev, tags }))
+            }
+          />
 
-      {/* YOUTUBE */}
-      <div>
-        <label className="block font-medium mb-1 text-black">
-          Link YouTube (Opsional)
-        </label>
-        <input
-          type="url"
-          name="youtubeLink"
-          value={form.youtubeLink}
-          onChange={handleChange}
-          placeholder="https://www.youtube.com/watch?v=..."
-          className={inputClass}
-        />
-      </div>
+          {/* STATUS */}
+          <Card title="Status Event">
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className={inputClass}
+            >
+              <option value="DRAFT">Draft</option>
+              <option value="PUBLISHED">Publish</option>
+            </select>
 
-      {/* STATUS */}
-      <div>
-        <label className="block font-medium mb-1 text-black">Status Event</label>
-        <select
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          className={inputClass}
-        >
-          <option value="PUBLISHED">Publish</option>
-          <option value="DRAFT">Draft</option>
-        </select>
-
-        <p className="text-sm text-gray-500 mt-1">
-          Draft tidak akan tampil di halaman publik
-        </p>
-      </div>
-
-      {/* ACTION */}
-      <div className="flex justify-end">
-        <button type="submit" disabled={loading} className="px-5 py-2 bg-pink-600 text-white rounded-lg disabled:opacity-50">
-          {loading ? "Menyimpan..." : "Simpan Event"}
-        </button>
+            <p className="text-xs text-pink-600 mt-2">
+              Draft tidak akan tampil di halaman publik
+            </p>
+          </Card>
+        </div>
       </div>
     </form>
   );
 }
+

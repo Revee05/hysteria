@@ -98,7 +98,9 @@ export default function AdminShell({ children }) {
               <AdminTopbar onOpenSidebar={() => setOpen(true)} />
             </div>
 
-            <main className="mx-auto w-full max-w-5xl px-6 py-8">{isDashboard ? renderContent() : children}</main>
+            <main className="flex-1 w-full px-6 py-8">
+              {isDashboard ? renderContent() : children}
+            </main>
           </div>
 
           {open && (

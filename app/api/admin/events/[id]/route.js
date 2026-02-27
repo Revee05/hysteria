@@ -18,6 +18,15 @@ export async function GET(req, { params }) {
 
     const event = await prisma.event.findUnique({
       where: { id: eventId },
+      include: {
+        categories: {
+          include: {
+            categoryItem: true,
+          },
+        },
+        organizers: true,
+        tags: true,
+      },
     });
 
     if (!event) {
@@ -56,40 +65,80 @@ export async function PUT(req, { params }) {
     const data = {
       title: body.title,
       description: body.description,
-      organizer: body.organizer,
-      categoryItemId: body.categoryItemId
-        ? Number(body.categoryItemId)
-        : undefined,
       location: body.location,
       registerLink: body.registerLink,
       mapsEmbedSrc: body.mapsEmbedSrc,
       poster: body.poster || null,
       driveLink: body.driveLink ?? null,
       youtubeLink: body.youtubeLink ?? null,
+      instagramLink: body.instagramLink ?? null,
+      drivebukuLink: body.drivebukuLink ?? null,
       isPublished:
         typeof body.isPublished === "boolean"
           ? body.isPublished
           : undefined,
     };
 
-    // START & END (SENSITIF JAM)
-    if (body.startDate && body.startTime) {
-      data.startAt = new Date(`${body.startDate}T${body.startTime}`);
-    } else if (body.startAt) {
-      data.startAt = new Date(body.startAt);
+    if (body.startAt) data.startAt = new Date(body.startAt);
+    if (body.endAt) data.endAt = new Date(body.endAt);
+
+    if (Array.isArray(body.organizerItemIds)) {
+      await prisma.eventOrganizer.deleteMany({
+        where: { eventId },
+      });
+
+      await prisma.eventOrganizer.createMany({
+        data: body.organizerItemIds.map((id) => ({
+          eventId,
+          categoryItemId: Number(id),
+        })),
+      });
     }
 
-    if (body.endDate && body.endTime) {
-      data.endAt = new Date(`${body.endDate}T${body.endTime}`);
-    } else if (body.endAt) {
-      data.endAt = new Date(body.endAt);
+    if (Array.isArray(body.tagNames)) {
+      await prisma.eventTag.deleteMany({
+        where: { eventId },
+      });
+
+      for (const name of body.tagNames) {
+        const slug = slugify(name, { lower: true, strict: true });
+
+        const tag = await prisma.tag.upsert({
+          where: { slug },
+          update: {},
+          create: { name, slug },
+        });
+
+        await prisma.eventTag.create({
+          data: {
+            eventId,
+            tagId: tag.id,
+          },
+        });
+      }
     }
 
     const event = await prisma.event.update({
       where: { id: eventId },
       data,
     });
-    
+
+    /* ================= UPDATE KATEGORI ================= */
+    if (Array.isArray(body.categoryItemIds)) {
+      await prisma.eventCategory.deleteMany({
+        where: { eventId },
+      });
+
+      await prisma.eventCategory.createMany({
+        data: body.categoryItemIds.map((id, idx) => ({
+          eventId,
+          categoryItemId: Number(id),
+          isPrimary: idx === 0,
+          order: idx,
+        })),
+      });
+    }
+
     return NextResponse.json(event);
   } catch (error) {
     console.error("UPDATE EVENT ERROR:", error);

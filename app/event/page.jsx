@@ -102,12 +102,12 @@ export default function EventsPage() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-4">
-      <h1 className="font-poppins text-[36px] font-bold leading-[100%] text-[var(--Color-3)]">
+    <div className="mx-auto p-6 space-y-4">
+      <h1 className="font-poppins text-[36px] font-bold leading-[100%] text-[var(--Color-5)]">
         Daftar Event
       </h1>
 
-      <p className="font-poppins text-[16px] font-normal text-[var(--Color-3)]">
+      <p className="font-poppins text-[16px] font-normal text-[var(--Color-5)]">
         Ruang untuk bertemu, bertukar pengetahuan dan membangun jejaring.
       </p>
 
@@ -210,7 +210,7 @@ export default function EventsPage() {
       ) : (
         <>
           {/* GRID */}
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-6 gap-4">
             {paginatedEvents.map((event) => (
               <Link
                 key={event.id}
@@ -233,21 +233,9 @@ export default function EventsPage() {
                   "
                 >
                   <div className="inline-flex gap-2 mb-3">
-                    {event.categoryItem?.title && (
-                      <span
-                        className="
-                          inline-flex
-                          items-center
-                          justify-center
-                          px-3
-                          h-[26px]
-                          rounded-full
-                          text-[12px]
-                          text-[var(--Color-1)]
-                          bg-[var(--Color-3)]
-                        "
-                      >
-                        {event.categoryItem.title}
+                    {event.categories?.[0]?.categoryItem?.title && (
+                      <span className="inline-flex px-3 h-[26px] rounded-full text-[12px] bg-[var(--Color-3)] text-[var(--Color-1)]">
+                        {event.categories[0].categoryItem.title}
                       </span>
                     )}
                     {event.organizer && (

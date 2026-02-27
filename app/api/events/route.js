@@ -46,7 +46,15 @@ export async function GET(req) {
     where,
     orderBy,
     include: {
-      categoryItem: { include: { category: true } },
+      categories: {
+        include: {
+          categoryItem: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      },
     },
   });
 

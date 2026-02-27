@@ -1,10 +1,12 @@
-export const dynamic = "force-dynamic";
-
 import { prisma } from "../../../lib/prisma";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getEventStatus, EVENT_STATUS_LABEL } from "../../../lib/event-status";
+import ShareButtons from "../../../components/adminUI/Event/ShareButtons";
+import { ArrowLeft } from "lucide-react";
+
+export const revalidate = 60;
 
 export default async function EventDetailPage({ params }) {
   const { slug } = await params;
@@ -15,25 +17,58 @@ export default async function EventDetailPage({ params }) {
       isPublished: true,
     },
     include: {
-      categoryItem: true,
+      categories: {
+        include: {
+          categoryItem: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      },
+      organizers: {
+        include: {
+          categoryItem: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
     },
   });
 
   const otherEvents = await prisma.event.findMany({
     where: {
       isPublished: true,
-      slug: { not: slug }, // jangan tampilkan event ini
+      slug: { not: slug },
     },
     include: {
-      categoryItem: true,
+      categories: {
+        include: {
+          categoryItem: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      },
     },
     orderBy: {
       startAt: "asc",
     },
-    take: 5, // jumlah event yang ditampilkan
+    take: 5,
   });
-
+  
   if (!event) return notFound();
+
+  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/event/${event.slug}`;
+  const shareText = encodeURIComponent(event.title);
 
   const status = getEventStatus(event.startAt, event.endAt);
 
@@ -44,6 +79,10 @@ export default async function EventDetailPage({ params }) {
     endDate &&
     startDate.toDateString() === endDate.toDateString();
 
+  const primaryCategory =
+    event.categories.find(c => c.isPrimary) ??
+    event.categories[0];
+
   return (
     <div className="w-full">
       {/* HERO GRADIENT */}
@@ -53,21 +92,12 @@ export default async function EventDetailPage({ params }) {
           href="/event"
           className="absolute top-6 left-6 z-10
                     inline-flex items-center justify-center
-                    w-10 h-10 rounded-full text-white transition"
+                    w-10 h-10 rounded-full
+                    text-white transition
+                    hover:bg-white/10"
           aria-label="Kembali"
         >
-          <svg
-            viewBox="0 0 32 32"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            className="w-9 h-9"
-          >
-            <line x1="26" y1="16" x2="6" y2="16" />
-            <line x1="12" y1="10" x2="6" y2="16" />
-            <line x1="12" y1="22" x2="6" y2="16" />
-          </svg>
+          <ArrowLeft className="w-7 h-7 stroke-[3]" />
         </Link>
       </section>
 
@@ -83,26 +113,45 @@ export default async function EventDetailPage({ params }) {
                 src={event.poster || "/placeholder-event.jpg"}
                 alt={event.title}
                 fill
+                sizes="(max-width: 768px) 100vw, 420px"
                 className="object-cover"
-                priority
               />
             </div>
           </div>
 
           {/* INFO */}
           <div className="md:col-span-2 space-y-4 pt-10 mt-28">
-            <span className="inline-block px-4 py-1 rounded-full bg-pink-600 text-white text-sm">
-              {event.categoryItem?.title}
-            </span>
+            <div className="flex flex-wrap gap-2">
+              {event.categories.map((cat) => (
+                <span
+                  key={cat.categoryItem.id}
+                  className={`
+                    inline-block px-4 py-1 rounded-full text-sm
+                    ${cat.isPrimary
+                      ? "bg-pink-600 text-white"
+                      : "bg-pink-100 text-pink-700"}
+                  `}
+                >
+                  {cat.categoryItem.title}
+                </span>
+              ))}
+            </div>
 
             <h1 className="text-3xl md:text-4xl font-bold leading-tight">
               {event.title}
             </h1>
 
             <p className="text-sm text-gray-600">
-              Diselenggarakan oleh:{" "}
-              <span className="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs">
-                {event.organizer}
+              Diselenggarakan oleh:
+              <span className="ml-2 inline-flex flex-wrap gap-2">
+                {event.organizers?.map((org) => (
+                  <span
+                    key={org.id}
+                    className="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs"
+                  >
+                    {org.categoryItem.title}
+                  </span>
+                ))}
               </span>
             </p>
 
@@ -197,10 +246,10 @@ export default async function EventDetailPage({ params }) {
             <div>
               <h3 className="font-semibold mb-2">Lokasi</h3>
               <p className="text-sm text-gray-600 mb-1">
-                Nama Tempat
+                {event.location}
               </p>
               <p className="text-sm text-gray-600 mb-3">
-                {event.location}
+                {event.address}
               </p>
 
               {event.mapsEmbedSrc && (
@@ -257,6 +306,32 @@ export default async function EventDetailPage({ params }) {
               "
               dangerouslySetInnerHTML={{ __html: event.description }}
             />
+
+            <h2 className="text-xl font-semibold mb-4">Tags</h2>
+
+            {event.tags && event.tags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {event.tags.map((et) => (
+                  <span
+                    key={et.tag.id}
+                    className="px-3 py-1 rounded-full text-xs
+                              bg-gray-100 text-gray-700
+                              hover:bg-pink-100 hover:text-pink-700 transition"
+                  >
+                    #{et.tag.name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">Tidak ada tag</p>
+            )}
+            
+            <div className="flex gap-3 mt-24">
+              <ShareButtons
+                url={shareUrl}
+                title={event.title}
+              />
+            </div>
           </div>
         </section>
 
@@ -286,6 +361,7 @@ export default async function EventDetailPage({ params }) {
                       alt={event.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
                     />
                   </div>
 
@@ -369,4 +445,47 @@ export default async function EventDetailPage({ params }) {
     </div>
   );
 
+}
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  const event = await prisma.event.findFirst({
+    where: {
+      slug,
+      isPublished: true,
+    },
+  });
+
+  if (!event) {
+    return {};
+  }
+
+  const url = `${process.env.NEXT_PUBLIC_SITE_URL}/event/${event.slug}`;
+
+  return {
+    title: event.title,
+    description: event.excerpt || "Informasi event terbaru dari Hysteria",
+    openGraph: {
+      title: event.title,
+      description: event.excerpt || event.title,
+      url,
+      siteName: "Hysteria",
+      images: [
+        {
+          url: event.poster || "/placeholder-event.jpg",
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
+      ],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description: event.excerpt || event.title,
+      images: [event.poster || "/placeholder-event.jpg"],
+    },
+  };
 }

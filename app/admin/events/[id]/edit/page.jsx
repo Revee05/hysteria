@@ -52,10 +52,11 @@ export default function EditEventPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-6 text-black">
-        Edit Event
-      </h1>
+    <div className="mx-auto p-6">
+      <h1 className="text-2xl font-semibold text-black">Edit Postingan</h1>
+      <p className="text-sm text-gray-500">
+        Edited a content for publication
+      </p>
 
       <EventForm
         initialData={initialData}
