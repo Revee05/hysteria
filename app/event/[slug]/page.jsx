@@ -26,6 +26,20 @@ export default async function EventDetailPage({ params }) {
           },
         },
       },
+      organizers: {
+        include: {
+          categoryItem: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
     },
   });
 
@@ -128,9 +142,16 @@ export default async function EventDetailPage({ params }) {
             </h1>
 
             <p className="text-sm text-gray-600">
-              Diselenggarakan oleh:{" "}
-              <span className="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs">
-                {event.organizer}
+              Diselenggarakan oleh:
+              <span className="ml-2 inline-flex flex-wrap gap-2">
+                {event.organizers?.map((org) => (
+                  <span
+                    key={org.id}
+                    className="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs"
+                  >
+                    {org.categoryItem.title}
+                  </span>
+                ))}
               </span>
             </p>
 
@@ -290,21 +311,21 @@ export default async function EventDetailPage({ params }) {
 
             {event.tags && event.tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {event.tags.map((tag, idx) => (
+                {event.tags.map((et) => (
                   <span
-                    key={idx}
+                    key={et.tag.id}
                     className="px-3 py-1 rounded-full text-xs
                               bg-gray-100 text-gray-700
                               hover:bg-pink-100 hover:text-pink-700 transition"
                   >
-                    #{tag}
+                    #{et.tag.name}
                   </span>
                 ))}
               </div>
             ) : (
               <p className="text-sm text-gray-500">Tidak ada tag</p>
             )}
-
+            
             <div className="flex gap-3 mt-24">
               <ShareButtons
                 url={shareUrl}

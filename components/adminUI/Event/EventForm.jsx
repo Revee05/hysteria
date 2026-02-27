@@ -63,6 +63,8 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     status: "PUBLISHED",      
     driveLink: "",            
     youtubeLink: "", 
+    instagramLink: "",
+    drivebukuLink: "",
     tags: [],
     isFlexibleTime : false,
   });
@@ -75,26 +77,27 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     const end = initialData.endAt ? new Date(initialData.endAt) : null;
 
     setForm({
-      title: initialData.title || "",
-      categoryItemIds: initialData.categories?.map(c => c.categoryItemId) || [],
-      organizerIds: initialData.organizers?.map(o => o.categoryItemId) || [], 
-      description: initialData.description || "",
-      startDate: start.toISOString().slice(0, 10),
-      startTime: start.toTimeString().slice(0, 5),
-      endDate: end ? end.toISOString().slice(0, 10) : "",
-      endTime: end ? end.toTimeString().slice(0, 5) : "",
-      location: initialData.location || "",
-      address: initialData.address || "",
-      registerLink: initialData.registerLink || "",
-      poster: initialData.poster || "",
-      status: initialData.isPublished ? "PUBLISHED" : "DRAFT",
-      driveLink: initialData.driveLink || "",                 
-      youtubeLink: initialData.youtubeLink || "",  
-      tags: initialData.tags || [],
-      mapsEmbed: initialData.mapsEmbedSrc
+      title           : initialData.title || "",
+      categoryItemIds : initialData.categories?.map(c => c.categoryItemId) || [],
+      organizerIds    : initialData.organizers?.map(o => Number(o.categoryItemId)) || [],
+      description     : initialData.description || "",
+      startDate       : start.toISOString().slice(0, 10),
+      startTime       : start.toTimeString().slice(0, 5),
+      endDate         : end ? end.toISOString().slice(0, 10) : "",
+      endTime         : end ? end.toTimeString().slice(0, 5) : "",
+      location        : initialData.location || "",
+      registerLink    : initialData.registerLink || "",
+      poster          : initialData.poster || "",
+      status          : initialData.isPublished ? "PUBLISHED" : "DRAFT",
+      driveLink       : initialData.driveLink || "",                 
+      youtubeLink     : initialData.youtubeLink || "",  
+      instagramLink   : initialData.instagramLink || "",  
+      drivebukuLink   : initialData.drivebukuLink || "",  
+      tags: initialData.eventTags?.map(et => et.tag?.name).filter(Boolean) || [],
+      mapsEmbed       : initialData.mapsEmbedSrc
         ? `<iframe src="${initialData.mapsEmbedSrc}" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>`
         : "",
-      isFlexibleTime: false,
+      isFlexibleTime  : false,
     });
   }, [initialData]);
 
@@ -145,7 +148,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     const subs = [];
 
     for (const organizer of platformTree) {
-      if (!form.organizerIds.includes(organizer.id)) continue;
+      if (!form.organizerIds.includes(Number(organizer.id))) continue;
 
       for (const child of organizer.children || []) {
         subs.push({
@@ -191,11 +194,13 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
   }, [form.organizerIds]);
 
   const toggleOrganizer = (id) => {
+    const numId = Number(id);
+
     setForm((prev) => ({
       ...prev,
-      organizerIds: prev.organizerIds.includes(id)
-        ? prev.organizerIds.filter(x => x !== id)
-        : [...prev.organizerIds, id],
+      organizerIds: prev.organizerIds.includes(numId)
+        ? prev.organizerIds.filter(x => x !== numId)
+        : [...prev.organizerIds, numId],
     }));
   };
 
@@ -248,30 +253,32 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     }
 
     const payload = {
-      title: form.title,
-      categoryItemIds: form.categoryItemIds,
-      organizerIds: form.organizerIds.filter(
+      title           : form.title,
+      categoryItemIds : form.categoryItemIds,
+
+      organizerItemIds: form.organizerIds.filter(
         (id) => id !== "__HYSTERIA__"
       ),
-      description: form.description,
-      startAt: new Date(`${form.startDate}T${form.startTime}`).toISOString(),
-      endAt: form.endDate && form.endTime
+      
+      description     : form.description,
+
+      startAt         : new Date(`${form.startDate}T${form.startTime}`).toISOString(),
+      endAt           : form.endDate && form.endTime
         ? new Date(`${form.endDate}T${form.endTime}`).toISOString()
         : null, // optional
-      location: form.location,
-      address: form.address,
-      registerLink: form.registerLink,
-      mapsEmbedSrc: extractMapSrc(form.mapsEmbed),
-      poster: form.poster,
-      isPublished: form.status === "PUBLISHED", 
-      driveLink: form.driveLink,                
-      youtubeLink: form.youtubeLink,
-      tags: Array.isArray(form.tags)
+      
+      location        : form.location,
+      registerLink    : form.registerLink,
+      mapsEmbedSrc    : extractMapSrc(form.mapsEmbed),
+      poster          : form.poster,
+      isPublished     : form.status === "PUBLISHED", 
+      driveLink       : form.driveLink,                
+      youtubeLink     : form.youtubeLink,
+      instagramLink   : form.instagramLink,
+      drivebukuLink   : form.drivebukuLink,
+      tagNames        : Array.isArray(form.tags)
         ? form.tags
-        : form.tags
-            .split(",")
-            .map(t => t.trim())
-            .filter(Boolean),
+        : form.tags.split(",").map(t => t.trim()).filter(Boolean),
     };
 
     const res = await fetch(
@@ -398,13 +405,19 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
               <p className="text-xs text-gray-500 mt-2">Link Dokumentasi Instagram</p>
               <input
                 type="url"
-                placeholder="https://www.Instagram.com/..."
+                name="instagramLink"
+                value={form.instagramLink}
+                onChange={handleChange}
+                placeholder="https://www.instagram.com/..."
                 className={inputClass}
               />
 
               <p className="text-xs text-gray-500 mt-2">Link Drive Buku</p>
               <input
                 type="url"
+                name="drivebukuLink"
+                value={form.drivebukuLink}
+                onChange={handleChange}
                 placeholder="https://drive.google.com/drive/folders/..."
                 className={inputClass}
               />
@@ -645,14 +658,12 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
           </Card>
 
           {/* TAGS */}
-          <Card title="Tags / Keywords">
-            <TagInput
-              value={form.tags}
-              onChange={(tags) =>
-                setForm((prev) => ({ ...prev, tags }))
-              }
-            />
-          </Card>
+          <TagInput
+            value={form.tags}
+            onChange={(tags) =>
+              setForm((prev) => ({ ...prev, tags }))
+            }
+          />
 
           {/* STATUS */}
           <Card title="Status Event">

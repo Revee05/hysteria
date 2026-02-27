@@ -186,10 +186,10 @@ model Category {
   requiredPermission   Permission? @relation(fields: [requiredPermissionId], references: [id])
 
   items CategoryItem[]
-    
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([slug])
   @@index([order])
 }
@@ -219,8 +219,9 @@ model CategoryItem {
   isActive Boolean @default(true)
 
   // RELASI MANY TO MANY
-  events EventCategory[]
-  
+  events          EventCategory[]
+  eventOrganizers EventOrganizer[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -325,8 +326,8 @@ model TentangVisiMisi {
   id       Int    @id @default(autoincrement())
   pageSlug String @unique @default("tentang") @db.VarChar(100)
 
-  visi  String @db.Text
-  misi  String @db.Text
+  visi String @db.Text
+  misi String @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -364,41 +365,45 @@ model TentangPanduanVisual {
   @@index([isActive])
 }
 
+// ====================================
+// EVENT
+// ====================================
+
 model Event {
-  id            Int       @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
   // BASIC INFO
-  title         String    @db.VarChar(255)
-  slug          String    @unique @db.VarChar(255)
-  description   String?   @db.Text
-  organizer     String?   @db.VarChar(255)
-  poster        String?   @db.VarChar(500)
+  title       String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+  poster      String? @db.VarChar(500)
 
   // RELASI (MANY TO MANY)
-  categories    EventCategory[]
+  organizers EventOrganizer[]
+  categories EventCategory[]
+  tags       EventTag[]
 
   // WAKTU
-  startAt       DateTime
-  endAt         DateTime?
+  startAt        DateTime
+  endAt          DateTime?
+  isFlexibleTime Boolean   @default(false)
 
   // LOKASI
-  location      String?   @db.VarChar(255)
-  address       String? @db.Text
-  mapsEmbedSrc  String?   @db.Text
+  location     String? @db.VarChar(255)
+  mapsEmbedSrc String? @db.Text
 
   // LINK
-  registerLink  String?   @db.VarChar(500)
-  driveLink     String?   @db.VarChar(500)
-  youtubeLink   String?   @db.VarChar(500)
-
-  // TAGS
-  tags          String[]  @db.VarChar(50)
+  registerLink  String? @db.VarChar(500)
+  driveLink     String? @db.VarChar(500)
+  youtubeLink   String? @db.VarChar(500)
+  instagramLink String? @db.VarChar(500)
+  drivebukuLink String? @db.VarChar(500)
 
   // PUBLISH
-  isPublished   Boolean   @default(false)
+  isPublished Boolean @default(false)
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([startAt])
   @@index([endAt])
@@ -410,16 +415,40 @@ model EventCategory {
   categoryItemId Int
 
   // RELASI
-  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  categoryItem   CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  categoryItem CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
 
   // OPTIONAL META (future-proof)
-  isPrimary      Boolean      @default(false)
-  order          Int          @default(0)
+  isPrimary Boolean @default(false)
+  order     Int     @default(0)
 
   @@id([eventId, categoryItemId])
   @@index([eventId])
   @@index([categoryItemId])
+}
+
+model EventOrganizer {
+  eventId        Int
+  categoryItemId Int
+
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  categoryItem CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, categoryItemId])
+  @@index([eventId])
+  @@index([categoryItemId])
+}
+
+model EventTag {
+  eventId Int
+  tagId   Int
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, tagId])
+  @@index([tagId])
+  @@index([eventId])
 }
 
 // ====================================
@@ -436,7 +465,7 @@ model Article {
   excerpt       String? @db.Text
   featuredImage String? @db.VarChar(500)
 
-   // ================= AUTHOR (MANUAL) =================
+  // ================= AUTHOR (MANUAL) =================
   authorName String  @db.VarChar(255)
   editorName String? @db.VarChar(255)
 
@@ -446,7 +475,7 @@ model Article {
   categories ArticleCategory[]
 
   // Tags
-  tags ArticleTag[]
+  tags  ArticleTag[]
   // Media
   media ArticleMedia[]
 
@@ -462,7 +491,6 @@ model Article {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 
   @@index([slug])
   @@index([status])
@@ -480,13 +508,13 @@ model ArticleCategory {
   @@index([categoryId])
 }
 
-
 model Tag {
   id   Int    @id @default(autoincrement())
   name String @db.VarChar(100)
   slug String @unique @db.VarChar(100)
 
   articles ArticleTag[]
+  events   EventTag[]
 }
 
 model ArticleTag {
@@ -512,8 +540,8 @@ model ArticleMedia {
   articleId Int
 
   type  MediaType
-  url   String @db.VarChar(500)
-  title String? @db.VarChar(255)
+  url   String    @db.VarChar(500)
+  title String?   @db.VarChar(255)
 
   order Int @default(0)
 

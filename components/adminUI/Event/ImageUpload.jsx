@@ -99,7 +99,7 @@ export default function ImageUpload({ value, onChange }) {
             >
               {uploading ? "Uploading..." : "Upload Poster"}
             </button>
-            <p className="text-sm text-black">PNG / JPG</p>
+            <p className="text-sm text-black">Ekstensi file : jpeg, jpg, png, webp</p>
           </div>
         )}
       </div>

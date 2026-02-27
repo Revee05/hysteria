@@ -24,6 +24,8 @@ export async function GET(req, { params }) {
             categoryItem: true,
           },
         },
+        organizers: true,
+        tags: true,
       },
     });
 
@@ -63,23 +65,58 @@ export async function PUT(req, { params }) {
     const data = {
       title: body.title,
       description: body.description,
-      organizer: body.organizer,
       location: body.location,
-      address: body.address ?? null, 
       registerLink: body.registerLink,
       mapsEmbedSrc: body.mapsEmbedSrc,
       poster: body.poster || null,
       driveLink: body.driveLink ?? null,
       youtubeLink: body.youtubeLink ?? null,
+      instagramLink: body.instagramLink ?? null,
+      drivebukuLink: body.drivebukuLink ?? null,
       isPublished:
         typeof body.isPublished === "boolean"
           ? body.isPublished
           : undefined,
-      tags: Array.isArray(body.tags) ? body.tags : [],
     };
 
     if (body.startAt) data.startAt = new Date(body.startAt);
     if (body.endAt) data.endAt = new Date(body.endAt);
+
+    if (Array.isArray(body.organizerItemIds)) {
+      await prisma.eventOrganizer.deleteMany({
+        where: { eventId },
+      });
+
+      await prisma.eventOrganizer.createMany({
+        data: body.organizerItemIds.map((id) => ({
+          eventId,
+          categoryItemId: Number(id),
+        })),
+      });
+    }
+
+    if (Array.isArray(body.tagNames)) {
+      await prisma.eventTag.deleteMany({
+        where: { eventId },
+      });
+
+      for (const name of body.tagNames) {
+        const slug = slugify(name, { lower: true, strict: true });
+
+        const tag = await prisma.tag.upsert({
+          where: { slug },
+          update: {},
+          create: { name, slug },
+        });
+
+        await prisma.eventTag.create({
+          data: {
+            eventId,
+            tagId: tag.id,
+          },
+        });
+      }
+    }
 
     const event = await prisma.event.update({
       where: { id: eventId },

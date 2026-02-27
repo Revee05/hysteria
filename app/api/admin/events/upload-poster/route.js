@@ -4,9 +4,10 @@ import sharp from "sharp";
 
 export const runtime = "nodejs";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 const MAX_SIZE = 3 * 1024 * 1024; // 3MB
 const REQUIRED_RATIO = 4 / 5; // 0.8
+const RATIO_TOLERANCE = 0.01;
 
 export async function POST(req) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req) {
       );
     }
 
-    // ===== VALIDASI MIME =====
+    // ===== MIME =====
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
         { message: "Format file harus JPG, PNG, atau WEBP" },
@@ -28,7 +29,7 @@ export async function POST(req) {
       );
     }
 
-    // ===== VALIDASI SIZE =====
+    // ===== SIZE =====
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
         { message: "Ukuran maksimal poster 3 MB" },
@@ -37,8 +38,6 @@ export async function POST(req) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-
-    // ===== VALIDASI DIMENSI & RASIO =====
     const image = sharp(buffer);
     const meta = await image.metadata();
 
@@ -49,33 +48,54 @@ export async function POST(req) {
       );
     }
 
+    let outputBuffer = buffer;
+    let cropped = false;
+
     const ratio = meta.width / meta.height;
-    if (Math.abs(ratio - REQUIRED_RATIO) > 0.01) {
-      return NextResponse.json(
-        {
-          message:
-            "Rasio poster harus 4:5 (contoh 800 × 1000 px)",
-        },
-        { status: 400 }
-      );
+
+    // ===== AUTO CROP JIKA RATIO BEDA =====
+    if (Math.abs(ratio - REQUIRED_RATIO) > RATIO_TOLERANCE) {
+      cropped = true;
+
+      let cropWidth = meta.width;
+      let cropHeight = Math.round(meta.width / REQUIRED_RATIO);
+
+      if (cropHeight > meta.height) {
+        cropHeight = meta.height;
+        cropWidth = Math.round(meta.height * REQUIRED_RATIO);
+      }
+
+      const left = Math.floor((meta.width - cropWidth) / 2);
+      const top = Math.floor((meta.height - cropHeight) / 2);
+
+      outputBuffer = await image
+        .extract({ left, top, width: cropWidth, height: cropHeight })
+        .toBuffer();
     }
 
     // ===== UPLOAD =====
     const uploader = new Uploads();
     const result = await uploader.handleUpload({
-      buffer,
+      buffer: outputBuffer,
       originalFilename: file.name,
       mimetype: file.type,
-      size: file.size,
+      size: outputBuffer.length,
     });
 
     return NextResponse.json({
       url: result.url,
       path: result.path,
+      cropped,
+      message: cropped
+        ? "Gambar otomatis dipotong ke rasio 4:5 (800 × 1000 px)"
+        : "Gambar sesuai rasio 4:5",
       metadata: {
-        width: meta.width,
-        height: meta.height,
-        size: file.size,
+        original: {
+          width: meta.width,
+          height: meta.height,
+        },
+        finalRatio: "4:5",
+        size: outputBuffer.length,
       },
     });
   } catch (err) {

@@ -19,6 +19,20 @@ export async function GET(req, { params }) {
           },
         },
       },
+      organizers: {
+        include: {
+          categoryItem: {
+            select: {
+              title: true,
+            },
+          },
+        },
+      },
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
     },
   });
 

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
-import { slugify } from "zod";
+import slugify from "slugify";
+
+export const runtime = "nodejs";
 
 export async function POST(req) {
   try {
@@ -9,8 +11,8 @@ export async function POST(req) {
     const {
       title,
       description,
-      organizer,
       categoryItemIds = [],
+      organizerItemIds = [],
       startAt,
       endAt,
       location,
@@ -20,7 +22,9 @@ export async function POST(req) {
       poster,
       driveLink,
       youtubeLink,
-      tags = [],
+      instagramLink,
+      drivebukuLink,
+      tagNames = [],
       isPublished,
     } = body;
 
@@ -28,7 +32,9 @@ export async function POST(req) {
     const errors = {};
 
     if (!title) errors.title = "Judul event wajib diisi";
-
+    if (!startAt) errors.startAt = "Tanggal mulai wajib diisi";
+    if (!location) errors.location = "Lokasi wajib diisi";
+    if (!poster) errors.poster = "Poster wajib diupload";
     if (
       !Array.isArray(categoryItemIds) ||
       categoryItemIds.length === 0
@@ -36,21 +42,9 @@ export async function POST(req) {
       errors.categoryItemIds = "Minimal pilih 1 kategori";
     }
 
-    if (!startAt) errors.startAt = "Tanggal mulai wajib diisi";
-
-    if (!location) errors.location = "Lokasi wajib diisi";
-
-    if (!poster) errors.poster = "Poster wajib diupload";
-
     // kalau ada error → return detail
     if (Object.keys(errors).length > 0) {
-      return NextResponse.json(
-        {
-          message: "Validasi gagal",
-          errors,
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Validasi gagal", errors }, { status: 400 });
     }
 
     /* ================= CEK KATEGORI ================= */
@@ -74,45 +68,68 @@ export async function POST(req) {
       where: { slug: { startsWith: baseSlug } },
     });
 
-    const slug =
-      slugCount > 0 ? `${baseSlug}-${slugCount + 1}` : baseSlug;
+    const slug = slugCount > 0 ? `${baseSlug}-${slugCount + 1}` : baseSlug;
 
     /* ================= CREATE EVENT ================= */
-    const event = await prisma.event.create({
-      data: {
-        title,
-        slug,
-        description,
-        organizer,
-        startAt: new Date(startAt),
-        endAt: endAt ? new Date(endAt) : null,
-        location,
-        address,
-        registerLink,
-        mapsEmbedSrc,
-        poster,
-        driveLink,
-        youtubeLink,
-        isPublished: Boolean(isPublished),
-        tags: Array.isArray(tags) ? tags : [],
+    const event = await prisma.$transaction(async (tx) => {
+      const createdEvent  = await tx.event.create({
+        data: {
+          title,
+          slug,
+          description,
+          startAt: new Date(startAt),
+          endAt: endAt ? new Date(endAt) : null,
+          location,
+          address,
+          registerLink,
+          mapsEmbedSrc,
+          poster,
+          driveLink,
+          youtubeLink,
+          instagramLink,
+          drivebukuLink,
+          isPublished: Boolean(isPublished),
+          
+          categories: {
+            create: categoryItemIds.map((id, idx) => ({
+              categoryItemId: Number(id), 
+              isPrimary: idx === 0,
+              order: idx,
+            })),
+          },
 
-        categories: {
-          create: categoryItemIds.map((id, idx) => ({
-            categoryItemId: Number(id), 
-            isPrimary: idx === 0,
-            order: idx,
-          })),
+          organizers: {
+            create: organizerItemIds.map((id) => ({
+              categoryItemId: Number(id),
+            })),
+          },
         },
-      },
+      });
+
+      // ===== TAGS =====
+      for (const name of tagNames) {
+        const slug = slugify(name, { lower: true, strict: true });
+
+        const tag = await tx.tag.upsert({
+          where: { slug },
+          update: {},
+          create: { name, slug },
+        });
+
+        await tx.eventTag.create({
+          data: {
+            eventId: createdEvent.id,
+            tagId: tag.id,
+          },
+        });
+      }
+      return createdEvent;
     });
 
     return NextResponse.json(event, { status: 201 });
   } catch (err) {
     console.error("POST /api/admin/events ERROR:", err);
-    return NextResponse.json(
-      { message: "Gagal membuat event" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Gagal membuat event" }, { status: 500 });
   }
 }
 
