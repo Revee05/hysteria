@@ -12,14 +12,14 @@ const poppins = Poppins({
 });
 
 export default function TentangPage() {
-  const defaultDescription = "Sebagai laboratorium bersama dan diharapkan memberikan dampak perubahan dengan penekanan kreativitas, Hysteria memimpikan terwujudnya ekosisem seni dan kreatifitas yang sehat, menyejahterakan, dan berkelanjutan. Dibentuk sejak 11 September 2004 Hysteria selain produksi artistik juga memfasilitasi pertemuan lintas disipliner dalam skala lokal hingga global untuk mencari trobosan-trobosan dalam persoalan kreatifitas, seni, komunitas, anak muda, dan isu kota.";
+  const defaultDescription = "Tentang Hysteria";
   const [loading, setLoading] = useState(true);
   const [heroData, setHeroData] = useState({
     title: "Tentang Hysteria",
     subtitle: "Hysteria , Colaboratorium and Creative Impact Hub",
     imageUrl: "/image/tim-hero.png",
   });
-  const [visiContent, setVisiContent] = useState("Terwujudnya ekosistem seni dan kreativitas yang sehat, menyejahterakan, dan berkelanjutan");
+  const [visiContent, setVisiContent] = useState("Misi Hysteria");
   const [descriptionContent, setDescriptionContent] = useState(defaultDescription);
   const [misiText, setMisiText] = useState("");
   const [sejarahItems, setSejarahItems] = useState([]);
@@ -80,7 +80,7 @@ export default function TentangPage() {
       .map((item) => item.trim())
       .filter(Boolean);
     if (parsedMisi.length > 0) return parsedMisi;
-    return ["Terciptanya Lembaga yang berdikari", "Terwujudnya kreator yang berdedikasi, tangguh, dan berdaya", "Terfasilitasinya perkembangan komunitas dan platform", "Eksisnya sumber daya manusia dan komunitas yang peduli pada nilai budaya, kearifan lokal, karakter bangsa, dan memahami keragaman eskpresi budaya sehingga tercipta jiwa toleran", "Adanya kebijakan budaya dan kreativitas yang ideal", "Komunitas berdaya (ekonomi sosbud) serta Kontekstual", "Terciptanya kreator baik individu maupun kolektif yang terkoneksi, berprestasi dan punya sensibilitas di skala lokal– nasional– internasional"];
+    return ["Visi Hysteria"];
   }, [misiText]);
 
   const resolvedVisualItems = useMemo(() => {
@@ -151,7 +151,7 @@ export default function TentangPage() {
               </a>
             ))}
           </div>
-          <p className="text-center mt-12 text-gray-500 italic font-poppins text-lg">Lihat panduan lengkap visual branding Hysteria.</p>
+          {/* <p className="text-center mt-12 text-gray-500 italic font-poppins text-lg">Lihat panduan lengkap visual branding Hysteria.</p> */}
         </section>
       </div>
 
