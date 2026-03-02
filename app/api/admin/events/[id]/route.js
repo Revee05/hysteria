@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
+import slugify from "slugify";
 
 /* =========================
    GET EVENT BY ID
@@ -19,13 +20,17 @@ export async function GET(req, { params }) {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
-        categories: {
+        eventCategories: {
           include: {
             categoryItem: true,
           },
         },
         organizers: true,
-        tags: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
       },
     });
 
@@ -63,19 +68,23 @@ export async function PUT(req, { params }) {
     }
 
     const data = {
-      title: body.title,
-      description: body.description,
-      location: body.location,
-      registerLink: body.registerLink,
-      mapsEmbedSrc: body.mapsEmbedSrc,
-      poster: body.poster || null,
-      driveLink: body.driveLink ?? null,
-      youtubeLink: body.youtubeLink ?? null,
-      instagramLink: body.instagramLink ?? null,
-      drivebukuLink: body.drivebukuLink ?? null,
-      isPublished:
+      title           : body.title,
+      description     : body.description,
+      location        : body.location,
+      registerLink    : body.registerLink,
+      mapsEmbedSrc    : body.mapsEmbedSrc,
+      poster          : body.poster || null,
+      driveLink       : body.driveLink ?? null,
+      youtubeLink     : body.youtubeLink ?? null,
+      instagramLink   : body.instagramLink ?? null,
+      drivebukuLink   : body.drivebukuLink ?? null,
+      isPublished     :
         typeof body.isPublished === "boolean"
           ? body.isPublished
+          : undefined,
+      isFlexibleTime  :
+        typeof body.isFlexibleTime === "boolean"
+          ? body.isFlexibleTime
           : undefined,
     };
 

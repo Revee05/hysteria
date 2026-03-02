@@ -17,7 +17,7 @@ export default async function EventDetailPage({ params }) {
       isPublished: true,
     },
     include: {
-      categories: {
+      eventCategories: {
         include: {
           categoryItem: {
             include: {
@@ -49,7 +49,7 @@ export default async function EventDetailPage({ params }) {
       slug: { not: slug },
     },
     include: {
-      categories: {
+      eventCategories: {
         include: {
           categoryItem: {
             include: {
@@ -68,25 +68,69 @@ export default async function EventDetailPage({ params }) {
   if (!event) return notFound();
 
   const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/event/${event.slug}`;
-  const shareText = encodeURIComponent(event.title);
 
   const status = getEventStatus(event.startAt, event.endAt);
 
   const startDate = new Date(event.startAt);
   const endDate = event.endAt ? new Date(event.endAt) : null;
 
-  const sameDay =
+  const sameMonth =
     endDate &&
-    startDate.toDateString() === endDate.toDateString();
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getFullYear() === endDate.getFullYear();
 
-  const primaryCategory =
-    event.categories.find(c => c.isPrimary) ??
-    event.categories[0];
+  const sameYear =
+    endDate &&
+    startDate.getFullYear() === endDate.getFullYear();
+
+  const formattedDate = endDate
+    ? sameMonth
+      ? `${startDate.getDate()} – ${endDate.getDate()} ${startDate.toLocaleDateString(
+          "id-ID",
+          { month: "long", year: "numeric" }
+        )}`
+      : sameYear
+      ? `${startDate.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+        })} – ${endDate.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })}`
+      : `${startDate.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })} – ${endDate.toLocaleDateString("id-ID", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })}`
+    : startDate.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+  const formattedTime = event.isFlexibleTime
+    ? "Menyesuaikan"
+    : `${startDate.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}${
+        endDate
+          ? ` – ${endDate.toLocaleTimeString("id-ID", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })} WIB`
+          : ""
+      }`;
 
   return (
     <div className="w-full">
       {/* HERO GRADIENT */}
-      <section className="relative w-full h-[260px] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-pink-500">
+      <section className="relative w-full h-[360px] bg-gradient-to-r from-pink-600 via-fuchsia-600 to-pink-500">
         {/* BACK BUTTON */}
         <Link
           href="/event"
@@ -94,7 +138,7 @@ export default async function EventDetailPage({ params }) {
                     inline-flex items-center justify-center
                     w-10 h-10 rounded-full
                     text-white transition
-                    hover:bg-white/10"
+                    hover:bg-white/10 mt-16"
           aria-label="Kembali"
         >
           <ArrowLeft className="w-7 h-7 stroke-[3]" />
@@ -122,7 +166,7 @@ export default async function EventDetailPage({ params }) {
           {/* INFO */}
           <div className="md:col-span-2 space-y-4 pt-10 mt-28">
             <div className="flex flex-wrap gap-2">
-              {event.categories.map((cat) => (
+              {event.eventCategories.map((cat) => (
                 <span
                   key={cat.categoryItem.id}
                   className={`
@@ -146,7 +190,7 @@ export default async function EventDetailPage({ params }) {
               <span className="ml-2 inline-flex flex-wrap gap-2">
                 {event.organizers?.map((org) => (
                   <span
-                    key={org.id}
+                    key={org.categoryItemId ?? org.id}
                     className="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs"
                   >
                     {org.categoryItem.title}
@@ -203,44 +247,26 @@ export default async function EventDetailPage({ params }) {
 
             <div>
               <h3 className="font-semibold mb-2">Jadwal Pelaksanaan</h3>
-              <p className="text-sm text-gray-600">
-                Tanggal:{" "}
-                {startDate.toLocaleDateString("id-ID", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-                {endDate && !sameDay && (
-                  <>
-                    {" – "}
-                    {endDate.toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </>
-                )}
-              </p>
+              <div className="text-sm text-gray-600 space-y-2">
+                {/* TANGGAL */}
+                <div className="grid grid-cols-[max-content_10px_1fr] gap-x-2">
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <div className="grid grid-cols-[140px_10px_1fr]">
+                      <span className="font-medium">Tanggal Acara</span>
+                      <span>:</span>
+                      <span>{formattedDate}</span>
+                    </div>
 
-              <p className="text-sm text-gray-600">
-                Waktu:{" "}
-                {startDate.toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-                {endDate && (
-                  <>
-                    {" – "}
-                    {endDate.toLocaleTimeString("id-ID", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
-                    WIB
-                  </>
-                )}
-              </p>
+                    <div className="grid grid-cols-[140px_10px_1fr]">
+                      <span className="font-medium">Waktu Acara</span>
+                      <span>:</span>
+                      <span className={event.isFlexibleTime ? "font-medium" : ""}>
+                        {formattedTime}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -266,30 +292,61 @@ export default async function EventDetailPage({ params }) {
               
               {/* BUTTONS */}
               <div>
-                <h3 className="font-semibold mb-2">Arsip Kegiatan</h3>
-                <div className="relative z-10 flex flex-col sm:flex-row gap-4 mt-10">
-                  <a
-                    href={event.driveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-6 py-3
-                              rounded-md bg-pink-600 text-white hover:bg-pink-700 transition"
-                  >
-                    Dokumentasi
-                  </a>
+                {(event.driveLink ||
+                  event.youtubeLink ||
+                  event.instagramLink ||
+                  event.drivebukuLink) && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Arsip Kegiatan</h3>
 
-                  <a
-                    href={event.youtubeLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-6 py-3
-                              rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-                  >
-                    Youtube
-                  </a>
-                </div>
+                    <div className="flex flex-wrap gap-4 mt-4">
+                      {event.driveLink && (
+                        <a
+                          href={event.driveLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-6 py-3 rounded-md bg-pink-600 text-white hover:bg-pink-700 transition"
+                        >
+                          Dokumentasi
+                        </a>
+                      )}
+
+                      {event.youtubeLink && (
+                        <a
+                          href={event.youtubeLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-6 py-3 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                        >
+                          YouTube
+                        </a>
+                      )}
+
+                      {event.instagramLink && (
+                        <a
+                          href={event.instagramLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-6 py-3 rounded-md bg-gradient-to-r from-pink-500 via-purple-500 to-orange-400 text-white hover:opacity-90 transition"
+                        >
+                          Instagram
+                        </a>
+                      )}
+
+                      {event.drivebukuLink && (
+                        <a
+                          href={event.drivebukuLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-6 py-3 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                        >
+                          Buku Kegiatan
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-              
             </div>
           </aside>
 
@@ -307,26 +364,27 @@ export default async function EventDetailPage({ params }) {
               dangerouslySetInnerHTML={{ __html: event.description }}
             />
 
-            <h2 className="text-xl font-semibold mb-4">Tags</h2>
-
-            {event.tags && event.tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {event.tags.map((et) => (
-                  <span
-                    key={et.tag.id}
-                    className="px-3 py-1 rounded-full text-xs
-                              bg-gray-100 text-gray-700
-                              hover:bg-pink-100 hover:text-pink-700 transition"
-                  >
-                    #{et.tag.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Tidak ada tag</p>
-            )}
+            <div className="mt-16">
+              <h2 className="text-xl font-semibold mb-4">Tags</h2>
+              {event.tags && event.tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {event.tags.map((et) => (
+                    <span
+                      key={et.tag.id}
+                      className="px-3 py-1 rounded-full text-xs
+                                bg-gray-100 text-gray-700
+                                hover:bg-pink-100 hover:text-pink-700 transition"
+                    >
+                      #{et.tag.name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">Tidak ada tag</p>
+              )}
+            </div>
             
-            <div className="flex gap-3 mt-24">
+            <div className="mt-16">
               <ShareButtons
                 url={shareUrl}
                 title={event.title}

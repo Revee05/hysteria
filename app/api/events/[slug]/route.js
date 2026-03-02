@@ -10,7 +10,7 @@ export async function GET(req, { params }) {
       isPublished: true,
     },
     include: {
-      categories: {
+      eventCategories: {
         include: {
           categoryItem: {
             include: {

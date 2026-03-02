@@ -218,9 +218,9 @@ model CategoryItem {
 
   isActive Boolean @default(true)
 
-  events Event[]
+  eventCategories    EventCategory[]
   platformCategories PlatformCategory[]
-  eventOrganizers EventOrganizer[]
+  eventOrganizers    EventOrganizer[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -353,8 +353,8 @@ model TentangVisiMisi {
   pageSlug String @unique @default("tentang") @db.VarChar(100)
 
   description String @db.Text
-  visi  String @db.Text
-  misi  String @db.Text
+  visi        String @db.Text
+  misi        String @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -406,9 +406,9 @@ model Event {
   poster      String? @db.VarChar(500)
 
   // RELASI (MANY TO MANY)
-  organizers EventOrganizer[]
-  categories EventCategory[]
-  tags       EventTag[]
+  organizers      EventOrganizer[]
+  eventCategories EventCategory[]
+  tags            EventTag[]
 
   // WAKTU
   startAt        DateTime

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ImageUpload from "./ImageUpload";
 import EventDescriptionEditor from "./EventDescriptionEditor";
@@ -44,7 +44,9 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
   };
 
   const getCategoryTitle = (id) =>
-    filteredCategoryItems.find(c => c.id === id)?.title || id;
+    filteredCategoryItems.find(
+      (c) => Number(c.id) === Number(id)
+    )?.title || id;
 
   const [form, setForm] = useState({
     title: "",
@@ -76,30 +78,66 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     const start = new Date(initialData.startAt);
     const end = initialData.endAt ? new Date(initialData.endAt) : null;
 
-    setForm({
-      title           : initialData.title || "",
-      categoryItemIds : initialData.categories?.map(c => c.categoryItemId) || [],
-      organizerIds    : initialData.organizers?.map(o => Number(o.categoryItemId)) || [],
-      description     : initialData.description || "",
-      startDate       : start.toISOString().slice(0, 10),
-      startTime       : start.toTimeString().slice(0, 5),
-      endDate         : end ? end.toISOString().slice(0, 10) : "",
-      endTime         : end ? end.toTimeString().slice(0, 5) : "",
-      location        : initialData.location || "",
-      registerLink    : initialData.registerLink || "",
-      poster          : initialData.poster || "",
-      status          : initialData.isPublished ? "PUBLISHED" : "DRAFT",
-      driveLink       : initialData.driveLink || "",                 
-      youtubeLink     : initialData.youtubeLink || "",  
-      instagramLink   : initialData.instagramLink || "",  
-      drivebukuLink   : initialData.drivebukuLink || "",  
-      tags: initialData.eventTags?.map(et => et.tag?.name).filter(Boolean) || [],
-      mapsEmbed       : initialData.mapsEmbedSrc
+    const isFlexible = Boolean(initialData.isFlexibleTime);
+
+    setForm((prev) => ({
+      ...prev,
+
+      title: initialData.title || "",
+
+      categoryItemIds:
+        initialData.eventCategories?.map(ec =>
+          Number(ec.categoryItemId)
+        ) || [],
+
+      organizerIds:
+        initialData.organizers?.map(o =>
+          Number(o.categoryItemId)
+        ) || [],
+
+      description: initialData.description || "",
+
+      startDate: start.toISOString().slice(0, 10),
+
+      startTime: isFlexible ? "" : start.toTimeString().slice(0, 5),
+
+      endDate: end ? end.toISOString().slice(0, 10) : "",
+      endTime: isFlexible
+        ? ""
+        : (end ? end.toTimeString().slice(0, 5) : ""),
+
+      location: initialData.location || "",
+      registerLink: initialData.registerLink || "",
+      poster: initialData.poster || "",
+      status: initialData.isPublished ? "PUBLISHED" : "DRAFT",
+
+      driveLink: initialData.driveLink || "",
+      youtubeLink: initialData.youtubeLink || "",
+      instagramLink: initialData.instagramLink || "",
+      drivebukuLink: initialData.drivebukuLink || "",
+
+      tags:
+        initialData.tags?.map(t =>
+          t.tag?.name
+        ).filter(Boolean) || [],
+
+      mapsEmbed: initialData.mapsEmbedSrc
         ? `<iframe src="${initialData.mapsEmbedSrc}" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>`
         : "",
-      isFlexibleTime  : false,
-    });
+
+      isFlexibleTime: isFlexible,
+    }));
   }, [initialData]);
+
+  useEffect(() => {
+    if (form.isFlexibleTime) {
+      setForm(prev => ({
+        ...prev,
+        startTime: "",
+        endTime: "",
+      }));
+    }
+  }, [form.isFlexibleTime]);
 
   // CLOSE DROPDOWN ON OUTSIDE CLICK
   useEffect(() => {
@@ -178,38 +216,52 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     return result;
   };
   
-  const filteredCategoryItems = [
-    ...getPlatformSubCategories(),
-    ...getHysteriaSubCategories(),
-  ];
+  const filteredCategoryItems = useMemo(() => {
+    return [
+      ...getPlatformSubCategories(),
+      ...getHysteriaSubCategories(),
+    ];
+  }, [form.organizerIds, platformTree, programTree]);
   
   // CLEAN CATEGORY WHEN ORGANIZER CHANGES
   useEffect(() => {
+    if (!form.organizerIds.length) return;
+    if (!filteredCategoryItems.length) return;
+
     setForm((prev) => ({
       ...prev,
       categoryItemIds: prev.categoryItemIds.filter((id) =>
-        filteredCategoryItems.some(c => c.id === id)
+        filteredCategoryItems.some(
+          (c) => Number(c.id) === Number(id)
+        )
       ),
     }));
   }, [form.organizerIds]);
 
+  const normalizeId = (id) => {
+    if (id === "__HYSTERIA__") return "__HYSTERIA__";
+    return Number(id);
+  };
+
   const toggleOrganizer = (id) => {
-    const numId = Number(id);
+    const normalized = normalizeId(id);
 
     setForm((prev) => ({
       ...prev,
-      organizerIds: prev.organizerIds.includes(numId)
-        ? prev.organizerIds.filter(x => x !== numId)
-        : [...prev.organizerIds, numId],
+      organizerIds: prev.organizerIds.includes(normalized)
+        ? prev.organizerIds.filter((x) => x !== normalized)
+        : [...prev.organizerIds, normalized],
     }));
   };
 
   const toggleCategory = (id) => {
+    const numId = Number(id);
+
     setForm(prev => ({
       ...prev,
-      categoryItemIds: prev.categoryItemIds.includes(id)
-        ? prev.categoryItemIds.filter(x => x !== id)
-        : [...prev.categoryItemIds, id],
+      categoryItemIds: prev.categoryItemIds.includes(numId)
+        ? prev.categoryItemIds.filter(x => x !== numId)
+        : [...prev.categoryItemIds, numId],
     }));
   };
 
@@ -241,8 +293,10 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     if (!form.title) missingFields.push("Judul Event");
     if (!Array.isArray(form.categoryItemIds) || form.categoryItemIds.length === 0)
       missingFields.push("Kategori");
-    if (!form.startDate || !form.startTime)
-      missingFields.push("Tanggal & Waktu Mulai");
+    if (!form.startDate)
+      missingFields.push("Tanggal Mulai");
+    if (!form.isFlexibleTime && !form.startTime)
+      missingFields.push("Waktu Mulai");
     if (!form.poster) missingFields.push("Poster Event");
     if (!form.location) missingFields.push("Lokasi");
 
@@ -262,10 +316,15 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       
       description     : form.description,
 
-      startAt         : new Date(`${form.startDate}T${form.startTime}`).toISOString(),
-      endAt           : form.endDate && form.endTime
-        ? new Date(`${form.endDate}T${form.endTime}`).toISOString()
-        : null, // optional
+      startAt: form.isFlexibleTime
+        ? new Date(`${form.startDate}T00:00`).toISOString()
+        : new Date(`${form.startDate}T${form.startTime}`).toISOString(),
+
+      endAt: form.isFlexibleTime
+        ? null
+        : form.endDate && form.endTime
+          ? new Date(`${form.endDate}T${form.endTime}`).toISOString()
+          : null,
       
       location        : form.location,
       registerLink    : form.registerLink,
@@ -276,9 +335,10 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       youtubeLink     : form.youtubeLink,
       instagramLink   : form.instagramLink,
       drivebukuLink   : form.drivebukuLink,
-      tagNames        : Array.isArray(form.tags)
-        ? form.tags
-        : form.tags.split(",").map(t => t.trim()).filter(Boolean),
+      isFlexibleTime: form.isFlexibleTime,
+      tagNames: Array.isArray(form.tags)
+        ? form.tags.filter(Boolean)
+        : [],
     };
 
     const res = await fetch(

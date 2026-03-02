@@ -7,7 +7,7 @@ import Link from "next/link";
 import { getEventStatus } from "../../lib/event-status";
 import { Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 12;
 
 export default function EventsPage() {
   const router = useRouter();
@@ -73,26 +73,18 @@ export default function EventsPage() {
      - statusFilter: lowercase
   ========================== */
   const processedEvents = useMemo(() => {
-    return events.map((event) => {
-      const statusLogic = getEventStatus(event.startAt, event.endAt);
-
-      return {
-        ...event,
-        status: statusLogic, // untuk UI logic
-        statusFilter: statusLogic.toLowerCase(), // untuk filter
-      };
-    });
+    return events.map((event) => ({
+      ...event,
+      status: getEventStatus(event.startAt, event.endAt),
+    }));
   }, [events]);
 
-  /* =========================
-     FILTER BERDASARKAN STATUS
-  ========================== */
-  const filteredEvents =
-    status === "all"
-      ? processedEvents
-      : processedEvents.filter(
-          (event) => event.statusFilter === status
-        );
+  const filteredEvents = useMemo(() => {
+    if (status === "all") return processedEvents;
+    return processedEvents.filter(
+      (event) => event.status.toLowerCase() === status
+    );
+  }, [processedEvents, status]);
 
   const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
 
@@ -101,9 +93,15 @@ export default function EventsPage() {
     page * ITEMS_PER_PAGE
   );
 
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages || 1);
+    }
+  }, [totalPages, page]);
+  
   return (
-    <div className="mx-auto p-6 space-y-4">
-      <h1 className="font-poppins text-[36px] font-bold leading-[100%] text-[var(--Color-5)]">
+    <div className="mx-auto px-4 mt-12 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-4">
+      <h1 className="font-poppins text-[24px] sm:text-[30px] md:text-[36px] font-bold leading-[100%] text-[var(--Color-5)]">
         Daftar Event
       </h1>
 
@@ -121,17 +119,7 @@ export default function EventsPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search"
-              className="
-                w-full h-[48px]
-                pl-6 pr-14
-                rounded-full
-                border border-[var(--Color-1)]
-                bg-[var(--Color-3)]
-                font-helvetica text-[16px]
-                text-[var(--Color-1)]
-                placeholder:text-[var(--Color-1)]
-                focus:outline-none
-              "
+              className="w-full h-[48px] pl-6 pr-14 rounded-full border border-[var(--Color-1)] bg-[var(--Color-3)] text-[16px] text-[var(--Color-1)] placeholder:text-[var(--Color-1)] focus:outline-none"
             />
             <Search
               className="absolute right-5 top-1/2 -translate-y-1/2"
@@ -153,16 +141,7 @@ export default function EventsPage() {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="
-                w-full h-full
-                rounded-full
-                border border-[var(--Color-1)]
-                bg-transparent
-                text-transparent
-                appearance-none
-                cursor-pointer
-                focus:outline-none
-              "
+              className="w-full h-full rounded-full border border-[var(--Color-1)] bg-transparent text-transparent appearance-none cursor-pointer focus:outline-none"
             >
               <option value="all">Semua Event</option>
               <option value="upcoming">Akan Berlangsung</option>
@@ -183,16 +162,7 @@ export default function EventsPage() {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="
-                w-full h-full
-                rounded-full
-                border border-[var(--Color-1)]
-                bg-transparent
-                text-transparent
-                appearance-none
-                cursor-pointer
-                focus:outline-none
-              "
+              className="w-full h-full rounded-full border border-[var(--Color-1)] bg-transparent text-transparent appearance-none cursor-pointer focus:outline-none"
             >
               <option value="latest">Terbaru</option>
               <option value="oldest">Terlama</option>
@@ -210,12 +180,12 @@ export default function EventsPage() {
       ) : (
         <>
           {/* GRID */}
-          <div className="grid sm:grid-cols-2 md:grid-cols-6 gap-4">
+          <div className="grid sm:grid-cols-2 md:grid-cols-6 gap-2">
             {paginatedEvents.map((event) => (
               <Link
                 key={event.id}
                 href={`/event/${event.slug}`}
-                className="group relative w-full max-w-[440px] aspect-[3/4] rounded-xl overflow-hidden"
+                className="group relative w-full max-w-[440px] aspect-[4/5] rounded-xl overflow-hidden"
               >
                 <Image
                   src={event.poster || "/placeholder-event.jpg"}
@@ -225,43 +195,21 @@ export default function EventsPage() {
                 />
 
                 <div
-                  className="
-                    absolute inset-0 p-5 flex flex-col justify-end
-                    bg-gradient-to-t from-black/80 via-black/40 to-transparent
-                    opacity-0 group-hover:opacity-100
-                    transition-opacity duration-300 ease-out
-                  "
+                  className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"
                 >
                   <div className="inline-flex gap-2 mb-3">
-                    {event.categories?.[0]?.categoryItem?.title && (
-                      <span className="inline-flex px-3 h-[26px] rounded-full text-[12px] bg-[var(--Color-3)] text-[var(--Color-1)]">
-                        {event.categories[0].categoryItem.title}
-                      </span>
-                    )}
-                    {event.organizer && (
-                      <span
-                        className="
-                          inline-flex
-                          items-center
-                          justify-center
-                          px-3
-                          h-[26px]
-                          rounded-full
-                          text-[12px]
-                          text-[var(--Color-1)]
-                          bg-[var(--Color-3)]
-                        "
-                      >
-                        {event.organizer}
+                    {event.eventCategories?.[0]?.categoryItem?.title && (
+                      <span className="inline-flex items-center justify-center px-3 h-[26px] rounded-[10px] border border-[var(--Color-1)] bg-[var(--Color-3)] text-[var(--Color-1)] font-poppins text-[12px] font-normal leading-[150%]">
+                        {event.eventCategories[0].categoryItem.title}
                       </span>
                     )}
                   </div>
 
-                  <h2 className="font-poppins text-[20px] font-semibold text-white leading-snug">
+                  <h2 className="mt-2 text-[12px] font-poppins font-bold leading-[150%] text-[var(--Color-3)]">
                     {event.title}
                   </h2>
 
-                  <p className="mt-1 text-[14px] text-white/90">
+                  <p className="mt-1 text-[10px] font-poppins font-normal leading-[150%] text-[var(--Color-3)]">
                     {new Date(event.startAt).toLocaleDateString("id-ID", {
                       weekday: "long",
                       day: "numeric",
@@ -277,19 +225,8 @@ export default function EventsPage() {
                         e.stopPropagation();
                         window.open(event.registerLink, "_blank");
                       }}
-                      className="
-                        mt-4
-                        inline-flex items-center justify-center
-                        h-[36px]
-                        rounded-lg
-                        bg-[var(--Color-6)]
-                        text-[var(--Color-3)]
-                        font-poppins text-[14px] font-normal
-                        transition
-                        hover:bg-[#D40568]
-                        active:bg-[#BC045C]
-                      "
-                    >
+                      className="mt-3 flex items-center justify-center w-[140px] h-[35px] rounded-[8px] bg-[var(--Color-1)] text-white font-poppins text-[12px] font-medium shadow transition hover:opacity-90"
+                    > 
                       Ikuti Sekarang
                     </button>
                   )}
@@ -301,18 +238,7 @@ export default function EventsPage() {
                         e.stopPropagation();
                         window.open(event.registerLink, "_blank");
                       }}
-                      className="
-                        mt-4
-                        inline-flex items-center justify-center
-                        h-[36px]
-                        rounded-lg
-                        bg-[#FDE6F1]
-                        text-[var(--Color-1)]
-                        font-poppins text-[14px] font-normal
-                        transition
-                        hover:bg-[#FCDAEA]
-                        active:bg-[#F9B2D4]
-                      "
+                      className="mt-3 flex items-center justify-center w-[140px] h-[35px] rounded-[8px] bg-[var(--Color-1)] text-white font-poppins text-[12px] font-medium shadow transition hover:opacity-90"
                     >
                       Sedang Berlangsung
                     </button>
@@ -321,16 +247,7 @@ export default function EventsPage() {
                   {event.status === "FINISHED" && (
                     <button
                       disabled
-                      className="
-                        mt-4
-                        inline-flex items-center justify-center
-                        h-[36px]
-                        rounded-lg
-                        bg-[#E5E5E5]
-                        text-[#9CA3AF]
-                        font-poppins text-[14px] font-normal
-                        cursor-not-allowed
-                      "
+                      className="mt-3 flex items-center justify-center w-[140px] h-[35px] rounded-[8px] bg-[var(--Color-1)] text-white font-poppins text-[12px] font-medium shadow transition hover:opacity-90"
                     >
                       Event Telah Berakhir
                     </button>
@@ -342,74 +259,102 @@ export default function EventsPage() {
 
           {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center mt-10">
-              <div className="flex items-center justify-center gap-4 w-[220px] h-[50px] bg-[var(--Color-1)] rounded-full">
-
+            <div className="flex items-center justify-center mt-16">
+              <div
+                className="flex items-center justify-center gap-4 w-[220px] h-[50px] rounded-full bg-[var(--Color-1)]"
+              >
                 {/* PREV */}
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="
-                    w-[25px] h-[25px]
-                    flex items-center justify-center
-                    rounded-full
-                    bg-[var(--Color-3)]
-                    shadow
-                    disabled:opacity-40
-                  "
+                  className="w-[25px] h-[25px] flex items-center justify-center rounded-full bg-[var(--Color-3)] shadow disabled:opacity-40"
                 >
-                  <ChevronLeft size={14} strokeWidth={2} color="var(--Color-1)" />
+                  <ChevronLeft size={20} strokeWidth={3} />
                 </button>
 
-                {/* PAGE NUMBER */}
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const isActive = page === i + 1;
+                {/* PAGE NUMBERS */}
+                <div className="flex items-center gap-4 text-white text-xl font-medium">
+                  {(() => {
+                    const pages = [];
+                    const maxVisible = 3;
+                    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+                    let end = start + maxVisible - 1;
 
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setPage(i + 1)}
-                      className={`
-                        w-[30px] h-[28.152px]
-                        flex items-center justify-center
-                        rounded
-                        font-helvetica text-[20px] font-normal
-                        ${
-                          isActive
-                            ? "bg-white/50 text-[var(--Color-5)] shadow"
-                            : "text-[var(--Color-3)]"
-                        }
-                      `}
-                      style={
-                        isActive
-                          ? {
-                              filter:
-                                "drop-shadow(0 0 5.8px rgba(0,0,0,0.25))",
-                            }
-                          : {}
+                    if (end > totalPages) {
+                      end = totalPages;
+                      start = Math.max(1, end - maxVisible + 1);
+                    }
+
+                    if (start > 1) {
+                      pages.push(
+                        <button
+                          key={1}
+                          onClick={() => setPage(1)}
+                          className="hover:scale-110 transition"
+                        >
+                          1
+                        </button>
+                      );
+                      if (start > 2) {
+                        pages.push(
+                          <span key="start-ellipsis" className="opacity-70">
+                            ...
+                          </span>
+                        );
                       }
-                    >
-                      {i + 1}
-                    </button>
-                  );
-                })}
+                    }
+
+                    for (let i = start; i <= end; i++) {
+                      const isActive = i === page;
+
+                      pages.push(
+                        <button
+                          key={i}
+                          onClick={() => setPage(i)}
+                          className={`w-[30px] h-[30px] flex items-center justify-center rounded-full text-[20px] font-normal transition-all duration-300 flex items-center justify-center
+                            ${
+                            i === page
+                            ? "text-[var(--Color-3)] bg-white/40 rounded-[6px]"
+                            : "text-[var(--Color-3)]"
+                            }
+                          `}
+                        >
+                          {i}
+                        </button>
+                      );
+                    }
+
+                    if (end < totalPages) {
+                      if (end < totalPages - 1) {
+                        pages.push(
+                          <span key="end-ellipsis" className="opacity-70">
+                            ...
+                          </span>
+                        );
+                      }
+                      pages.push(
+                        <button
+                          key={totalPages}
+                          onClick={() => setPage(totalPages)}
+                          className="hover:scale-110 transition"
+                        >
+                          {totalPages}
+                        </button>
+                      );
+                    }
+
+                    return pages;
+                  })()}
+                </div>
 
                 {/* NEXT */}
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="
-                    w-[25px] h-[25px]
-                    flex items-center justify-center
-                    rounded-full
-                    bg-[var(--Color-3)]
-                    shadow
-                    disabled:opacity-40
-                  "
+                  className="w-[25px] h-[25px] flex items-center justify-center rounded-full bg-[var(--Color-3)] shadow disabled:opacity-40"
                 >
-                  <ChevronRight size={14} strokeWidth={2} color="var(--Color-1)" />
+                  <ChevronRight size={20} strokeWidth={3} />
                 </button>
-
               </div>
             </div>
           )}

@@ -16,7 +16,6 @@ export async function POST(req) {
       startAt,
       endAt,
       location,
-      address,
       registerLink,
       mapsEmbedSrc,
       poster,
@@ -35,11 +34,15 @@ export async function POST(req) {
     if (!startAt) errors.startAt = "Tanggal mulai wajib diisi";
     if (!location) errors.location = "Lokasi wajib diisi";
     if (!poster) errors.poster = "Poster wajib diupload";
+    if (!description) errors.description = "Deskripsi wajib diisi";
     if (
       !Array.isArray(categoryItemIds) ||
       categoryItemIds.length === 0
     ) {
       errors.categoryItemIds = "Minimal pilih 1 kategori";
+    }
+    if (!Array.isArray(organizerItemIds) || organizerItemIds.length === 0) {
+      errors.organizerItemIds = "Minimal pilih 1 penyelenggara";
     }
 
     // kalau ada error → return detail
@@ -80,7 +83,6 @@ export async function POST(req) {
           startAt: new Date(startAt),
           endAt: endAt ? new Date(endAt) : null,
           location,
-          address,
           registerLink,
           mapsEmbedSrc,
           poster,
@@ -90,7 +92,7 @@ export async function POST(req) {
           drivebukuLink,
           isPublished: Boolean(isPublished),
           
-          categories: {
+          eventCategories: {
             create: categoryItemIds.map((id, idx) => ({
               categoryItemId: Number(id), 
               isPrimary: idx === 0,
@@ -139,7 +141,7 @@ export async function GET() {
     const events = await prisma.event.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        categories: {
+        eventCategories: {
           include: {
             categoryItem: {
               select: { title: true },

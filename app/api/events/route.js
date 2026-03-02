@@ -46,7 +46,7 @@ export async function GET(req) {
     where,
     orderBy,
     include: {
-      categories: {
+      eventCategories: {
         include: {
           categoryItem: {
             include: {
