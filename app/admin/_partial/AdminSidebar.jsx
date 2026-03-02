@@ -23,7 +23,13 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
     },
     { key: "category", label: "Category", view: "category", icon: IconCategorySmall, enabled: true },
 
-    { key: "page", label: "Page",view: "page",icon: IconSection,enabled: true,children: [
+    { 
+      key: "page",
+      label: "Page",
+      view: "page",
+      icon: IconSection,
+      enabled: true,
+      children: [
         { key: "home", label: "Page Home", view: "page.home", icon: IconHero, enabled: true },
         { key: "program", label: "Page Program", view: "page.program", icon: IconHero, enabled: true },
         { key: "artlab", label: "Page Artlab", view: "page.artlab", icon: IconHero, enabled: true },
@@ -31,6 +37,18 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
         { key: "laki-masak", label: "Page Laki Masak", view: "page.laki-masak", icon: IconHero, enabled: true },
       ],
     },
+
+    { key: "platform",
+      label: "Platform",
+      view: "platform",
+      icon: IconPlatform,
+      enabled: true,
+      children: [
+        { key: "hysteria-artlab", label: "Hysteria Artlab", view: "platform.hysteria-artlab", icon: IconPlatform, enabled: true },
+        { key: "ditampart", label: "Ditampart", view: "platform.ditampart", icon: IconPlatform, enabled: true },
+        { key: "laki-masak", label: "Laki Masak", view: "platform.laki-masak", icon: IconPlatform, enabled: true },
+    ]},
+
     { key: "event", label: "Event", view: "event", icon: IconEvent, enabled: true },
     { key: "article", label: "Artikel", view: "article", icon: IconPost, enabled: true },
     {
