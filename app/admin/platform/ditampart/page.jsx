@@ -17,11 +17,10 @@ import {
   buildPlatformColumns,
   ditampartDummyData,
   filterDitampartData,
-  mockupPosterDummyData,
 } from '../_handler/data';
 
 const categories = [
-  { id: 1, title: 'Karya 3D' },
+  { id: 1, title: '3D' },
   { id: 2, title: 'Mock up dan Poster' },
   { id: 3, title: 'Foto Kegiatan' },
   { id: 4, title: 'Short Film Dokumenter' },
@@ -37,8 +36,9 @@ export default function DitampartPage() {
   const [modalTitle, setModalTitle] = useState('');
   const [modalInitial, setModalInitial] = useState({});
   const [modalPlaceholders, setModalPlaceholders] = useState({});
+  const [modalApiEndpoint, setModalApiEndpoint] = useState('');
 
-  const [platformModal, setPlatformModal] = useState({ open: false, title: '', subtitle: '', items: [] });
+  const [platformModal, setPlatformModal] = useState({ open: false, title: '', subtitle: '', categoryItemSlug: '', showImageUpload: false });
 
   const debouncedSearch = useDebounce(searchQuery);
 
@@ -46,31 +46,58 @@ export default function DitampartPage() {
   const handleEdit   = (row) => console.log('Edit:', row);
   const handleDelete = (row) => console.log('Delete:', row);
 
-  const openModalForCategory = (cat) => {
+  const endpointMap = {
+    1: '/api/admin/platform-content/ditampart/3d',
+    3: '/api/admin/platform-content/ditampart/foto-kegiatan',
+    4: '/api/admin/platform-content/ditampart/short-film-dokumenter',
+  };
+
+  const openModalForCategory = async (cat) => {
     // cat id 2 → PlatformIndex modal (Mock up dan Poster)
     if (cat.id === 2) {
-      setPlatformModal({
-        open: true,
-        title: 'Mock up dan Poster',
-        subtitle: 'Kelola konten Mock up dan Poster',
-        items: mockupPosterDummyData,
-      });
+      setPlatformModal({ open: true, title: 'Mock up dan Poster', subtitle: 'Kelola konten Mock up dan Poster', categoryItemSlug: 'mockup-dan-poster', showImageUpload: true });
       return;
     }
-    setModalTitle(`Link ${cat.title}`);
-    setModalInitial({ categoryId: cat.id, categoryTitle: cat.title });
+
     let placeholdersObj = { input: 'text . . . . . ' };
     if (cat.id === 1) placeholdersObj = { input: 'https://drive.google.com/drive/folders/. . . ' };
     if (cat.id === 3) placeholdersObj = { input: 'https://drive.google.com/drive/folders/. . . ' };
     if (cat.id === 4) placeholdersObj = { input: 'https://www.youtube.com/watch . . .' };
+
+    const endpoint = endpointMap[cat.id];
+    let currentUrl = '';
+    try {
+      const res = await fetch(endpoint);
+      if (res.ok) {
+        const data = await res.json();
+        currentUrl = data?.item?.url || '';
+      }
+    } catch (err) {
+      // open modal with empty value if fetch fails
+    }
+
+    setModalTitle(`Link ${cat.title}`);
+    setModalInitial({ categoryId: cat.id, categoryTitle: cat.title, input: currentUrl });
     setModalPlaceholders(placeholdersObj);
+    setModalApiEndpoint(endpoint);
     setModalOpen(true);
   };
 
-  const handleSaveFromForm = async (data) => {
-    console.log('Saved from LinkForm:', data, modalInitial);
-    // TODO: integrate saving logic (API call / state update)
-    setModalOpen(false);
+  const handleSaveFromForm = async ({ name }) => {
+    try {
+      const res = await fetch(modalApiEndpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: name }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to save');
+      }
+    } catch (err) {
+      console.error('Error saving link:', err);
+      throw err;
+    }
   };
 
   // ── columns (memoised agar referensi stabil) ──────────────────────────────
@@ -144,8 +171,8 @@ export default function DitampartPage() {
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-col md:flex-row items-center gap-3 mb-4">
-          <div className="w-full">
+        <div className="flex flex-wrap md:flex-row items-center gap-3 mb-4">
+          <div className="w-full md:w-auto">
             <SearchField
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -161,21 +188,19 @@ export default function DitampartPage() {
           </div>
 
           <SelectField
-            className="rounded-md bg-white border border-gray-300 shadow-sm"
+            className="w-full md:w-auto rounded-md bg-white border border-gray-300 shadow-sm"
             value={subKategori}
             onChange={setSubKategori}
             options={subKategoriDitampartOptions}
             emptyOptionLabel="Semua Sub Kategori"
-            sx={{ minWidth: 200 }}
           />
 
           <SelectField
-            className="rounded-md bg-white border border-gray-300 shadow-sm"
+            className="w-[206px] md:w-auto rounded-md bg-white border border-gray-300 shadow-sm"
             value={statusFilter}
             onChange={setStatusFilter}
             options={statusOptions}
             emptyOptionLabel="Semua Status"
-            sx={{ minWidth: 180 }}
           />
           <PageFilter perPage={perPage} onChange={setPerPage} />
         </div>
@@ -191,18 +216,15 @@ export default function DitampartPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/50" onClick={() => setPlatformModal(p => ({ ...p, open: false }))} />
             <div className="relative z-10 w-full max-h-[95vh] overflow-auto px-4">
-              <div className="mx-auto w-full sm:max-w-lg md:max-w-4xl p-2 bg-white rounded-lg shadow-lg">
-                <PlatformIndex
-                  title={platformModal.title}
-                  subtitle={platformModal.subtitle}
-                  actionLabel="Tambah"
-                  onAdd={() => console.log('Tambah', platformModal.title)}
-                  items={platformModal.items}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  searchPlaceholder="Cari konten..."
-                  close={() => setPlatformModal(p => ({ ...p, open: false }))}
-                />
+              <div className="mx-auto w-full sm:max-w-lg md:max-w-6xl p-2 bg-white rounded-lg shadow-lg">
+                      <PlatformIndex
+                        platformSlug="ditampart"
+                        categoryItemSlug={platformModal.categoryItemSlug}                        showImageUpload={platformModal.showImageUpload}                        title={platformModal.title}
+                        subtitle={platformModal.subtitle}
+                        actionLabel="+add"
+                        searchPlaceholder="Cari konten..."
+                        close={() => setPlatformModal(p => ({ ...p, open: false }))}
+                      />
               </div>
             </div>
           </div>

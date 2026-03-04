@@ -57,6 +57,9 @@ const INITIAL_MAIN_FORM = {
   youtubeProfile: "",
 };
 
+/** Batas ukuran file upload untuk halaman ini (dalam MB). */
+const MAX_SIZE_MB = 2;
+
 export default function PageArtlab() {
   const [active, setActive] = useState("main");  // tab aktif: "main" | "hero"
   const [loading, setLoading] = useState(true);   // true selama data awal belum dimuat
@@ -134,14 +137,14 @@ export default function PageArtlab() {
   const handleHeroFilesChange = (id, files, clearImage = false) => {
     setHeroItems((prev) => prev.map((item) =>
       item.id === id
-        ? { ...item, files, ...(clearImage ? { imageUrl: null, pendingClear: true } : {}) }
+        ? { ...item, files, dirty: true, ...(clearImage ? { imageUrl: null, pendingClear: true } : {}) }
         : item
     ));
   };
 
   /** Dipanggil saat user mengubah title/subtitle sebuah item hero di form. */
   const handleHeroItemChange = (id, changes) => {
-    setHeroItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...changes } : item)));
+    setHeroItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...changes, dirty: true } : item)));
   };
 
   /** User menekan tombol hapus gambar utama — tandai pending clear, UI akan bersih. */
@@ -241,7 +244,7 @@ export default function PageArtlab() {
             const payload = await res.json().catch(() => ({}));
             throw new Error(payload.error?.message || `Gagal menyimpan hero: ${item.label}`);
           }
-        } else if (item.pendingClear || item.title !== undefined || item.subtitle !== undefined) {
+        } else if (item.pendingClear || item.dirty) {
           // Update text fields and/or clear image
           const body = { title: item.title || "", subtitle: item.subtitle || "" };
           if (item.pendingClear) body.imageUrl = null;
@@ -257,7 +260,7 @@ export default function PageArtlab() {
         }
       }
 
-      setHeroItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
+      setHeroItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false, dirty: false })));
       showToast("Hero berhasil disimpan", "success");
     } catch (err) {
       console.error(err);
@@ -320,6 +323,8 @@ export default function PageArtlab() {
               coverItems={mainItems}
               onSubmit={handleSaveMain}
               submitting={mainSaving}
+              maxSizeMB={MAX_SIZE_MB}
+              mainImageLabel="ukuran 500x516 px, - format file .webp"
             />
           </div>
         ) : (
@@ -330,6 +335,7 @@ export default function PageArtlab() {
               onItemChange={handleHeroItemChange}
               onSubmit={handleSaveHero}
               submitting={heroSaving}
+              maxSizeMB={MAX_SIZE_MB}
             />
           </div>
         )}

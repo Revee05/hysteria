@@ -20,6 +20,9 @@ export * from "./services/platform.service.js";
 export * from "./repositories/platform.repository.js";
 export * from "./repositories/platformImage.repository.js";
 export * from "./validators/platform.validator.js";
+export * from "./validators/link.validator.js";
+export * from "./services/link.service.js";
+export * from "./repositories/link.repository.js";
 
 /**
  * Named convenience exports — dipakai langsung oleh API routes.
@@ -33,3 +36,8 @@ export const getPlatformImages        = platformService.getPlatformImages;
 export const getPlatformImage         = platformService.getPlatformImage;
 export const updatePlatformImage      = platformService.updatePlatformImage;
 export const updatePlatformImageWithFile = platformService.updatePlatformImageWithFile;
+
+// Merchandise convenience exports
+import * as merchService from './services/link.service.js';
+export const getMerchandise = merchService.getMerchandise;
+export const updateMerchandise = merchService.updateMerchandise;

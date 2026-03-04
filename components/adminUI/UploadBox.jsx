@@ -20,7 +20,7 @@ export default function UploadBox({
   existingUrl = null,
   onClearExisting = null,
   accept = "image/*",
-  maxSizeMB = 5,
+  maxSizeMB = '',
 }) {
   const fileRef = useRef(null);
   const [previews, setPreviews] = useState([]);

@@ -1,5 +1,5 @@
 /**
- * platform.service.js
+ * platform.service.js untuk service API pada pembuatan halaman slug page platform 
  *
  * Business logic utama untuk modul platform.
  * Layer ini duduk di antara API route (controller) dan repository (database).
