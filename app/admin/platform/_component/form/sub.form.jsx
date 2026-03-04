@@ -47,9 +47,9 @@ export default function SubForm({ open = false, mode = 'add', initialData = null
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black opacity-40" onClick={onClose} />
         <form onSubmit={handleSubmit} className="relative bg-white rounded-md shadow-lg w-full max-w-lg md:max-w-2xl mx-4 p-6 z-10">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">{mode === 'add' ? 'Tambah Item' : 'Edit Item'}</h3>
-                <button type="button" onClick={onClose} className="text-gray-600 hover:text-red-500 cursor-pointer">✕</button>
+            <div className="flex  items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">{mode === 'add' ? 'Create | Post ' : 'Edit Item'}</h3>
+                <button type="button" onClick={onClose} className="text-lg text-gray-600 hover:text-red-500 cursor-pointer">✕</button>
             </div>
 
             <div className="mb-3">

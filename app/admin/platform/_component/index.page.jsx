@@ -277,9 +277,9 @@ export default function PlatformIndex({
       <div className="flex w-full items-start justify-between mb-4 gap-4">
         <div>
           <h3 className="text-2xl font-extrabold">{title}</h3>
-          <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
+          {/* <p className="text-sm text-gray-600 mt-1">{subtitle}</p> */}
         </div>
-        <div className="ml-auto flex flex-wrap items-end md:flex-row md:items-start gap-2">
+        <div className="ml-auto flex flex-end items-end md:flex-row md:items-start gap-2">
           <button
             type="button"
             onClick={() => handleAdd()}
