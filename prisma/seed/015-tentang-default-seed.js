@@ -39,10 +39,12 @@ module.exports = async function seed() {
     await client.query(`DELETE FROM "TentangSejarahItem"`);
     const years = Array.from({ length: 2020 - 2004 + 1 }, (_, index) => String(2004 + index));
     for (const [index, year] of years.entries()) {
+      const imageIndex = String(index + 1).padStart(2, "0");
+      const imageUrl = `/image/KRONIK-${imageIndex}.webp`;
       await client.query(
         `INSERT INTO "TentangSejarahItem" ("title", "imageUrl", "order", "isActive", "createdAt", "updatedAt")
-         VALUES ($1, NULL, $2, true, NOW(), NOW())`,
-        [year, index],
+         VALUES ($1, $2, $3, true, NOW(), NOW())`,
+        [year, imageUrl, index],
       );
     }
 
