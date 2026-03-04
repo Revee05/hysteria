@@ -1,4 +1,3 @@
-// _components/FilmSection.jsx
 "use client";
 
 import { useState, useRef } from "react";
@@ -13,6 +12,7 @@ const poppins = Poppins({
 
 // DATA FILM (Diperkaya agar cocok dengan layout Forum)
 const FILM_ITEMS = [
+  // ... (Data Film tetap sama) ...
   {
     id: 1,
     title: "Sinema Kolektif #01",
@@ -132,7 +132,7 @@ export default function FilmSection() {
   };
 
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
+    <section id="pemutaran-film" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -140,7 +140,7 @@ export default function FilmSection() {
           Pemutaran Film
         </h2>
         
-        {/* LINK HEADER KE HALAMAN FILM (DIPERBARUI) */}
+        {/* LINK DIPERBARUI: Dihilangkan "-all" */}
         <Link 
             href="/program/pemutaran-film" 
             className="text-black font-semibold underline underline-offset-4 hover:text-[#D63384] transition"
@@ -217,9 +217,9 @@ export default function FilmSection() {
                         {item.date}
                     </p>
                     
-                    {/* LINK TOMBOL */}
+                    {/* LINK DIPERBARUI: Dihilangkan "-all" */}
                     <Link 
-                        href={`/program/film/${item.id}`} 
+                        href="/program/pemutaran-film" 
                         className="bg-[#D63384] hover:bg-[#b02a6b] text-white text-sm font-semibold py-2.5 px-6 rounded-lg w-fit transition-colors shadow-lg inline-block"
                     >
                         Ikuti Sekarang

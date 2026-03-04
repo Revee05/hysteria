@@ -40,7 +40,8 @@ const FESTIVALS = [
 
 export default function FestivalSection() {
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 py-10 mb-10">
+    // TAMBAHAN: id="festival" ditambahkan di sini agar bisa diakses lewat /program#festival
+    <section id="festival" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 py-10 mb-10">
       
       {/* JUDUL SECTION */}
       <div className="flex justify-between items-end mb-8">

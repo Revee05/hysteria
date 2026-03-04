@@ -2,6 +2,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -14,28 +15,24 @@ const VIDEO_ITEMS = [
   {
     id: 1,
     title: "Sapa Warga",
-    // Gambar: Interaksi warga
     image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000&auto=format&fit=crop",
-    link: "#",
+    // UBAH: Langsung mengarah ke slug-nya
+    link: "/program/sapa-warga"
   },
   {
     id: 2,
     title: "Hysteria Berkelana",
-    // Gambar: Traveling/Vlog
     image: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000&auto=format&fit=crop",
-    link: "#",
+    // UBAH: Langsung mengarah ke slug-nya
+    link: "/program/hysteria-berkelana"
   },
 ];
 
 export default function VideoSeriesSection() {
   return (
-    // PENYESUAIAN CONTAINER:
-    // 1. px-6 md:px-10 lg:px-20 (Agar sejajar lurus)
-    // 2. max-w-[1440px] mx-auto
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
+    <section id="video-series" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
       
       {/* JUDUL SECTION */}
-      {/* Ukuran disamakan: text-[28px] md:text-[32px] */}
       <h2
         className={`${poppins.className} text-[28px] md:text-[32px] font-bold text-black mb-8`}
       >
@@ -45,11 +42,10 @@ export default function VideoSeriesSection() {
       {/* GRID LAYOUT (2 Kolom) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         {VIDEO_ITEMS.map((item) => (
-          <div
+          <Link
+            href={item.link}
             key={item.id}
-            // Radius diperhalus jadi rounded-[24px]
-            // Tinggi disesuaikan md:h-[380px] agar sama tinggi dengan card section lain
-            className="group relative w-full h-[300px] md:h-[380px] rounded-[24px] overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+            className="block group relative w-full h-[300px] md:h-[380px] rounded-[24px] overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
           >
             {/* 1. BACKGROUND IMAGE */}
             <div className="absolute inset-0 bg-gray-800">
@@ -97,7 +93,7 @@ export default function VideoSeriesSection() {
               </div>
 
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

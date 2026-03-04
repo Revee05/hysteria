@@ -16,30 +16,30 @@ const PODCAST_ITEMS = [
     title: "Safari Memori",
     desc: "Podcast tentang arsip, nostalgia, dan penelusuran jejak",
     image: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=1000&auto=format&fit=crop",
-    // Link disesuaikan 100% dengan database CMS
-    link: "/program/podcast/safari-memori", 
+    // UBAH: Link disesuaikan agar langsung menembak ke slug utama (tanpa /podcast/)
+    link: "/program/safari-memori", 
   },
   {
     id: 2,
     title: "Aston",
     desc: "Podcast tentang perspektif personal anak stonen dalam membahas isu sosial",
     image: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=1000&auto=format&fit=crop",
-    // Link disesuaikan 100% dengan database CMS
-    link: "/program/podcast/aston", 
+    // Link YouTube
+    link: "https://www.youtube.com/playlist?list=PLdSnnxk_n91Js1V4HMIbiX5pIowNIbEKN", 
   },
   {
     id: 3,
     title: "Sore di Stonen",
     desc: "Podcast yang berfokus pada suasana ngobrol yang santai dan reflektif",
     image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1000&auto=format&fit=crop",
-    // Link YouTube ditambahkan di sini
+    // Link YouTube
     link: "https://www.youtube.com/playlist?app=desktop&list=PLdSnnxk_n91LUQA8_xtmo8E_J04_KqD06", 
   },
 ];
 
 export default function PodcastSection() {
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
+    <section id="podcast" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
       
       {/* JUDUL SECTION */}
       <h2

@@ -1,9 +1,8 @@
-// _components/ForumSection.jsx
 "use client";
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link"; // Pastikan import Link ada
+import Link from "next/link"; 
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -12,6 +11,7 @@ const poppins = Poppins({
 });
 
 const DATA_POSTINGAN = [
+  // ... (Data Postingan tetap sama) ...
   {
     id: 1,
     title: "DI KOREA MUNG PINDAH TURU TOK!",
@@ -141,7 +141,7 @@ export default function ForumSection() {
   };
 
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
+    <section id="forum" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -149,7 +149,7 @@ export default function ForumSection() {
           Forum
         </h2>
         
-        {/* LINK HEADER KE HALAMAN FORUM */}
+        {/* LINK DIPERBARUI: Dihilangkan "-all" */}
         <Link 
             href="/program/forum" 
             className="text-black font-semibold underline underline-offset-4 hover:text-[#D63384] transition"
@@ -221,7 +221,7 @@ export default function ForumSection() {
                         {post.date}
                     </p>
                     
-                    {/* LINK TOMBOL KE HALAMAN FORUM */}
+                    {/* LINK DIPERBARUI: Dihilangkan "-all" */}
                     <Link 
                         href="/program/forum"
                         className="bg-[#D63384] hover:bg-[#b02a6b] text-white text-sm font-semibold py-2.5 px-6 rounded-lg w-fit transition-colors shadow-lg inline-block"

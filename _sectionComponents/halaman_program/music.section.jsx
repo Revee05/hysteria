@@ -1,4 +1,3 @@
-// _components/MusicSection.jsx
 "use client";
 
 import { useState, useRef } from "react";
@@ -13,6 +12,7 @@ const poppins = Poppins({
 
 // DATA MUSIK (Disesuaikan dengan struktur Forum)
 const MUSIC_ITEMS = [
+  // ... (Data Musik tetap sama) ...
   { 
     id: 1, 
     title: "SGRT",
@@ -127,7 +127,7 @@ export default function MusicSection() {
   };
 
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
+    <section id="music" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -135,7 +135,7 @@ export default function MusicSection() {
           Musik
         </h2>
         
-        {/* LINK HEADER KE HALAMAN MUSIK (Ganti Link Sesuai Routing) */}
+        {/* LINK DIPERBARUI: Dihilangkan "-all" */}
         <Link 
             href="/program/music" 
             className="text-black font-semibold underline underline-offset-4 hover:text-[#D63384] transition"
@@ -209,9 +209,9 @@ export default function MusicSection() {
                         {item.date}
                     </p>
                     
-                    {/* LINK TOMBOL KE DETAIL MUSIK */}
+                    {/* LINK DIPERBARUI: Dihilangkan "-all" */}
                     <Link 
-                        href={`/program/music/${item.id}`} // Contoh routing ke detail
+                        href="/program/music"
                         className="bg-[#D63384] hover:bg-[#b02a6b] text-white text-sm font-semibold py-2.5 px-6 rounded-lg w-fit transition-colors shadow-lg inline-block"
                     >
                         Ikuti Sekarang

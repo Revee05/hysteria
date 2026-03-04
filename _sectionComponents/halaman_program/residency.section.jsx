@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link"; // Tambahkan import Link
+import Link from "next/link"; 
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -17,26 +17,25 @@ const RESIDENCY_ITEMS = [
     title: "Flash Residency",
     // Gambar studio seni
     image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1000&auto=format&fit=crop",
-    link: "/program/flash-residency", // Ubah ke slug flash-residency
+    // UBAH: Langsung mengarah ke slug-nya sesuai PROGRAM_DATA
+    link: "/program/flash-residency",
   },
   {
     id: 2,
     title: "Kandang Tandang",
     // Gambar workshop kolaboratif
     image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000&auto=format&fit=crop",
-    link: "/program/kandang-tandang", // Ubah ke slug kandang-tandang
+    // UBAH: Langsung mengarah ke slug-nya sesuai PROGRAM_DATA
+    link: "/program/kandang-tandang",
   },
 ];
 
 export default function ResidencySection() {
   return (
-    // PENYESUAIAN CONTAINER:
-    // 1. px-6 md:px-10 lg:px-20 (Agar sejajar lurus)
-    // 2. max-w-[1440px] mx-auto
-    <section className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
+    // id="residensi-workshop" tetap dipertahankan agar navbar bisa auto-scroll ke sini
+    <section id="residensi-workshop" className="w-full max-w-[1440px] mx-auto px-6 md:px-10 lg:px-20 mb-20">
       
       {/* JUDUL SECTION */}
-      {/* Ukuran disamakan: text-[28px] md:text-[32px] */}
       <h2
         className={`${poppins.className} text-[28px] md:text-[32px] font-bold text-black mb-8`}
       >
@@ -67,7 +66,6 @@ export default function ResidencySection() {
             </div>
 
             {/* 2. FOOTER BAR (Judul & Panah) */}
-            {/* Background solid tetap dipertahankan sesuai desain asli, tapi dipercantik */}
             <div className="absolute bottom-0 left-0 right-0 bg-[#3E3245] p-6 md:p-8 flex items-center justify-between transition-colors duration-300 group-hover:bg-[#5a4863]">
               
               {/* Judul */}
