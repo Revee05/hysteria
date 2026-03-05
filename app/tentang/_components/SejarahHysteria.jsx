@@ -15,7 +15,7 @@ export default function SejarahHysteria({ items = [] }) {
       {historyImages.length === 0 ? <div className="text-center text-sm text-zinc-500">Belum ada data sejarah.</div> : null}
       <Swiper
         style={{ "--swiper-navigation-color": "#ff93c9" }}
-        slidesPerView={1.2}
+        slidesPerView={1.1}
         spaceBetween={20}
         freeMode={true}
         navigation={true}
@@ -26,11 +26,11 @@ export default function SejarahHysteria({ items = [] }) {
             spaceBetween: 10,
           },
           420: {
-            slidesPerView: 1.3,
+            slidesPerView: 1.6,
             spaceBetween: 10,
           },
           520: {
-            slidesPerView: 1.6,
+            slidesPerView: 2,
             spaceBetween: 10,
           },
           640: {
@@ -38,26 +38,30 @@ export default function SejarahHysteria({ items = [] }) {
             spaceBetween: 20,
           },
           768: {
-            slidesPerView: 2.1,
+            slidesPerView: 1.8,
             spaceBetween: 30,
           },
           1024: {
-            slidesPerView: 2.95,
+            slidesPerView: 2.1,
+            spaceBetween: 40,
+          },
+          1280: {
+            slidesPerView: 2.6,
             spaceBetween: 40,
           },
         }}
-        className="mySwiper w-full h-[350px] sm:h-[400px] md:h-[550px] lg:h-[600px]">
+        className="mySwiper w-full h-[270px] sm:h-[400px] md:h-[550px] lg:h-[650px]">
         {historyImages.map((item, index) => (
           <SwiperSlide
             key={item.id || index}
-            className="relative group overflow-hidden rounded-xl bg-gray-200">
+            className="relative group overflow-hidden rounded-4xl bg-gray-200">
             <div className="relative h-full">
               <Image
                 src={item.imageUrl || "/image/tim-hero.png"}
                 alt={`Sejarah Hysteria ${index + 1}`}
                 fill
                 unoptimized={!(item.imageUrl || "").startsWith("/")}
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-fill transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </SwiperSlide>
