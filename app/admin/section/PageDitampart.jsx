@@ -48,6 +48,9 @@ const INITIAL_MAIN_FORM = {
   youtubeProfile: "",
 };
 
+/** Batas ukuran file upload untuk halaman ini (dalam MB). */
+const MAX_SIZE_MB = 2;
+
 export default function PageDitampart() {
   const [active, setActive] = useState("main");  // tab aktif: "main" | "hero"
   const [loading, setLoading] = useState(true);
@@ -129,14 +132,14 @@ export default function PageDitampart() {
   const handleHeroFilesChange = (id, files, clearImage = false) => {
     setHeroItems((prev) => prev.map((item) =>
       item.id === id
-        ? { ...item, files, ...(clearImage ? { imageUrl: null, pendingClear: true } : {}) }
+        ? { ...item, files, dirty: true, ...(clearImage ? { imageUrl: null, pendingClear: true } : {}) }
         : item
     ));
   };
 
   /** Update field teks (title/subtitle) sebuah item hero. */
   const handleHeroItemChange = (id, changes) => {
-    setHeroItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...changes } : item)));
+    setHeroItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...changes, dirty: true } : item)));
   };
 
   /**
@@ -258,7 +261,7 @@ export default function PageDitampart() {
             const payload = await res.json().catch(() => ({}));
             throw new Error(payload.error?.message || `Gagal menyimpan hero: ${item.label}`);
           }
-        } else if (item.pendingClear || item.title !== undefined || item.subtitle !== undefined) {
+        } else if (item.pendingClear || item.dirty) {
           const body = { title: item.title || "", subtitle: item.subtitle || "" };
           if (item.pendingClear) body.imageUrl = null;
           const res = await fetch(`/api/admin/platform/${PLATFORM_SLUG}/images/${item.apiKey}`, {
@@ -273,7 +276,7 @@ export default function PageDitampart() {
         }
       }
 
-      setHeroItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false })));
+      setHeroItems((prev) => prev.map((item) => ({ ...item, files: [], pendingClear: false, dirty: false })));
       showToast("Hero berhasil disimpan", "success");
     } catch (err) {
       console.error(err);
@@ -335,6 +338,8 @@ export default function PageDitampart() {
               coverItems={mainItems}
               onSubmit={handleSaveMain}
               submitting={mainSaving}
+              maxSizeMB={MAX_SIZE_MB}
+              mainImageLabel="ukuran 480x600 px, - format file .webp"
             />
           </div>
         ) : (
@@ -345,6 +350,7 @@ export default function PageDitampart() {
               onItemChange={handleHeroItemChange}
               onSubmit={handleSaveHero}
               submitting={heroSaving}
+              maxSizeMB={MAX_SIZE_MB}
             />
           </div>
         )}

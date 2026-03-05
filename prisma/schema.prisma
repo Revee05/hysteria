@@ -221,6 +221,7 @@ model CategoryItem {
   eventCategories    EventCategory[]
   platformCategories PlatformCategory[]
   eventOrganizers    EventOrganizer[]
+  platformContents   PlatformContent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -298,6 +299,7 @@ model Platform {
 
   images     PlatformImage[]
   categories PlatformCategory[]
+  contents   PlatformContent[]
 
   @@index([slug])
 }
@@ -345,6 +347,52 @@ model PlatformImage {
 
   @@unique([platformId, key])
   @@index([platformId])
+  @@index([type])
+}
+
+model PlatformContent {
+  id Int @id @default(autoincrement())
+
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  // Kategori konten — mengacu ke CategoryItem (sub-nav platform)
+  categoryItem   CategoryItem? @relation(fields: [categoryItemId], references: [id], onDelete: SetNull)
+  categoryItemId Int?
+
+  title    String   @db.VarChar(500)
+  url      String?  @db.VarChar(500)
+  year     Int?
+  tags     String[]             // array tag bebas, disimpan as text[]
+  order    Int      @default(0)
+  isActive Boolean  @default(true)
+
+  images PlatformContentImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([platformId])
+  @@index([categoryItemId])
+  @@index([order])
+  @@index([isActive])
+}
+
+model PlatformContentImage {
+  id Int @id @default(autoincrement())
+
+  content   PlatformContent @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId Int
+
+  imageUrl String? @db.VarChar(500)
+  type     String  @default("thumbnail") @db.VarChar(50) // thumbnail | gallery | cover
+  alt      String? @db.VarChar(255)
+  order    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contentId])
   @@index([type])
 }
 

@@ -69,7 +69,7 @@ export default function HeadSection({
         </div>
 
         {/* ================= IMAGE AREA ================= */}
-        <div className="flex justify-center md:justify-end order-first md:order-last">
+        <div className="mt-6 md:mt-0 flex justify-center md:justify-end order-first md:order-last">
 
           {/* ===== CASE: SATU GAMBAR ===== */}
           {images.length === 1 ? (

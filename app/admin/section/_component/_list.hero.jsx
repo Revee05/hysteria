@@ -36,8 +36,9 @@ function ChevronIcon({ open }) {
  *  items         – array of { id, label, title, subtitle, files }
  *  onFilesChange – (id, newFiles) => void
  *  onItemChange  – (id, changes) => void
+ *  maxSizeMB     – number  max upload size in MB
  */
-export default function ListHero({ items = [], onFilesChange, onItemChange = () => {} }) {
+export default function ListHero({ items = [], onFilesChange, onItemChange = () => {}, maxSizeMB }) {
   // Hanya satu item yang bisa terbuka sekaligus; null = semua tertutup
   const [openId, setOpenId] = useState(null);
 
@@ -109,7 +110,7 @@ export default function ListHero({ items = [], onFilesChange, onItemChange = () 
                     existingUrl={item.imageUrl || null}  // tampilkan gambar tersimpan jika ada
                     onClearExisting={() => onFilesChange(item.id, [], true)}  // true = tandai pendingClear di parent
                     accept="image/*"
-                    maxSizeMB={5}
+                    maxSizeMB={maxSizeMB}
                   />
                 </div>
               </div>

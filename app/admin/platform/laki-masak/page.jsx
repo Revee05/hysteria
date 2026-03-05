@@ -17,8 +17,6 @@ import {
   buildPlatformColumns,
   lakiMasakDummyData,
   filterLakiMasakData,
-  homecookedDummyData,
-  komikRamuanDummyData,
 } from '../_handler/data';
 
 const categories = [
@@ -37,36 +35,61 @@ export default function LakiMasakPage() {
   const [modalTitle, setModalTitle] = useState('');
   const [modalInitial, setModalInitial] = useState({});
   const [modalPlaceholders, setModalPlaceholders] = useState({});
+  const [modalApiEndpoint, setModalApiEndpoint] = useState('');
 
-  const [platformModal, setPlatformModal] = useState({ open: false, title: '', subtitle: '', items: [] });
+  const [platformModal, setPlatformModal] = useState({ open: false, title: '', subtitle: '', categoryItemSlug: '', showImageUpload: false });
 
   const debouncedSearch = useDebounce(searchQuery);
 
   const handleEdit   = (row) => console.log('Edit:', row);
   const handleDelete = (row) => console.log('Delete:', row);
 
-  const openModalForCategory = (cat) => {
-    // cat id 1 & 2 → PlatformIndex modal
+  const openModalForCategory = async (cat) => {
     if (cat.id === 1) {
-      setPlatformModal({ open: true, title: 'Homecooked', subtitle: 'Kelola konten Homecooked', items: homecookedDummyData });
+      setPlatformModal({ open: true, title: 'Homecooked', subtitle: 'Kelola konten Homecooked', categoryItemSlug: 'homecooked', showImageUpload: true });
       return;
     }
     if (cat.id === 2) {
-      setPlatformModal({ open: true, title: 'Komik Ramuan', subtitle: 'Kelola konten Komik Ramuan', items: komikRamuanDummyData });
+      setPlatformModal({ open: true, title: 'Komik Ramuan', subtitle: 'Kelola konten Komik Ramuan', categoryItemSlug: 'komik-ramuan', showImageUpload: true });
       return;
     }
     // cat id 3 → LinkForm modal (Pre-Order)
-    setModalTitle(`Kelola ${cat.title}`);
-    setModalInitial({ categoryId: cat.id, categoryTitle: cat.title });
+    const endpoint = '/api/admin/platform-content/laki-masak/pre-order';
     const placeholdersObj = cat.id === 3 ? { input: 'https://api.whatsapp.com/send/?phone=62' } : { input: 'text . . . . . ' };
+
+    let currentUrl = '';
+    try {
+      const res = await fetch(endpoint);
+      if (res.ok) {
+        const data = await res.json();
+        currentUrl = data?.item?.url || '';
+      }
+    } catch (err) {
+      // open modal with empty value if fetch fails
+    }
+
+    setModalTitle(`Kelola ${cat.title}`);
+    setModalInitial({ categoryId: cat.id, categoryTitle: cat.title, input: currentUrl });
     setModalPlaceholders(placeholdersObj);
+    setModalApiEndpoint(endpoint);
     setModalOpen(true);
   };
 
-  const handleSaveFromForm = async (data) => {
-    console.log('Saved from LinkForm (LakiMasak):', data, modalInitial);
-    // TODO: integrate saving logic (API call / state update)
-    setModalOpen(false);
+  const handleSaveFromForm = async ({ name }) => {
+    try {
+      const res = await fetch(modalApiEndpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: name }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to save');
+      }
+    } catch (err) {
+      console.error('Error saving link:', err);
+      throw err;
+    }
   };
 
   const columns = useMemo(
@@ -143,8 +166,8 @@ export default function LakiMasakPage() {
               </div>
 
               {/* filter */}
-              <div className="flex flex-col md:flex-row items-center gap-3 mb-4">
-                <div className="w-full">
+              <div className="flex flex-wrap md:flex-row items-center gap-3 mb-4">
+                <div className="w-full md:w-auto">
                   <SearchField
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -159,21 +182,19 @@ export default function LakiMasakPage() {
                   />
                 </div>
                 <SelectField
-                  className="rounded-md bg-white border border-gray-300 shadow-sm"
+                  className="w-full md:w-auto rounded-md bg-white border border-gray-300 shadow-sm"
                   value={subKategori}
                   onChange={setSubKategori}
                   options={subKategoriLakiMasakOptions}
                   emptyOptionLabel="Semua Sub Kategori"
-                  sx={{ minWidth: 200 }}
                 />
                 <SelectField
-                  className="rounded-md bg-white border border-gray-300 shadow-sm"
+                  className="w-[206px] md:w-auto rounded-md bg-white border border-gray-300 shadow-sm"
                   value={statusFilter}
                   onChange={setStatusFilter}
                   options={statusOptions}
                   emptyOptionLabel="Semua Status"
-                  sx={{ minWidth: 180 }}
-                />
+                  />
                 <PageFilter perPage={perPage} onChange={setPerPage} />
               </div>
 
@@ -187,15 +208,12 @@ export default function LakiMasakPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                   <div className="absolute inset-0 bg-black/50" onClick={() => setPlatformModal(p => ({ ...p, open: false }))} />
                   <div className="relative z-10 w-full max-h-[95vh] overflow-auto px-4">
-                    <div className="mx-auto w-full sm:max-w-lg md:max-w-4xl p-2 bg-white rounded-lg shadow-lg">
+                    <div className="mx-auto w-full sm:max-w-lg md:max-w-6xl p-2 bg-white rounded-lg shadow-lg">
                       <PlatformIndex
-                        title={platformModal.title}
+                        platformSlug="laki-masak"
+                        categoryItemSlug={platformModal.categoryItemSlug}                        showImageUpload={platformModal.showImageUpload}                        title={platformModal.title}
                         subtitle={platformModal.subtitle}
-                        actionLabel="Tambah"
-                        onAdd={() => console.log('Tambah', platformModal.title)}
-                        items={platformModal.items}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
+                        actionLabel="+add"
                         searchPlaceholder="Cari konten..."
                         close={() => setPlatformModal(p => ({ ...p, open: false }))}
                       />

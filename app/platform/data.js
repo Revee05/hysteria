@@ -46,9 +46,18 @@ export const PLATFORM_DATA = {
             cardType: 'poster',
             linkUrl: '#',
             items: [
-              { src: '/image/DummyPoster.webp', alt: 'Episode 1', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Akan Berlangsung', meta: 'Sabtu, 8 Maret 2026'},
-              { src: '/image/DummyPoster.webp', alt: 'Episode 2', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Akan Berlangsung', meta: 'Sabtu, 15 Maret 2026'},
+              { src: '/image/bakso_bakar.webp', alt: 'Episode 1', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Akan Berlangsung', meta: 'Sabtu, 8 Maret 2026'},
+              { src: '/image/artist.webp', alt: 'Episode 2', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Sedang Berlangsung', meta: 'Sabtu, 15 Maret 2026'},
               { src: '/image/DummyPoster.webp', alt: 'Episode 3', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Telah Berakhir', meta: 'Sabtu, 22 Maret 2026'},
+              { src: '/image/bakso_malang.jpg', alt: 'Episode 1', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Akan Berlangsung', meta: 'Sabtu, 8 Maret 2026'},
+              { src: '/image/DummyPoster.webp', alt: 'Episode 2', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Sedang Berlangsung', meta: 'Sabtu, 15 Maret 2026'},
+              { src: '/image/artist.webp', alt: 'Episode 3', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Telah Berakhir', meta: 'Sabtu, 22 Maret 2026'},
+              { src: '/image/DummyPoster.webp', alt: 'Episode 1', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Akan Berlangsung', meta: 'Sabtu, 8 Maret 2026'},
+              { src: '/image/bakso_malang.jpg', alt: 'Episode 2', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Sedang Berlangsung', meta: 'Sabtu, 15 Maret 2026'},
+              { src: '/image/DummyPoster.webp', alt: 'Episode 3', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Telah Berakhir', meta: 'Sabtu, 22 Maret 2026'},
+              { src: '/image/artist.webp', alt: 'Episode 1', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Akan Berlangsung', meta: 'Sabtu, 8 Maret 2026'},
+              { src: '/image/DummyPoster.webp', alt: 'Episode 2', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Sedang Berlangsung', meta: 'Sabtu, 15 Maret 2026'},
+              { src: '/image/bakso_malang.jpg', alt: 'Episode 3', title: 'Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~', badge: 'Telah Berakhir', meta: 'Sabtu, 22 Maret 2026'},
             ]
           },
           {
@@ -57,7 +66,7 @@ export const PLATFORM_DATA = {
             cardType: 'video',
             linkUrl: '#',
             items: [
-              { src: '/image/video.webp', alt: 'Anitalk 1', title: 'Anitalk Episode 1', timestamp: '22.00' },
+              { src: 'https://youtu.be/D0UnqGm_miA', alt: 'Anitalk 1', title: 'Anitalk Episode 1', timestamp: '22.00' },
               { src: '/image/video.webp', alt: 'Anitalk 2', title: 'Anitalk Episode 2', timestamp: '22.00' },
               { src: '/image/video.webp', alt: 'Anitalk 3', title: 'Anitalk Episode 3', timestamp: '22.00' },
             ]
@@ -82,7 +91,7 @@ export const PLATFORM_DATA = {
         image: '/image/list-item.jpg',
         description: 'Menceritakan seni budaya dan kehidupan kampung melalui kerja kolaborasi dengan bermain.',
         layout: 'grid',
-        filters: ['Having Fun Artlab', 'Peltoe'],
+        filters: ['Having Fun Artlab', 'Peltoe', 'test1', 'test2', 'test3', 'test4', 'test5'],
         items: [
           { src: '/image/DummyPoster.webp', title: 'AI SUNRISE WALK MERAPI', tag: 'Having Fun Artlab', badge: null, meta: null },
           { src: '/image/DummyPoster.webp', title: 'AI SUNRISE WALK MERAPI', tag: 'Having Fun Artlab', badge: null, meta: null },

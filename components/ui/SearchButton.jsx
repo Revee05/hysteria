@@ -131,12 +131,12 @@ export default function SearchButton({
         <button
           aria-label="Search"
           onClick={() => setOpen(true)}
-          className={`p-2 rounded-md text-zinc-700 dark:text-zinc-50 ${buttonClassName}`}
+          className={`p-2 rounded-md text-zinc-700 dark:text-zinc-50 hover:md:text-pink-500 ${buttonClassName}`}
         >
           {renderIconNode()}
         </button>
       ) : (
-        <div className={`flex items-center gap-2 bg-white dark:bg-gray-500/10 border border-zinc-50 dark:border-zinc-50 rounded-md px-2 py-1 ${openWrapperClassName}`}>
+        <div className={`flex text-white items-center gap-2 bg-white dark:bg-gray-500/10 border border-zinc-50 dark:border-zinc-50 rounded-md px-2 py-1 ${openWrapperClassName}`}>
           {renderIconNode()}
 
           <input
@@ -154,7 +154,7 @@ export default function SearchButton({
               setValue("");
               if (onSearch) onSearch("");
             }}
-            className={`p-1 rounded text-zinc-700 dark:text-zinc-50 ${closeButtonClassName}`}
+            className={`p-2 rounded text-zinc-700 dark:text-zinc-50 cursor-pointer dark:hover:text-pink-500 ${closeButtonClassName}`}
           >
             {renderCloseNode()}
           </button>

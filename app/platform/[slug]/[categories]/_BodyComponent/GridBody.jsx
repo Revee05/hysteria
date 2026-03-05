@@ -17,7 +17,7 @@ import PosterCard from "./cards/PosterCard";
  *   filters : string[]  (unique tag labels for filtering)
  */
 
-const ITEMS_PER_PAGE = 15; // 5 kolom × 3 baris
+const ITEMS_PER_PAGE = 10; // 5 kolom × 2 baris
 
 export default function GridBody({ items = [], filters = [] }) {
   const [search, setSearch] = useState("");
@@ -121,7 +121,7 @@ export default function GridBody({ items = [], filters = [] }) {
 
       {/* Grid — Tailwind-based cards */}
       {paginatedItems.length > 0 ? (
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
           {paginatedItems.map((item, i) => (
             <PosterCard
               key={i}

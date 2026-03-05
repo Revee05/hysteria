@@ -36,8 +36,9 @@ function ChevronIcon({ open }) {
  * Props:
  *  items         – array of { id, label, files }
  *  onFilesChange – (id, newFiles) => void
+ *  maxSizeMB     – number  max upload size in MB
  */
-export default function ListCover({ items = [], onFilesChange }) {
+export default function ListCover({ items = [], onFilesChange, maxSizeMB }) {
   // Hanya satu item yang bisa terbuka sekaligus; null = semua tertutup
   const [openId, setOpenId] = useState(null);
 
@@ -79,7 +80,7 @@ export default function ListCover({ items = [], onFilesChange }) {
                   existingUrl={item.imageUrl || null}  // tampilkan gambar tersimpan jika ada
                   onClearExisting={() => onFilesChange(item.id, [], true)}  // true = tandai pendingClear di parent
                   accept="image/*"
-                  maxSizeMB={5}
+                  maxSizeMB={maxSizeMB}
                 />
               </div>
             )}

@@ -229,11 +229,11 @@ export const artlabDummyData = [
 
 // anitalk
 export const anitalkDummyData = [
-  { id: 101, no: 1, title: 'Anitalk Eps.01 — Perjalanan Stonen 29', year:2026 },
-  { id: 102, no: 2, title: 'Anitalk Eps.02 — Di Balik Layar Stonen 29', year:2026 },
-  { id: 103, no: 3, title: 'Anitalk Eps.03 — Kolaborasi dengan Musisi Lokal', year:2026 },
-  { id: 104, no: 4, title: 'Anitalk Eps.04 — Eksplorasi Tema Sosial dalam Podcast', year:2026 },
-  { id: 105, no: 5, title: 'Anitalk Eps.05 — Merayakan Keberagaman Melalui Podcast', year:2026 },
+  { id: 101, no: 1, title: 'Anitalk Eps.01 — Perjalanan Stonen 29', url: '', year:2026 },
+  { id: 102, no: 2, title: 'Anitalk Eps.02 — Di Balik Layar Stonen 29', url: '', year:2026 },
+  { id: 103, no: 3, title: 'Anitalk Eps.03 — Kolaborasi dengan Musisi Lokal', url: '', year:2026 },
+  { id: 104, no: 4, title: 'Anitalk Eps.04 — Eksplorasi Tema Sosial dalam Podcast', url: '', year:2026 },
+  { id: 105, no: 5, title: 'Anitalk Eps.05 — Merayakan Keberagaman Melalui Podcast', url: '', year:2026 },
 ];
 
 // ── Filter ────────────────────────────────────────────────────

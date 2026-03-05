@@ -291,7 +291,7 @@ export default function StatusManagement() {
 
   return (
     <PermissionGate requiredPermissions={["status.get"]}>
-      <div className="mx-4 sm:mx-6 lg:mx-12 p-6 bg-white rounded-lg shadow-sm max-w-full">
+      <div className="mx-0 md:mx-2 p-6 bg-white rounded-lg shadow-lg max-w-screen-lg mx-auto min-h-screen">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-zinc-900">User Status Management</h1>
           <p className="text-sm text-zinc-600 mt-1">Manage available user statuses for the system</p>

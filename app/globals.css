@@ -120,6 +120,9 @@ html,
 
 @theme {
   --font-poppins: var(--font-poppins);
+
+  /* Skeleton shimmer sweep animation */
+  --animate-shimmer: shimmer 1.8s ease-in-out infinite;
 }
 
 /* Modern scrollbar (scoped to `body` and `.scrollable`) */

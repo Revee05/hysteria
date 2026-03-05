@@ -10,6 +10,7 @@
  *  onItemChange  – (id, changes) => void  — untuk update title/subtitle
  *  onSubmit      – (items) => void  — dipanggil dengan items terkini saat tombol Simpan diklik
  *  submitting    – boolean  — true selama proses save berlangsung
+ *  maxSizeMB     – number  max upload size in MB (set by parent Page)
  */
 "use client";
 import React from "react";
@@ -22,6 +23,7 @@ export default function FormHero({
   onItemChange = () => {},
   onSubmit = () => {},
   submitting = false,
+  maxSizeMB = '',
 }) {
   return (
     <div className="bg-white rounded">
@@ -29,6 +31,7 @@ export default function FormHero({
         items={items}
         onFilesChange={onFilesChange}
         onItemChange={onItemChange}
+        maxSizeMB={maxSizeMB}
       />
 
       <div className="mt-4 flex justify-end">
