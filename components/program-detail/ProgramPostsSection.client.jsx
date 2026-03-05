@@ -60,7 +60,7 @@ export default function ProgramPostsSection({
           {posts.map((post) => (
             <InstagramPostCard
               key={post.id}
-              href={`/program/${programSlug}/post/${post.id}`}
+              href={`/program/${programSlug}/${post.id}`}
               thumbnailUrl={post.thumbnailUrl}
               alt={post.alt ?? "Instagram thumbnail"}
             />

@@ -34,6 +34,12 @@ import { usePathname } from "next/navigation";
 import ArticlesPage from "../articles/page.jsx";
 import CreateArticlePage from "../articles/create/page.jsx";
 
+// program
+import ProgramPage from "@/app/admin/programs/page.jsx";
+import CreateProgramPage from "@/app/admin/programs/create/page.jsx";
+import CreateHysteriaPage from "@/app/admin/programs/create-hysteria/page.jsx";
+import EditPodcastPage from "@/app/admin/programs/podcast/page.jsx";
+
 export default function AdminShell({ children }) {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
@@ -98,6 +104,16 @@ export default function AdminShell({ children }) {
 
       case "event":
         return <EventPage />;
+
+      case "program_menu":
+      case "program.semua_postingan":
+        return <ProgramPage />;
+      case "program.tambah_postingan":
+        return <CreateProgramPage />;
+        case "program.tambah_hysteria_berkelana":
+        return <CreateHysteriaPage />;
+      case "program.edit_podcast":
+        return <EditPodcastPage />;
         
       case "dashboard":
       default:

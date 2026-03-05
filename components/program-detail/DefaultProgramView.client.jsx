@@ -5,6 +5,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { notFound, useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Poppins } from 'next/font/google';
+import Link from 'next/link';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -185,7 +186,12 @@ export default function DefaultProgramView({ actualSlug }) {
                         hasSidebar ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 sm:justify-items-start' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6'
                     }`}>
                         {currentDisplayItems.map((item) => (
-                            <div key={item.id} className="group relative rounded-[10px] overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full" style={{ maxWidth: '210px', height: '290px', background: 'linear-gradient(180deg, #F2C94C 0%, #F2994A 100%)' }}>
+                            <Link 
+                                  href={`/program/${actualSlug}/${item.id}`} 
+                                  key={item.id} 
+                                  className="group relative rounded-[10px] overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 w-full block" 
+                                  style={{ maxWidth: '210px', height: '290px', background: 'linear-gradient(180deg, #F2C94C 0%, #F2994A 100%)' }}
+                              >
                                 <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-0 transition-opacity duration-300 group-hover:opacity-0"></div>
                                 <div className="relative z-10 p-4 h-full flex flex-col justify-between text-white transition-opacity duration-300 group-hover:opacity-0">
                                     <div className="self-start">{item.isChoice && <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-2 py-1 rounded backdrop-blur-sm border border-white/10">Pilihan</span>}</div>
@@ -196,10 +202,11 @@ export default function DefaultProgramView({ actualSlug }) {
                                         <span className="bg-white text-[#D63384] text-[10px] font-bold px-3 py-1 rounded-full w-max mb-2 shadow-sm">{item.status}</span>
                                         <h3 className="font-bold text-sm leading-snug text-white mb-1">{item.title}</h3>
                                         <span className="text-[10px] font-medium text-gray-200 block mb-3">{item.date}</span>
-                                        {item.status === 'Akan Berlangsung' && <button className="bg-[#D63384] hover:bg-[#b52a6f] text-white text-[11px] py-2 px-4 rounded-md font-semibold w-max transition-colors shadow-md cursor-pointer">Ikuti Sekarang</button>}
+                              
+                                        {item.status === 'Akan Berlangsung' && <span className="bg-[#D63384] hover:bg-[#b52a6f] text-white text-[11px] py-2 px-4 rounded-md font-semibold w-max transition-colors shadow-md cursor-pointer block text-center">Ikuti Sekarang</span>}
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
