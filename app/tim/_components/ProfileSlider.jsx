@@ -20,8 +20,8 @@ export default function ProfileSlider({ profiles, title, slug }) {
   };
 
   return (
-    <div className="w-full py-16 relative">
-      <div className="flex items-center justify-between mb-12 mx-auto px-4 md:px-24 max-w-[1920px]">
+    <div className="w-full py-10 md:py-16 relative">
+      <div className="flex items-center justify-between mb-8 md:mb-12 mx-auto px-4 md:px-24 max-w-[1920px]">
         <button
           onClick={() => scroll("left")}
           className="hidden md:flex w-[60px] h-[60px] bg-white rounded-full items-center justify-center shadow-lg hover:opacity-80 transition-opacity"
@@ -34,7 +34,11 @@ export default function ProfileSlider({ profiles, title, slug }) {
           />
         </button>
 
-        <h2 className="text-center font-bold text-[32px] md:text-[40px] leading-[1.5] text-black font-poppins" id={slug}>{title}</h2>
+        <h2
+          className="text-center font-bold text-[24px] md:text-[40px] leading-tight md:leading-[1.5] text-black font-poppins"
+          id={slug}>
+          {title}
+        </h2>
 
         <button
           onClick={() => scroll("right")}
@@ -52,12 +56,12 @@ export default function ProfileSlider({ profiles, title, slug }) {
       <div className="relative w-full max-w-[1920px] mx-auto">
         <div
           ref={scrollContainerRef}
-          className="flex gap-[44px] overflow-x-auto snap-x snap-mandatory pb-12 px-4 md:px-24 no-scrollbar scroll-smooth"
+          className="flex gap-4 md:gap-[44px] overflow-x-auto snap-x snap-mandatory pb-8 md:pb-12 px-4 md:px-24 no-scrollbar scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {profiles.map((profile, index) => (
             <div
               key={index}
-              className="flex-none w-[300px] md:w-[285px] snap-center">
+              className="flex-none w-[145px] md:w-[285px] snap-center">
               <ProfileCard {...profile} />
             </div>
           ))}

@@ -35,7 +35,7 @@ export default function TentangSettingsPage() {
             "& .MuiTabs-indicator": { backgroundColor: "#db2777" },
           }}>
           <Tab
-            label="Page Hero"
+            label="Hero Page Tentang"
             id="tab-tentang-hero"
             aria-controls="tabpanel-tentang-hero"
             sx={{ minWidth: "auto" }}

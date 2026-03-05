@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { IconDashboard, IconUsers, IconSettings, IconSection, IconPlatform, IconEvent, IconPost, IconSocial, IconUserManagement, IconPermission, IconStatus, IconHero, IconCategorySmall, IconDiversity } from "../../../components/ui/icon";
+import { IconDashboard, IconUsers, IconSettings, IconSection, IconPlatform, IconEvent, IconPost, IconSocial, IconUserManagement, IconPermission, IconStatus, IconHero, IconCategorySmall, IconDiversity, IconBusiness } from "../../../components/ui/icon";
 
 export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onNavigate, currentView }) {
   const [openKeys, setOpenKeys] = useState({});
@@ -23,7 +23,7 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
     },
     { key: "category", label: "Category", view: "category", icon: IconCategorySmall, enabled: true },
 
-    { 
+    {
       key: "page",
       label: "Page",
       view: "page",
@@ -38,7 +38,8 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
       ],
     },
 
-    { key: "platform",
+    {
+      key: "platform",
       label: "Platform",
       view: "platform",
       icon: IconPlatform,
@@ -47,7 +48,8 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
         { key: "hysteria-artlab", label: "Hysteria Artlab", view: "platform.hysteria-artlab", icon: IconPlatform, enabled: true },
         { key: "ditampart", label: "Ditampart", view: "platform.ditampart", icon: IconPlatform, enabled: true },
         { key: "laki-masak", label: "Laki Masak", view: "platform.laki-masak", icon: IconPlatform, enabled: true },
-    ]},
+      ],
+    },
 
     { key: "event", label: "Event", view: "event", icon: IconEvent, enabled: true },
     { key: "article", label: "Artikel", view: "article", icon: IconPost, enabled: true },
@@ -59,7 +61,7 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
       enabled: true,
       children: [
         { key: "team", label: "Team", view: "team", icon: IconDiversity, enabled: true },
-        { key: "tentang", label: "Tentang", view: "tentang", icon: IconDiversity, enabled: true },
+        { key: "tentang", label: "Tentang", view: "tentang", icon: IconBusiness, enabled: true },
       ],
     },
   ];

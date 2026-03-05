@@ -17,9 +17,9 @@ const CATEGORY_MAPPING = {
 };
 
 const ABOUT_MENU_ITEMS = [
-  { href: "/about#visi", label: "Visi dan Misi" },
-  { href: "/about#sejarah", label: "Sejarah Hysteria" },
-  { href: "/about#panduan-visual", label: "Panduan Visual" },
+  { href: "/tentang#visi-misi", label: "Visi dan Misi" },
+  { href: "/tentang#sejarah", label: "Sejarah Hysteria" },
+  { href: "/tentang#panduan-visual", label: "Panduan Visual" },
 ];
 
 const ABOUT_MENU_MOBILE_ITEMS = [
