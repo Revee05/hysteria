@@ -14,18 +14,31 @@ export default function SejarahHysteria({ items = [] }) {
     <div className="w-full px-4">
       {historyImages.length === 0 ? <div className="text-center text-sm text-zinc-500">Belum ada data sejarah.</div> : null}
       <Swiper
+        style={{ "--swiper-navigation-color": "#ff93c9" }}
         slidesPerView={1.2}
         spaceBetween={20}
         freeMode={true}
         navigation={true}
         modules={[FreeMode, Navigation]}
         breakpoints={{
+          320: {
+            slidesPerView: 1.1,
+            spaceBetween: 10,
+          },
+          420: {
+            slidesPerView: 1.3,
+            spaceBetween: 10,
+          },
+          520: {
+            slidesPerView: 1.6,
+            spaceBetween: 10,
+          },
           640: {
-            slidesPerView: 2.2,
+            slidesPerView: 1.5,
             spaceBetween: 20,
           },
           768: {
-            slidesPerView: 3.2,
+            slidesPerView: 2.1,
             spaceBetween: 30,
           },
           1024: {
@@ -33,7 +46,7 @@ export default function SejarahHysteria({ items = [] }) {
             spaceBetween: 40,
           },
         }}
-        className="mySwiper w-full h-[600px]">
+        className="mySwiper w-full h-[350px] sm:h-[400px] md:h-[550px] lg:h-[600px]">
         {historyImages.map((item, index) => (
           <SwiperSlide
             key={item.id || index}

@@ -543,7 +543,7 @@ export default function UserManagement() {
 
   return (
     <PermissionGate requiredPermissions={["users.read"]}>
-    <div className="mx-4 sm:mx-6 lg:mx-12 p-6 bg-white rounded-lg shadow-sm max-w-full">
+    <div className="md:mx-2 p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-screen-lg min-h-screen">
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-zinc-900">User Management</h1>
         <p className="text-sm text-zinc-600 mt-1">Manage system users and their roles</p>

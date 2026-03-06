@@ -65,7 +65,7 @@ export default function TimPage() {
   const sliderCategories = orderedCategories.slice(1);
 
   return (
-    <main className={`${poppins.variable} font-sans bg-white min-h-screen pb-32`}>
+    <main className={`${poppins.variable} font-sans bg-white min-h-screen pb-20 md:pb-32`}>
       <TimHero
         imageUrl={hero.imageUrl}
         title={hero.title}
@@ -73,10 +73,10 @@ export default function TimPage() {
       />
 
       {/* Section 1: Pengelola Hysteria (Grid) */}
-      <section className="py-20 relative px-4 md:px-0">
-        <div className="max-w-[1400px] mx-auto mt-12 md:mt-24">
+      <section className="py-12 md:py-20 relative px-4 md:px-0">
+        <div className="max-w-[1400px] mx-auto mt-8 md:mt-24 text-center md:text-left">
           <h2
-            className="text-center font-bold text-[32px] md:text-[40px] leading-[1.5] mb-16 text-black font-poppins"
+            className="text-center font-bold text-[24px] md:text-[40px] leading-tight md:leading-[1.5] mb-8 md:mb-16 text-black font-poppins"
             id={primaryCategory?.slug}>
             {primaryCategory?.name || "Pengelola Hysteria"}
           </h2>
@@ -84,7 +84,7 @@ export default function TimPage() {
           {loading && !primaryCategory ? (
             <div className="text-center text-sm text-zinc-500">Memuat data tim...</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-x-[44px] gap-y-16 justify-items-center px-14">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-[44px] gap-y-8 md:gap-y-16 justify-items-center md:px-14">
               {(primaryCategory?.members || []).map((member) => (
                 <ProfileCard
                   key={member.id}

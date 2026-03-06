@@ -16,7 +16,9 @@ const seeds = [
   // require("./010-team.js"),
   // require("./011-platform-permissions.js"),
   // require("./012-platform-seed.js"),
-  require("./013-platform-categories-seed.js"),
+  // require("./013-platform-categories-seed.js"),
+  require("./014-event-seed.js"),
+  require("./015-tentang-default-seed.js"),
 ];
 
 async function main() {

@@ -69,24 +69,15 @@ export default function HeroSettingsTab() {
     setSaving(true);
 
     try {
-      let options;
+      const formData = new FormData();
+      formData.append("title", form.title || "");
+      formData.append("subtitle", form.subtitle || "");
+      if (clearImage) formData.append("clearImage", "true");
       if (typeof File !== "undefined" && form.imageFile instanceof File) {
-        const formData = new FormData();
-        formData.append("title", form.title || "");
-        formData.append("subtitle", form.subtitle || "");
         formData.append("imageUrl", form.imageFile);
-        options = { method: "PUT", body: formData };
-      } else {
-        options = {
-          method: "PUT",
-          body: JSON.stringify({
-            title: form.title,
-            subtitle: form.subtitle,
-            ...(clearImage ? { clearImage: true } : {}),
-            ...(form.imageUrl?.trim() ? { imageUrl: form.imageUrl.trim() } : {}),
-          }),
-        };
       }
+
+      const options = { method: "PUT", body: formData };
 
       const res = await apiCall(`/api/admin/page-hero/${PAGE_SLUG}`, options);
       const json = await res.json().catch(() => null);
@@ -142,20 +133,8 @@ export default function HeroSettingsTab() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1">Image URL</label>
-                    <input
-                      type="text"
-                      value={form.imageUrl}
-                      onChange={(event) => {
-                        setClearImage(false);
-                        setForm((prev) => ({ ...prev, imageUrl: event.target.value }));
-                      }}
-                      className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1">Upload Gambar</label>
+                    <label className="block text-sm font-medium text-zinc-700 mb-1">Upload Gambar (opsional)</label>
+                    <p className="mb-2 text-xs text-zinc-500">Placeholder: pilih file gambar hero bila ingin mengganti gambar saat ini.</p>
                     <input
                       type="file"
                       accept="image/*"
@@ -166,6 +145,7 @@ export default function HeroSettingsTab() {
                       }}
                       className="block w-full text-sm text-zinc-600 file:mr-3 file:rounded file:border-0 file:bg-pink-50 file:px-3 file:py-2 file:text-pink-700 hover:file:bg-pink-100"
                     />
+                    <p className="mt-1 text-xs text-zinc-500">Opsional. Maksimal 5MB. Jika dipilih, upload akan menggantikan gambar hero saat ini.</p>
                     <div className="mt-2">
                       <button
                         type="button"

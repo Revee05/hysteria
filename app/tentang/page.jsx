@@ -12,14 +12,14 @@ const poppins = Poppins({
 });
 
 export default function TentangPage() {
-  const defaultDescription = "Sebagai laboratorium bersama dan diharapkan memberikan dampak perubahan dengan penekanan kreativitas, Hysteria memimpikan terwujudnya ekosisem seni dan kreatifitas yang sehat, menyejahterakan, dan berkelanjutan. Dibentuk sejak 11 September 2004 Hysteria selain produksi artistik juga memfasilitasi pertemuan lintas disipliner dalam skala lokal hingga global untuk mencari trobosan-trobosan dalam persoalan kreatifitas, seni, komunitas, anak muda, dan isu kota.";
+  const defaultDescription = "Tentang Hysteria";
   const [loading, setLoading] = useState(true);
   const [heroData, setHeroData] = useState({
     title: "Tentang Hysteria",
     subtitle: "Hysteria , Colaboratorium and Creative Impact Hub",
     imageUrl: "/image/tim-hero.png",
   });
-  const [visiContent, setVisiContent] = useState("Terwujudnya ekosistem seni dan kreativitas yang sehat, menyejahterakan, dan berkelanjutan");
+  const [visiContent, setVisiContent] = useState("Misi Hysteria");
   const [descriptionContent, setDescriptionContent] = useState(defaultDescription);
   const [misiText, setMisiText] = useState("");
   const [sejarahItems, setSejarahItems] = useState([]);
@@ -80,7 +80,7 @@ export default function TentangPage() {
       .map((item) => item.trim())
       .filter(Boolean);
     if (parsedMisi.length > 0) return parsedMisi;
-    return ["Terciptanya Lembaga yang berdikari", "Terwujudnya kreator yang berdedikasi, tangguh, dan berdaya", "Terfasilitasinya perkembangan komunitas dan platform", "Eksisnya sumber daya manusia dan komunitas yang peduli pada nilai budaya, kearifan lokal, karakter bangsa, dan memahami keragaman eskpresi budaya sehingga tercipta jiwa toleran", "Adanya kebijakan budaya dan kreativitas yang ideal", "Komunitas berdaya (ekonomi sosbud) serta Kontekstual", "Terciptanya kreator baik individu maupun kolektif yang terkoneksi, berprestasi dan punya sensibilitas di skala lokal– nasional– internasional"];
+    return ["Visi Hysteria"];
   }, [misiText]);
 
   const resolvedVisualItems = useMemo(() => {
@@ -89,7 +89,7 @@ export default function TentangPage() {
   }, [visualItems]);
 
   return (
-    <main className={`${poppins.variable} font-sans bg-white pb-32`}>
+    <main className={`${poppins.variable} font-sans bg-white pb-20 md:pb-32`}>
       {/* Banner */}
       <TimHero
         title={heroData.title}
@@ -97,61 +97,66 @@ export default function TentangPage() {
         imageUrl={heroData.imageUrl}
       />
 
-      <div className="relative w-full">
-        <section className="py-20 text-center px-4 md:px-0 relative z-10 pt-[100px]">
+      <div className="relative max-w-[1400px] mx-auto px-6">
+        <section className="py-12 md:py-20 text-justify md:text-center px-6 md:px-0 relative z-10 pt-16 md:pt-[100px]">
           <div className="max-w-[1520px] mx-auto">
-            <p className="text-[20px] leading-[1.5] text-black font-poppins whitespace-pre-line">{descriptionContent}</p>
+            <p className="text-[16px] md:text-[20px] leading-relaxed md:leading-[1.5] text-black font-poppins whitespace-pre-line px-2 md:px-0">{descriptionContent}</p>
           </div>
         </section>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-4 md:px-0 space-y-24">
+      <div className="max-w-[1400px] mx-auto px-6 space-y-16 md:space-y-24">
         {/* Visi Section */}
-        <section className="relative">
-          <div className="rounded-[10px] shadow-[0px_0px_15px_0px_rgba(0,0,0,0.25)] p-12 md:p-10 flex flex-col md:flex-row items-center md:items-start gap-12">
+        <section
+          id="visi-misi"
+          className="relative px-2">
+          <div className="rounded-[10px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.15)] md:shadow-[0px_0px_15px_0px_rgba(0,0,0,0.25)] p-8 md:p-10 flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-12">
             <div className="w-full md:w-1/4">
-              <h2 className="font-bold text-[40px] leading-[1.5] text-black font-poppins text-center md:text-left">Visi:</h2>
+              <h2 className="font-bold text-[24px] sm:text-[32px] md:text-[40px] xl:text-[52px] leading-tight text-black font-poppins text-center md:text-left">Visi:</h2>
             </div>
             <div className="w-full md:w-3/4 flex items-center">
-              <p className="whitespace-pre-line text-[24px] leading-[1.5] text-black font-poppins text-center md:text-left">{visiContent}</p>
+              <p className="whitespace-pre-line text-[18px] md:text-[24px] leading-relaxed text-black font-poppins text-center md:text-left w-full">{visiContent}</p>
             </div>
           </div>
         </section>
 
         {/* Misi Section */}
-        <section className="relative">
-          <div className="rounded-[10px] shadow-[0px_0px_15px_0px_rgba(0,0,0,0.25)] p-12 md:p-16 flex flex-col md:flex-row items-start gap-12">
+        <section className="relative px-2 md:px-0">
+          <div className="rounded-[10px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.15)] md:shadow-[0px_0px_15px_0px_rgba(0,0,0,0.25)] p-8 md:p-10 flex flex-col md:flex-row items-start gap-6 md:gap-12">
             <div className="w-full md:w-1/4">
-              <h2 className="font-bold text-[40px] leading-[1.5] text-black font-poppins text-center md:text-left">Misi:</h2>
+              <h2 className="font-bold text-[24px] sm:text-[32px] md:text-[40px] xl:text-[52px] leading-tight text-black font-poppins text-center md:text-left">Misi:</h2>
             </div>
             <div className="w-full md:w-3/4">
-              <p className="whitespace-pre-line text-[24px] leading-[1.5] text-black font-poppins text-center md:text-left">{misiText}</p>
+              <p className="whitespace-pre-line text-[18px] md:text-[24px] leading-relaxed text-black font-poppins text-left">{misiText}</p>
             </div>
           </div>
         </section>
 
         {/* Sejarah Hysteria Section */}
-        <section className="pt-12">
-          <h2 className="text-center font-bold text-[40px] md:text-[64px] mb-16 text-black font-poppins">Sejarah Hysteria</h2>
+        <section
+          id="sejarah"
+          className="pt-8 md:pt-12 px-2 md:px-0">
+          <h2 className="text-center font-bold text-[24px] sm:text-[32px] md:text-[40px] xl:text-[52px] mb-8 md:mb-16 text-black font-poppins uppercase tracking-wider">Sejarah Hysteria</h2>
           <SejarahHysteria items={sejarahItems} />
         </section>
 
         {/* Panduan Visual Hysteria Section */}
-        <section className="pt-12">
-          <h2 className="text-center font-bold text-[40px] md:text-[64px] mb-16 text-black font-poppins">Panduan Visual Hysteria</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[35px] max-w-[1550px] mx-auto">
+        <section
+          id="panduan-visual"
+          className="pt-8 md:pt-12 px-2 md:px-0">
+          <h2 className="text-center font-bold text-[24px] sm:text-[32px] md:text-[40px] xl:text-[52px] mb-8 md:mb-16 text-black font-poppins uppercase tracking-wider">Panduan Visual Hysteria</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-[35px] max-w-[1550px] mx-auto">
             {resolvedVisualItems.map((item, index) => (
               <a
                 key={item.id || index}
                 href={item.link || "#"}
                 target={item.link ? "_blank" : undefined}
                 rel={item.link ? "noopener noreferrer" : undefined}
-                className={`h-[265px] flex items-center justify-center rounded-[10px] shadow-[0px_0px_15px_0px_rgba(0,0,0,0.25)] p-12 transition-transform hover:scale-105 ${index % 2 === 0 ? "bg-[#e83c91] text-white" : "bg-[#d9d9d9] text-[#43334c]"}`}>
-                <h3 className="font-bold text-[32px] md:text-[40px] leading-[1.25] text-center font-poppins break-words max-w-[436px]">{item.title}</h3>
+                className={`h-[120px] sm:h-[180px] md:h-[265px] flex items-center justify-center rounded-[10px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.15)] md:shadow-[0px_0px_15px_0px_rgba(0,0,0,0.25)] p-2 md:p-12 transition-transform hover:scale-105 ${index % 2 === 0 ? "bg-[#e83c91] text-white" : "bg-[#d9d9d9] text-[#43334c]"}`}>
+                <h3 className="font-bold text-[14px] sm:text-[24px] md:text-[28px] leading-tight text-center font-poppins break-words max-w-full md:max-w-[436px] uppercase">{item.title}</h3>
               </a>
             ))}
           </div>
-          <p className="text-center mt-12 text-gray-500 italic font-poppins text-lg">Lihat panduan lengkap visual branding Hysteria.</p>
         </section>
       </div>
 

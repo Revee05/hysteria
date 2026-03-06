@@ -84,7 +84,7 @@ function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster" }) {
         {/* Left arrow (desktop) */}
         <button
           onClick={() => scroll("left")}
-          className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full items-center justify-center shadow-md hover:shadow-lg transition border border-zinc-500"
+          className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-90 w-10 h-10 bg-white rounded-full items-center justify-center shadow-md hover:shadow-lg transition border border-zinc-500"
           aria-label="Scroll left"
         >
           <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

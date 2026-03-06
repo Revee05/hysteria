@@ -128,7 +128,7 @@ export default function Header({ onMenuToggle }) {
           <button
             onClick={onMenuToggle}
             aria-label="Toggle menu"
-            className="p-2 rounded-md text-zinc-700 dark:text-zinc-50 cursor-pointer flex items-center"
+            className="p-2 rounded-md text-zinc-700 dark:text-zinc-50 cursor-pointer flex items-center hover:md:text-pink-500 transition-colors"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

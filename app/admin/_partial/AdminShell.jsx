@@ -1,18 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AuthProvider } from "../../../lib/context/auth-context.jsx";
+
 import AdminTopbar from "./AdminTopbar.jsx";
 import AdminSidebar from "./AdminSidebar.jsx";
-import { AuthProvider } from "../../../lib/context/auth-context.jsx";
+
+// users
 import Users from "../users/user_management/page.jsx";
 import Permission from "../users/permission/page.jsx";
 import StatusManagement from "../users/status_management/page.jsx";
+
+// nav categories
+import CategoriesPage from "../categories/page.jsx";
+
+// platform
+import HysteriaArtlabPage from "@/app/admin/platform/hysteria-artlab/page.jsx"
+import DitampartPage from "@/app/admin/platform/ditampart/page.jsx"
+import LakiMasakPage from "@/app/admin/platform/laki-masak/page.jsx"
+
+// pages
 import PageHome from "../section/PageHome.jsx";
 import PageArtlab from "../section/PageArtlab.jsx";
 import PageDitampart from "../section/PageDitampart.jsx";
 import PageLakiMasak from "../section/PageLakiMasak.jsx";
-import CategoriesPage from "../categories/page.jsx";
+
+//team
 import TeamManagementPage from "../team/page.jsx";
+// event
 import EventPage from "../events/page.jsx";
 import TentangSettingsPage from "../tentang/page.jsx";
 import { usePathname } from "next/navigation";
@@ -49,6 +64,7 @@ export default function AdminShell({ children }) {
         return <StatusManagement />;
       case "users.permission":
         return <Permission />;
+
       case "page":
       case "page.home":
         return <PageHome />;
@@ -60,16 +76,29 @@ export default function AdminShell({ children }) {
         return <PageLakiMasak />;
       case "category":
         return <CategoriesPage />;
+
+      case "platform":
+      case "platform.hysteria-artlab":
+        return <HysteriaArtlabPage />;
+      case "platform.ditampart":
+        return <DitampartPage />;
+      case "platform.laki-masak":
+        return <LakiMasakPage />;
+
       case "team":
         return <TeamManagementPage />;
+
       case "article":
         return <ArticlesPage onNavigate={handleNavigate} />;
       case "article.create":
         return <CreateArticlePage onNavigate={handleNavigate} />;
+
       case "tentang":
         return <TentangSettingsPage />;
+
       case "event":
         return <EventPage />;
+        
       case "dashboard":
       default:
         return children;
@@ -78,7 +107,7 @@ export default function AdminShell({ children }) {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 via-pink-100 to-orange-100">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 via-pink-100 to-orange-100 justify-center">
         <div className="lg:flex lg:items-start lg:justify-start">
           <aside
             className={`hidden lg:block lg:flex-shrink-0 border-r border-zinc-200 bg-white transition-width duration-200 ${collapsed ? "w-20" : "w-64"} sticky top-0 h-screen overflow-hidden`}
