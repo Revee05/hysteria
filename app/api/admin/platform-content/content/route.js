@@ -4,17 +4,17 @@
  * POST /api/admin/platform-content
  *      — buat konten baru; terima multipart/form-data (dengan gambar) atau JSON
  */
-import { respondSuccess, respondError, AppError } from "../../../../lib/response.js";
-import { withApiLogging, logInfo, logError } from "../../../../lib/api-logger.js";
-import { requireAuthWithPermission } from "../../../../lib/helper/permission.helper.js";
-import { parseMultipartForm, validateFileMimeType } from "../../../../lib/upload/multipart.js";
-import Uploads from "../../../../lib/upload/uploads.js";
+import { respondSuccess, respondError, AppError } from "../../../../../lib/response.js";
+import { withApiLogging, logInfo, logError } from "../../../../../lib/api-logger.js";
+import { requireAuthWithPermission } from "../../../../../lib/helper/permission.helper.js";
+import { parseMultipartForm, validateFileMimeType } from "../../../../../lib/upload/multipart.js";
+import Uploads from "../../../../../lib/upload/uploads.js";
 import {
   listPlatformContents,
   listPlatformContentsBySlug,
   createPlatformContent,
   addContentImage,
-} from "../../../../modules/admin/platform.content/index.js";
+} from "../../../../../modules/admin/platform.content/index.js";
 
 const ALLOWED_IMAGE_MIMES = ["image/webp", "image/jpeg", "image/png"];
 
@@ -30,6 +30,8 @@ const getHandler = async (request) => {
     const platformSlug     = searchParams.get("platformSlug");
     const categoryItemId   = searchParams.get("categoryItemId") ?? null;
     const categoryItemSlug = searchParams.get("categoryItemSlug") ?? null;
+    const minimalParam     = (searchParams.get('minimal') || '').toLowerCase();
+    const minimal = minimalParam === '1' || minimalParam === 'true' || minimalParam === 'yes';
 
     if (!platformId && !platformSlug) {
       return respondError(new AppError("Query parameter 'platformSlug' atau 'platformId' wajib diisi", 400, "VALIDATION_ERROR"));
@@ -38,9 +40,9 @@ const getHandler = async (request) => {
     let contents;
     if (platformSlug) {
       // Gunakan slug — tidak perlu lookup platformId di frontend
-      contents = await listPlatformContentsBySlug(platformSlug, categoryItemSlug);
+      contents = await listPlatformContentsBySlug(platformSlug, categoryItemSlug, minimal);
     } else {
-      contents = await listPlatformContents(platformId, categoryItemId);
+      contents = await listPlatformContents(platformId, categoryItemId, minimal);
     }
 
     logInfo("[PlatformContent][Admin][LIST] Success", { platformId, platformSlug, count: contents.length });

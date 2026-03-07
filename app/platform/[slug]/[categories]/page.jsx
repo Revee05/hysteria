@@ -3,23 +3,34 @@ import { notFound } from "next/navigation";
 import HeroSection from "./_component/HeroSection";
 import CarouselBody from "./_BodyComponent/CarouselBody";
 import GridBody from "./_BodyComponent/GridBody";
-import { listPlatforms, listCategories, getCategory, getPlatform } from "../../apiData";
+import {
+  listPublicPlatforms,
+  getPublicPlatform,
+  getPublicCategory,
+} from "../../../../modules/public/platform/services/platform.public.service.js";
 
 export async function generateStaticParams() {
-  return listPlatforms().flatMap(({ slug }) =>
-    (listCategories(slug) || []).map((c) => ({
-      slug,
-      categories: c.slug || (c.title || "").toLowerCase().replace(/\s+/g, "-"),
-    }))
-  );
+  try {
+    const platforms = await listPublicPlatforms();
+    return platforms.flatMap(({ slug, categories }) =>
+      (categories || []).map((c) => ({
+        slug,
+        categories: c.slug || (c.title || "").toLowerCase().replace(/\s+/g, "-"),
+      }))
+    );
+  } catch {
+    return [];
+  }
 }
 
 export default async function Page({ params }) {
   const { slug, categories } = (await params) || {};
   if (!slug) return notFound();
 
-  const item = getCategory(slug, categories);
-  const platform = getPlatform(slug);
+  const [item, platform] = await Promise.all([
+    getPublicCategory(slug, categories),
+    getPublicPlatform(slug),
+  ]);
   if (!platform || !item) return notFound();
 
   // Determine layout — default to 'grid' when not specified
@@ -31,8 +42,8 @@ export default async function Page({ params }) {
         {/* Shared hero section — same component, different metadata */}
         <HeroSection
           imageUrl={item.image || platform.head?.images?.[0]?.src || "/image/ilustrasi-menu.png"}
-          title={item.title || platform.head?.title || "Platform"}
-          description={item.description || platform.head?.description || "Explore our platform categories"}
+          title={item.imageTitle || item.title || platform.head?.title || "Platform"}
+          description={item.imageSubtitle || item.description || platform.head?.description || "Explore our platform categories"}
         />
 
         {/* Dynamic body based on layout type */}
