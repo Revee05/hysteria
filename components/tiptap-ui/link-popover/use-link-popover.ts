@@ -118,7 +118,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
     const { href } = editor.getAttributes("link")
 
     if (isLinkActive(editor) && url === null) {
-      setUrl(href || "")
+      queueMicrotask(() => setUrl(href || ""))
     }
   }, [editor, url])
 
