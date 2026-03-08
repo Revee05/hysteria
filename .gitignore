@@ -49,6 +49,8 @@ next-env.d.ts
 #test dll
 /test
 /logs
+/public/uploads/
+.lint-output.txt
 
 .vscode/
 .github/

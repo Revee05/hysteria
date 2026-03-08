@@ -187,6 +187,7 @@ const MobileToolbarContent = ({
 export function SimpleEditor({ content, onUpdate }: any) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
+  const [toolbarHeight, setToolbarHeight] = useState(0);
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
     "main",
   );
@@ -246,8 +247,28 @@ export function SimpleEditor({ content, onUpdate }: any) {
 
   const rect = useCursorVisibility({
     editor,
-    overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
+    overlayHeight: toolbarHeight,
   });
+
+  useEffect(() => {
+    const node = toolbarRef.current;
+    if (!node) return;
+
+    const updateToolbarHeight = () => {
+      setToolbarHeight(node.getBoundingClientRect().height);
+    };
+
+    updateToolbarHeight();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      updateToolbarHeight();
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!isMobile && mobileView !== "main") {

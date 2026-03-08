@@ -185,7 +185,9 @@ export function useMenuNavigation<T>({
 
   useEffect(() => {
     if (query) {
-      setSelectedIndex(autoSelectFirstItem ? 0 : -1)
+      queueMicrotask(() => {
+        setSelectedIndex(autoSelectFirstItem ? 0 : -1)
+      })
     }
   }, [query, autoSelectFirstItem])
 
