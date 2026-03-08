@@ -41,9 +41,9 @@ export default async function Page({ params }) {
       <main className="font-sans w-full max-w-[1920px] mx-auto bg-white min-h-screen">
         {/* Shared hero section — same component, different metadata */}
         <HeroSection
-          imageUrl={item.image || platform.head?.images?.[0]?.src || "/image/ilustrasi-menu.png"}
+          imageUrl={item.image || "/image/ilustrasi-menu.png"}
           title={item.imageTitle || item.title || platform.head?.title || "Platform"}
-          description={item.imageSubtitle || item.description || platform.head?.description || "Explore our platform categories"}
+          description={item.imageSubtitle || "Explore our platform categories"}
         />
 
         {/* Dynamic body based on layout type */}

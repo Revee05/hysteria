@@ -24,15 +24,15 @@ export default function AdminTopbar({ onOpenSidebar }) {
         <button onClick={onOpenSidebar} className="lg:hidden p-2 rounded-md hover:bg-zinc-100" aria-label="Open menu">
           <IconMenu className="h-5 w-5 text-zinc-700" />
         </button>
-        <h1 className="text-lg font-semibold text-zinc-700">
+        <h1 className="text-sm md:text-lg font-semibold text-zinc-700 flex flex-wrap items-center">
           {roleLabel ? (
             <>
-              {roleLabel} Area - Hello{' '}
+              <span className="mr-1">{roleLabel} Area - Hello</span>
               <span className="italic text-pink-600">{user?.name || ''}</span>
             </>
           ) : (user?.name ? (
             <>
-              Dashboard Panel - Hello{' '}
+              <span className="mr-1">Dashboard Panel - Hello</span>
               <span className="italic text-pink-600">{user.name}</span>
             </>
           ) : 'Dashboard Panel')}
@@ -43,7 +43,7 @@ export default function AdminTopbar({ onOpenSidebar }) {
         <Avatar
           className="h-10 w-10 rounded-full bg-transparent overflow-hidden"
           hoverBorderColor="#3B82F6"
-          hoverBorderWidth={1}
+          hoverBorderWidth={1}  
           hoverScale={1.08}
           src={user?.avatar || user?.photo || user?.image || user?.profilePicture || ''}
           alt={user?.name || 'User'}
