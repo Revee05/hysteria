@@ -12,6 +12,33 @@ const CONTENT_INCLUDE = {
   categoryItem: { select: { id: true, title: true, slug: true, url: true } },
 };
 
+/** Minimal include/select: bentuk respons ringkas untuk daftar (hilangkan createdAt/updatedAt).
+ * Menggunakan `select` supaya field seperti `createdAt`/`updatedAt` tidak dikembalikan.
+ */
+const MINIMAL_SELECT = {
+  id: true,
+  platformId: true,
+  categoryItemId: true,
+  title: true,
+  url: true,
+  instagram: true,
+  youtube: true,
+  description: true,
+  host: true,
+  guests: true,
+  year: true,
+  tags: true,
+  // order: true,
+  // isActive: true,
+  // ambil hanya satu gambar preview
+  images: {
+    orderBy: [{ order: "asc" }, { id: "asc" }],
+    take: 1,
+    select: { id: true, imageUrl: true, type: true, alt: true },
+  },
+  categoryItem: { select: { id: true, title: true, slug: true } },
+};
+
 // ─── PLATFORM CONTENT ────────────────────────────────────────────────────────
 
 /**
@@ -21,9 +48,20 @@ const CONTENT_INCLUDE = {
  * @param {number|null} [categoryItemId]
  * @returns {Promise<PlatformContent[]>}
  */
-export async function findContentsByPlatformId(platformId, categoryItemId = null) {
+export async function findContentsByPlatformId(
+  platformId,
+  categoryItemId = null,
+  minimal = false,
+) {
   const where = { platformId };
   if (categoryItemId !== null) where.categoryItemId = categoryItemId;
+  if (minimal) {
+    return prisma.platformContent.findMany({
+      where,
+      select: MINIMAL_SELECT,
+      orderBy: [{ order: "asc" }, { id: "asc" }],
+    });
+  }
   return prisma.platformContent.findMany({
     where,
     include: CONTENT_INCLUDE,
@@ -38,9 +76,20 @@ export async function findContentsByPlatformId(platformId, categoryItemId = null
  * @param {string|null} [categoryItemSlug]
  * @returns {Promise<PlatformContent[]>}
  */
-export async function findContentsByPlatformSlug(platformSlug, categoryItemSlug = null) {
+export async function findContentsByPlatformSlug(
+  platformSlug,
+  categoryItemSlug = null,
+  minimal = false,
+) {
   const where = { platform: { slug: platformSlug } };
   if (categoryItemSlug) where.categoryItem = { slug: categoryItemSlug };
+  if (minimal) {
+    return prisma.platformContent.findMany({
+      where,
+      select: MINIMAL_SELECT,
+      orderBy: [{ order: "asc" }, { id: "asc" }],
+    });
+  }
   return prisma.platformContent.findMany({
     where,
     include: CONTENT_INCLUDE,
@@ -55,7 +104,10 @@ export async function findContentsByPlatformSlug(platformSlug, categoryItemSlug 
  * @returns {Promise<number|null>}
  */
 export async function findPlatformIdBySlug(slug) {
-  const p = await prisma.platform.findUnique({ where: { slug }, select: { id: true } });
+  const p = await prisma.platform.findUnique({
+    where: { slug },
+    select: { id: true },
+  });
   return p?.id ?? null;
 }
 
@@ -66,7 +118,10 @@ export async function findPlatformIdBySlug(slug) {
  * @returns {Promise<number|null>}
  */
 export async function findCategoryItemIdBySlug(slug) {
-  const item = await prisma.categoryItem.findFirst({ where: { slug }, select: { id: true } });
+  const item = await prisma.categoryItem.findFirst({
+    where: { slug },
+    select: { id: true },
+  });
   return item?.id ?? null;
 }
 
@@ -76,7 +131,10 @@ export async function findCategoryItemIdBySlug(slug) {
  * @returns {Promise<PlatformContent|null>}
  */
 export async function findContentById(id) {
-  return prisma.platformContent.findUnique({ where: { id }, include: CONTENT_INCLUDE });
+  return prisma.platformContent.findUnique({
+    where: { id },
+    include: CONTENT_INCLUDE,
+  });
 }
 
 /**
@@ -95,7 +153,11 @@ export async function createContent(data) {
  * @returns {Promise<PlatformContent>}
  */
 export async function updateContentById(id, data) {
-  return prisma.platformContent.update({ where: { id }, data, include: CONTENT_INCLUDE });
+  return prisma.platformContent.update({
+    where: { id },
+    data,
+    include: CONTENT_INCLUDE,
+  });
 }
 
 /**

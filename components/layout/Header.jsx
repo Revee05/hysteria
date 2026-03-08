@@ -77,8 +77,8 @@ export default function Header({ onMenuToggle }) {
   return (
     <header
       style={{
-        backgroundColor: showBg ? 'rgba(0, 0, 0, 0.4)' : 'transparent',
-        borderBottom: showBg ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid transparent'
+        backgroundColor: showBg ? '#e83c92c8' : 'transparent',
+        borderBottom: showBg ? '1px solid rgba(250, 1, 225, 0.1)' : '1px solid transparent'
       }}
       className={`${headerPositionClass} transition-all duration-200`}
     >

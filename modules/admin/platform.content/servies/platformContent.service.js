@@ -35,12 +35,12 @@ import {
  * @param {string} platformSlug
  * @param {string|null} [categoryItemSlug]
  */
-export async function listPlatformContentsBySlug(platformSlug, categoryItemSlug = null) {
+export async function listPlatformContentsBySlug(platformSlug, categoryItemSlug = null, minimal = false) {
   if (!platformSlug || typeof platformSlug !== "string") {
     throw new AppError("platformSlug tidak valid", 400, "VALIDATION_ERROR");
   }
   logInfo("[PlatformContent][Service][LIST_BY_SLUG] Start", { platformSlug, categoryItemSlug });
-  const contents = await findContentsByPlatformSlug(platformSlug, categoryItemSlug || null);
+  const contents = await findContentsByPlatformSlug(platformSlug, categoryItemSlug || null, minimal);
   logInfo("[PlatformContent][Service][LIST_BY_SLUG] Success", { platformSlug, count: contents.length });
   return contents;
 }
@@ -50,7 +50,7 @@ export async function listPlatformContentsBySlug(platformSlug, categoryItemSlug 
  * @param {number|string} platformId
  * @param {number|string|null} [categoryItemId]
  */
-export async function listPlatformContents(platformId, categoryItemId = null) {
+export async function listPlatformContents(platformId, categoryItemId = null, minimal = false) {
   const id = parseInt(platformId, 10);
   if (!id || isNaN(id)) throw new AppError("platformId tidak valid", 400, "VALIDATION_ERROR");
 
@@ -58,7 +58,7 @@ export async function listPlatformContents(platformId, categoryItemId = null) {
   if (categoryItemId && isNaN(catId)) throw new AppError("categoryItemId tidak valid", 400, "VALIDATION_ERROR");
 
   logInfo("[PlatformContent][Service][LIST] Start", { platformId: id, categoryItemId: catId });
-  const contents = await findContentsByPlatformId(id, catId);
+  const contents = await findContentsByPlatformId(id, catId, minimal);
   logInfo("[PlatformContent][Service][LIST] Success", { platformId: id, count: contents.length });
   return contents;
 }

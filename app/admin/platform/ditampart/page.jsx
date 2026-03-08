@@ -55,7 +55,7 @@ export default function DitampartPage() {
   const openModalForCategory = async (cat) => {
     // cat id 2 → PlatformIndex modal (Mock up dan Poster)
     if (cat.id === 2) {
-      setPlatformModal({ open: true, title: 'Mock up dan Poster', subtitle: 'Kelola konten Mock up dan Poster', categoryItemSlug: 'mockup-dan-poster', showImageUpload: true });
+      setPlatformModal({ open: true, title: 'Mock up dan Poster', subtitle: 'Kelola konten Mock up dan Poster', categoryItemSlug: 'mockup-dan-poster', showImageUpload: true, showDescription: true });
       return;
     }
 
@@ -217,14 +217,21 @@ export default function DitampartPage() {
             <div className="absolute inset-0 bg-black/50" onClick={() => setPlatformModal(p => ({ ...p, open: false }))} />
             <div className="relative z-10 w-full max-h-[95vh] overflow-auto px-4">
               <div className="mx-auto w-full sm:max-w-lg md:max-w-6xl p-2 bg-white rounded-lg shadow-lg">
-                      <PlatformIndex
-                        platformSlug="ditampart"
-                        categoryItemSlug={platformModal.categoryItemSlug}                        showImageUpload={platformModal.showImageUpload}                        title={platformModal.title}
-                        subtitle={platformModal.subtitle}
-                        actionLabel="+add"
-                        searchPlaceholder="Cari konten..."
-                        close={() => setPlatformModal(p => ({ ...p, open: false }))}
-                      />
+                <PlatformIndex
+                  // meta untuk fetch data
+                  platformSlug="ditampart"
+                  categoryItemSlug={platformModal.categoryItemSlug}
+                  title={platformModal.title}
+                  subtitle={platformModal.subtitle}
+                  actionLabel="+add"
+                  searchPlaceholder="Cari konten..."
+                  close={() => setPlatformModal(p => ({ ...p, open: false }))}
+
+                  // field and columns to show
+                  showURL={true}
+                  showDescription={platformModal.showDescription}
+                  showImageUpload={platformModal.showImageUpload}
+                />
               </div>
             </div>
           </div>
@@ -235,13 +242,14 @@ export default function DitampartPage() {
             <div className="absolute inset-0 bg-black opacity-40" onClick={() => setModalOpen(false)} />
             {/* modal content */}
             <div className="z-60 mx-auto w-full sm:max-w-md md:max-w-lg lg:max-w-2xl p-2 bg-white rounded-lg shadow-lg">
-              <LinkForm
-                close={() => setModalOpen(false)}
-                title={modalTitle}
-                initial={modalInitial}
-                placeholders={modalPlaceholders}
-                onSave={handleSaveFromForm}
-              />
+                <LinkForm
+                  close={() => setModalOpen(false)}
+                  title={modalTitle}
+                  subtitle={modalPlaceholders.subtitle || ''}
+                  initial={modalInitial}
+                  placeholders={modalPlaceholders}
+                  onSave={handleSaveFromForm}
+                />
             </div>
           </div>
         )}

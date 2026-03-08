@@ -362,6 +362,11 @@ model PlatformContent {
 
   title    String   @db.VarChar(500)
   url      String?  @db.VarChar(500)
+  instagram String? @db.VarChar(500)
+  youtube   String? @db.VarChar(500)
+  description String? @db.Text
+  host     String?  @db.VarChar(255)
+  guests   String[]             // array tamu, disimpan as text[]
   year     Int?
   tags     String[]             // array tag bebas, disimpan as text[]
   order    Int      @default(0)

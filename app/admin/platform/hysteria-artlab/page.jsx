@@ -153,10 +153,16 @@ export default function HysteriaArtlabPage() {
               <PlatformIndex
                 platformSlug="hysteria-artlab"
                 categoryItemSlug="anitalk"
-                title="Podcast Artlab"
-                subtitle="Kelola Podcast Artlab"
+                title="Anitalk"
+                subtitle="Kelola Anitalk Konten"
+                showImageUpload={false}
                 actionLabel="+Add"
+                showTags={true}
                 searchPlaceholder="Cari judul podcast..."
+                showURL={true}
+                showDescription={true}
+                showGuests={true}
+                showHost={true}
                 close={() => setOpenAntalk(false)}
               />
             </div>
@@ -176,6 +182,14 @@ export default function HysteriaArtlabPage() {
                 subtitle="Kelola Artist Radar"
                 actionLabel="+Add"
                 searchPlaceholder="Cari judul artist radar..."
+                showURL={false}
+                showImageUpload={true}
+                showTags={true}
+                showInstagram={true}
+                showYoutube={true}
+                showDescription={true}
+                showHost={true}
+                showGuests={true}
                 close={() => setOpenArtistRadar(false)}
               />
             </div>

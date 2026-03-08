@@ -97,8 +97,8 @@ export default function LinkForm({
   return (
     <div className="p-6">
       <div className="flex flex-col items-start justify-between mb-2">
-        <h3 className="text-lg font-bold mb-2">{title}</h3>
-        <p className="text-sm text-gray-500">{subtitle}</p>
+        <h3 className="text-lg text-zinc-700 font-bold mb-2">{title}</h3>
+        <p className="text-sm text-zinc-700">{subtitle}</p>
         {/* <button onClick={close} className="text-gray-500 rounded-full hover:text-gray-700 hover:bg-gray-200 cursor-pointer ">✕</button> */}
       </div>
 
@@ -110,7 +110,7 @@ export default function LinkForm({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={(placeholders.input || 'text . . . . . ')}
-            className="border rounded px-3 py-2"
+            className="border border-zinc-400 rounded px-3 py-2 text-zinc-900"
             inputMode={isPhone ? 'numeric' : 'text'}
           />
           {errors.input && <div className="text-red-600 text-sm">{errors.input}</div>}
