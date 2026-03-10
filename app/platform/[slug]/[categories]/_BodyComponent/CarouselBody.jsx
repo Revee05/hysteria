@@ -140,7 +140,7 @@ function CardSwitch({ cardType, item }) {
         url={item.url}
         alt={item.alt}
         title={item.title}
-        description={item.description}
+        prevdescription={item.prevdescription}
         tags={item.tags}
         host={item.host}
         guests={item.guests}

@@ -29,7 +29,7 @@ function extractYouTubeId(url) {
   return null;
 }
 
-export default function VideoCard({ imageUrl, youtube, url, alt, title, tags, description, host, guests, timestamp }) {
+export default function VideoCard({ imageUrl, youtube, url, alt, title, tags, prevdescription, host, guests, timestamp }) {
   const sourceForId = youtube || url || imageUrl;
   const ytId = extractYouTubeId(sourceForId);
   
@@ -60,7 +60,7 @@ export default function VideoCard({ imageUrl, youtube, url, alt, title, tags, de
   return (
     <Wrapper
       {...wrapperProps}
-      className="bg-white group relative flex flex-col h-full w-full overflow-hidden rounded-xl bg-zinc-100 border border-zinc-300 cursor-pointer shadow-xl transform transition-transform duration-300 hover:-translate-y-4 hover:shadow-xl hover:border-pink-500"
+      className="bg-white group relative flex flex-col h-full w-full overflow-hidden rounded-lg border border-zinc-300 cursor-pointer shadow-xl transform transition-transform duration-300 hover:-translate-y-4 hover:shadow-xl hover:border-pink-500"
     >
       {/* Thumbnail 16:9 */}
       <div className="relative w-full aspect-video flex-shrink-0 bg-zinc-200">
@@ -87,51 +87,47 @@ export default function VideoCard({ imageUrl, youtube, url, alt, title, tags, de
         </div>
       </div>
 
-      <div className="flex flex-col flex-grow">
+      <div className="px-2.5 md:px-3 py-1.5 md:py-2 pt-2 gap-1 flex flex-col flex-grow">
         {/* Judul */}
         {title && (
-          <div className="px-3 py-2 mt-2 md:px-4 md:py-2 md:mt-3 flex-shrink-0"> 
-            <p className="font-lato text-zinc-800 text-xs md:text-base font-bold leading-tight line-clamp-2">{title}</p>
+          <div className="flex-shrink-0"> 
+            <p className="font-lato text-zinc-800 text-[13px] md:text-[14px] font-semibold leading-tight line-clamp-2">{title}</p>
           </div>
         )}
 
         {/* Deskripsi */}
-        {description && (
-          <div className="px-3 md:px-4 md:pb-2 flex-shrink-0">
-            <p className="text-zinc-600 text-xs leading-tight mt-1 line-clamp-4">{description}</p>
+        {prevdescription && (
+          <div className="flex-shrink-0">
+            <p className="text-zinc-500 text-[12px] leading-4 line-clamp-4">{prevdescription}</p>
           </div>
         )}
 
         {/* Host & Guests */}
-        <div className="px-3 py-1 md:px-4 md:py-2 md:pb-3 flex-shrink-0">
-          <p className="text-xs font-medium truncate">
+        <div className="flex-shrink-0">
+          <p className="text-[10px] truncate">
             <span style={{ color: "#E83C91" }} className="mr-1">Host:</span>
-            <span className="text-zinc-600">{host || "-"}</span>
+            <span className="text-zinc-900 font-bold">{host || "-"}</span>
           </p>
 
-          <p className="text-xs pt-1 line-clamp-2">
-            <span style={{ color: "#E83C91" }} className="mr-1">Guests:</span>
-            <span className="text-zinc-600">{(guests && guests.length) ? guests.join(", ") : "-"}</span>
-          </p>
+          <p className="text-[10px] pt-1 pb-1 line-clamp-2 md:line-clamp-3">
+              <span style={{ color: "#E83C91" }} className="mr-1">Guests:</span>
+              <span className="text-zinc-900 font-bold break-words">{(guests && guests.length) ? guests.join(", ") : "-"}</span>
+            </p>
         </div>
 
-        {/* tags list */}
-        <div className="px-3 pb-3 md:px-4 md:pb-4 flex-shrink-0">
-          {tags && tags.length > 0 ? (
-            <>
-              <div className="flex flex-wrap gap-1">
-                <span style={{ color: "#E83C91" }} className="mr-1 text-xs">Tags:</span>
-                {tags.map((t, idx) => (
-                  <span key={idx} className="text-xs text-white bg-gradient-to-r from-pink-500 to-orange-900 rounded-full px-2">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </>
-          ) : (
-            <span style={{ color: "#E83C91" }} className="mr-1 text-xs">Tags: - </span>
-          )}
-        </div>
+        {/* tags list (render only when tags exist) */}
+        {/* {tags && tags.length > 0 && (
+          <div className="px-3 pb-3 md:px-4 md:pb-4 flex-shrink-0">
+            <div className="flex flex-wrap gap-1">
+              <span style={{ color: "#E83C91" }} className="mr-1 text-xs">Tags:</span>
+              {tags.map((t, idx) => (
+                <span key={idx} className="text-xs text-white bg-gradient-to-r from-pink-500 to-orange-900 rounded-full px-2">
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        )} */}
       </div>
     </Wrapper>
   );

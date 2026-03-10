@@ -55,7 +55,7 @@ export default function HysteriaArtlabPage() {
               <div className="flex flex-col gap-6 md:col-span-4">
                   <div className="p-5 border border-gray-400 rounded-lg bg-white shadow-xl">
                     <h2 className="py-1 text-pink-500 font-bold mb-3 font-poppins">Merchandise</h2>
-                    <div>
+                    <div className="flex flex-col md:flex-row gap-3 md:gap-5">
                       <button
                         type="button"
                         className="inline-block bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg shadow-md font-semibold cursor-pointer"
@@ -157,10 +157,13 @@ export default function HysteriaArtlabPage() {
                 subtitle="Kelola Anitalk Konten"
                 showImageUpload={false}
                 actionLabel="+Add"
-                showTags={true}
+
+                // pass data field (judul dan tahun default)
+                // showTags={true}
                 searchPlaceholder="Cari judul podcast..."
                 showURL={true}
-                showDescription={true}
+                showPrevDescription={true}
+                // showDescription={true}
                 showGuests={true}
                 showHost={true}
                 showMeta={true}

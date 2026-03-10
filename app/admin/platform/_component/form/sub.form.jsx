@@ -9,9 +9,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export const META_OPTIONS = [
-  { value: "video", label: "Anitalk" },
+  { value: "video", label: "Anitalk or Homecooked" },
   { value: "artist", label: "Artist Radar" },
   { value: "mockup", label: "Mockup dan Poster" },
+  { value: "komik-ramuan", label: "Komik Ramuan" },
 ];
 
 export default function SubForm({

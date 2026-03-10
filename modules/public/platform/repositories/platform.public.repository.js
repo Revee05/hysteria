@@ -116,6 +116,40 @@ export async function findGridContents(platformId, categoryItemId) {
 }
 
 /**
+ * Mengambil satu PlatformContent berdasarkan ID-nya.
+ * @param {number} id
+ */
+export async function findContentById(id) {
+  return prisma.platformContent.findFirst({
+    where: { id: Number(id), isActive: true },
+    select: {
+      ...CONTENT_SELECT,
+      categoryItem: {
+        select: { id: true, title: true, slug: true },
+      },
+      platform: {
+        select: { id: true, slug: true },
+      },
+    },
+  });
+}
+
+/**
+ * Mengambil konten lain dalam sub-kategori yang sama (untuk "Konten Lainnya").
+ * @param {number} platformId
+ * @param {number} categoryItemId
+ * @param {number} excludeId  — ID konten yang sedang ditampilkan
+ */
+export async function findRelatedContents(platformId, categoryItemId, excludeId) {
+  return prisma.platformContent.findMany({
+    where: { platformId, categoryItemId, isActive: true, id: { not: excludeId } },
+    orderBy: [{ order: "asc" }, { id: "asc" }],
+    take: 4,
+    select: CONTENT_SELECT,
+  });
+}
+
+/**
  * Mengambil sub-kategori carousel beserta kontennya.
  * Sub-kategori = CategoryItem yang parentId-nya adalah parentCategoryItemId.
  * Setiap sub-kategori menyertakan PlatformContent milik platform ini.

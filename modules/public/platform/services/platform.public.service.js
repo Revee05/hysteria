@@ -10,6 +10,8 @@ import {
   findPublicPlatformBySlug,
   findGridContents,
   findCarouselSubCategories,
+  findContentById,
+  findRelatedContents,
 } from "../repositories/platform.public.repository.js";
 
 // ─── DUMMY DATA (sementara) ───────────────────────────────────────────────────
@@ -40,15 +42,25 @@ function resolveCardType(meta) {
   return "poster";
 }
 
+/** Inferensi cardType dari slug kategori, untuk fallback ketika meta belum diset di DB. */
+function resolveCardTypeFromSlug(slug) {
+  if (slug === "komik-ramuan") return "komik-ramuan";
+  if (slug === "mockup-dan-poster" || slug === "mockup-poster") return "mockup";
+  return "poster";
+}
+
 /** Petakan satu PlatformContent ke item kartu grid/poster. */
 function mapToGridItem(content) {
   const img = content.images?.[0];
   return {
+    id: content.id,
     imageUrl: img?.imageUrl ?? null,
     alt: img?.alt || content.title,
     title: content.title,
     prevdescription: content.prevdescription ?? null,
     description: content.description ?? null,
+    host: content.host ?? null,
+    guests: content.guests || [],
     tags: content.tags || [],
     year: content.year ? String(content.year) : null,
     meta: content.meta ?? (content.year ? String(content.year) : null),
@@ -61,6 +73,7 @@ function mapToGridItem(content) {
 function mapToCarouselItem(cardType, content) {
   const img = content.images?.[0];
   const base = {
+    id: content.id,
     imageUrl: img?.imageUrl ?? null,
     alt: img?.alt || content.title,
     title: content.title,
@@ -97,7 +110,7 @@ export async function listPublicPlatforms() {
       description: p.subHeadline || "",
     },
     categories: p.categories
-      .sort((a, b) => a.order - b.order)
+      .sort((a, b) => b.order - a.order)
       .map((c) => ({
         title: c.categoryItem?.title || "",
         slug: c.categoryItem?.slug || "",
@@ -118,7 +131,7 @@ export async function getPublicPlatform(slug) {
 
   const mainImages = (platform.images || [])
     .filter((img) => img.type === "main" && img.imageUrl)
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => b.order - a.order)
     .map((img) => ({
       src: img.imageUrl,
       alt: img.label || slug,
@@ -167,7 +180,7 @@ export async function getPublicCategory(platformSlug, categorySlug) {
   // Hero image — matched by key, then fallback to cover image by index
   const heroImages = (platform.images || [])
     .filter((img) => img.type === "hero")
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => b.order - a.order);
 
   // Some hero keys in DB may use slightly different slugs (e.g. 'mockup-poster'
   // vs category slug 'mockup-dan-poster'). Try normalized variants to be
@@ -183,7 +196,7 @@ export async function getPublicCategory(platformSlug, categorySlug) {
 
   const coverImages = (platform.images || [])
     .filter((img) => img.type === "cover" && img.imageUrl)
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => b.order - a.order);
 
   const image = heroImage?.imageUrl || coverImages[catIndex]?.imageUrl || platform.mainImageUrl || null;
   const imageTitle    = heroImage?.title    || null;
@@ -221,6 +234,26 @@ export async function getPublicCategory(platformSlug, categorySlug) {
 
   // carousel
   const subs = await findCarouselSubCategories(platform.id, cat.categoryItem.id);
+
+  // Fallback: jika tidak ada sub-kategori di DB, render sebagai grid
+  if (subs.length === 0) {
+    const contents = await findGridContents(platform.id, cat.categoryItem.id);
+    const metaCardType = resolveCardType(cat.categoryItem?.meta);
+    const resolvedCardType = metaCardType !== "poster"
+      ? metaCardType
+      : resolveCardTypeFromSlug(catSlug);
+    const items = contents.map(mapToGridItem);
+    const filters = [...new Set(contents.flatMap((c) => c.tags || []))];
+    return {
+      ...base,
+      layout: "grid",
+      cardType: resolvedCardType,
+      filters,
+      items,
+      subCategories: [],
+    };
+  }
+
   const subCategories = subs.map((sub) => {
     if (sub.slug === "stonen-29-radio-show") {
       return { title: sub.title, slug: sub.slug, linkUrl: sub.url || null, cardType: "poster", items: STONEN_DUMMY_ITEMS };
@@ -251,10 +284,48 @@ export async function listPublicCategories(platformSlug) {
   if (!platform) return null;
 
   return (platform.categories || [])
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => b.order - a.order)
     .map((c) => ({
       title: c.categoryItem?.title || "",
       slug: c.categoryItem?.slug || "",
       url: c.categoryItem?.url || "",
     }));
+}
+
+/**
+ * Data satu konten platform beserta konten terkait lainnya di sub-kategori yang sama.
+ * Digunakan oleh halaman detail `/platform/[slug]/[categories]/[subCategory]/[id]`.
+ *
+ * Returns: { item, related[] } atau null jika tidak ditemukan.
+ */
+export async function getPublicContentItem(id) {
+  const content = await findContentById(id);
+  if (!content) return null;
+
+  const related = content.categoryItem?.id && content.platform?.id
+    ? await findRelatedContents(content.platform.id, content.categoryItem.id, content.id)
+    : [];
+
+  const mapItem = (c) => {
+    const img = c.images?.[0];
+    return {
+      id: c.id,
+      imageUrl: img?.imageUrl ?? null,
+      alt: img?.alt || c.title,
+      title: c.title,
+      prevdescription: c.prevdescription ?? null,
+      description: c.description ?? null,
+      host: c.host ?? null,
+      guests: c.guests || [],
+      tags: c.tags || [],
+      youtube: c.youtube ?? null,
+      instagram: c.instagram ?? null,
+      url: c.url ?? null,
+    };
+  };
+
+  return {
+    item: mapItem({ ...content, images: content.images }),
+    related: related.map(mapItem),
+  };
 }
