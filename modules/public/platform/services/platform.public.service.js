@@ -40,6 +40,13 @@ function resolveCardType(meta) {
   return "poster";
 }
 
+/** Inferensi cardType dari slug kategori, untuk fallback ketika meta belum diset di DB. */
+function resolveCardTypeFromSlug(slug) {
+  if (slug === "komik-ramuan") return "komik-ramuan";
+  if (slug === "mockup-dan-poster" || slug === "mockup-poster") return "mockup";
+  return "poster";
+}
+
 /** Petakan satu PlatformContent ke item kartu grid/poster. */
 function mapToGridItem(content) {
   const img = content.images?.[0];
@@ -221,6 +228,26 @@ export async function getPublicCategory(platformSlug, categorySlug) {
 
   // carousel
   const subs = await findCarouselSubCategories(platform.id, cat.categoryItem.id);
+
+  // Fallback: jika tidak ada sub-kategori di DB, render sebagai grid
+  if (subs.length === 0) {
+    const contents = await findGridContents(platform.id, cat.categoryItem.id);
+    const metaCardType = resolveCardType(cat.categoryItem?.meta);
+    const resolvedCardType = metaCardType !== "poster"
+      ? metaCardType
+      : resolveCardTypeFromSlug(catSlug);
+    const items = contents.map(mapToGridItem);
+    const filters = [...new Set(contents.flatMap((c) => c.tags || []))];
+    return {
+      ...base,
+      layout: "grid",
+      cardType: resolvedCardType,
+      filters,
+      items,
+      subCategories: [],
+    };
+  }
+
   const subCategories = subs.map((sub) => {
     if (sub.slug === "stonen-29-radio-show") {
       return { title: sub.title, slug: sub.slug, linkUrl: sub.url || null, cardType: "poster", items: STONEN_DUMMY_ITEMS };

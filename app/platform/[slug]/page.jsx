@@ -13,9 +13,25 @@ export async function generateMetadata({ params }) {
   try {
     const platform = await getPublicPlatform(slug);
     if (!platform) return {};
+    const logoPath = '/svg/Logo-hysteria.svg';
+    const ogImage = platform.head?.images?.[0]?.src || logoPath;
+
     return {
       title: platform.head?.title || slug,
       description: platform.head?.description || undefined,
+      icons: {
+        icon: logoPath,
+        shortcut: logoPath,
+        apple: logoPath,
+      },
+      openGraph: {
+        title: platform.head?.title || slug,
+        description: platform.head?.description || undefined,
+        images: [{ url: ogImage, alt: platform.head?.title || 'Hysteria' }],
+      },
+      twitter: {
+        images: [ogImage],
+      },
     };
   } catch {
     return {};

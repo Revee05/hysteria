@@ -274,7 +274,7 @@ export default function DitampartPage() {
                   // field and columns to show
                   showURL={true}
                   showPrevDescription={platformModal.showPrevDescription}
-                  showDescription={platformModal.showDescription}
+                  // showDescription={platformModal.showDescription}
                   showImageUpload={platformModal.showImageUpload}
                   showMeta={platformModal.showMeta}
                 />

@@ -48,11 +48,11 @@ export default function LakiMasakPage() {
 
   const openModalForCategory = async (cat) => {
     if (cat.id === 1) {
-      setPlatformModal({ open: true, title: 'Homecooked', subtitle: 'Kelola konten Homecooked', categoryItemSlug: 'homecooked', showImageUpload: true, showInstagram: true, showYoutube: true, showDescription: true, showTags: true, showURL: true });
+      setPlatformModal({ open: true, title: 'Homecooked', subtitle: 'Kelola konten Homecooked', categoryItemSlug: 'homecooked', showImageUpload: true, showPrevDescription: true, showURL: true, showMeta: true });
       return;
     }
     if (cat.id === 2) {
-      setPlatformModal({ open: true, title: 'Komik Ramuan', subtitle: 'Kelola konten Komik Ramuan', categoryItemSlug: 'komik-ramuan', showImageUpload: true });
+      setPlatformModal({ open: true, title: 'Komik Ramuan', subtitle: 'Kelola konten Komik Ramuan', categoryItemSlug: 'komik-ramuan', showImageUpload: true, showTitle: true, showYear: true, showLinkURL: true, showPrevDescription: true, showMeta: true });
       return;
     }
     // cat id 3 → LinkForm modal (Pre-Order)
@@ -223,14 +223,16 @@ export default function LakiMasakPage() {
                       <PlatformIndex
                         platformSlug="laki-masak"
                         categoryItemSlug={platformModal.categoryItemSlug}
-                        showImageUpload={platformModal.showImageUpload}
-                        showDescription={platformModal.showDescription}
-                        showInstagram={platformModal.showInstagram}
-                        showYoutube={platformModal.showYoutube}
-                        showTags={platformModal.showTags}
-                        showURL={platformModal.showURL}
                         title={platformModal.title}
                         subtitle={platformModal.subtitle}
+                        
+                        // pass data
+                        // judul, tahun default ada
+                        showURL={platformModal.showURL}
+                        showPrevDescription={platformModal.showPrevDescription}
+                        showImageUpload={platformModal.showImageUpload}
+                        showMeta={platformModal.showMeta}
+
                         actionLabel="+add"
                         searchPlaceholder="Cari konten..."
                         close={() => setPlatformModal(p => ({ ...p, open: false }))}

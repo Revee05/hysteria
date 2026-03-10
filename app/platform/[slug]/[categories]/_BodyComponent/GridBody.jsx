@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import PosterCard from "./cards/PosterCard";
 import MockUpPosterCard from "./cards/MockUpPosterCard";
+import KomikRamuanCard from "./cards/KomikRamuanCard";
 import Tooltip from '@mui/material/Tooltip';
 import SortMenu from "@/components/ui/SortMenu";
 import Pagination from "@/components/ui/Pagination";
@@ -239,7 +240,7 @@ const DUMMY_ITEMS = [
 
 const DEFAULT_ITEMS_PER_PAGE = 10; // default: 5 kolom × 2 baris
 
-export default function GridBody({ items = [], filters = [] }) {
+export default function GridBody({ items = [], filters = [], cardType = "poster" }) {
   const resolvedItems = items.length > 0 ? items : DUMMY_ITEMS;
   const resolvedFilters = filters.length > 0 ? filters : DUMMY_FILTERS;
   const [search, setSearch] = useState("");
@@ -333,7 +334,8 @@ export default function GridBody({ items = [], filters = [] }) {
   }, [resolvedItems, activeFilter, search, sortMode]);
 
   /* ---------- pagination ---------- */
-  const isMockupLayout = resolvedItems.some((item) => item.meta === "mockup");
+  const isKomikRamuan = cardType === "komik-ramuan";
+  const isMockupLayout = isKomikRamuan || resolvedItems.some((item) => item.meta === "mockup");
   const itemsPerPage = isMockupLayout ? 8 : DEFAULT_ITEMS_PER_PAGE;
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
@@ -430,7 +432,18 @@ export default function GridBody({ items = [], filters = [] }) {
       {paginatedItems.length > 0 ? (
         <div className={`grid gap-5 ${ isMockupLayout ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-5' }`}>
           {paginatedItems.map((item, i) =>
-            item.meta === "mockup" ? (
+            isKomikRamuan ? (
+              <KomikRamuanCard
+                key={i}
+                imageUrl={item.imageUrl || item.src || item.thumbnail}
+                alt={item.alt}
+                year={item.year || item.meta || item.date}
+                title={item.title}
+                prevdescription={item.prevdescription || item.description}
+                href={item.href || item.url}
+                buttonLabel={item.buttonLabel}
+              />
+            ) : item.meta === "mockup" ? (
               <MockUpPosterCard
                 key={i}
                 imageUrl={item.imageUrl}

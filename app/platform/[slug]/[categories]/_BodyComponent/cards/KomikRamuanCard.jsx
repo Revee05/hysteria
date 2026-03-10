@@ -27,7 +27,7 @@ export default function MockUpPosterCard({
 }) {
   const imgSrc = imageUrl || "/image/DummyPoster.webp";
   const isLocal = typeof imgSrc === "string" && imgSrc.startsWith("/");
-  const fullTitle = year && title ? `${year} - ${title}` : title || year || "";
+//   const fullTitle = year && title ? `${year} - ${title}` : title || year || "";
 
   return (
     <div className="w-full md:max-w-[380px] md:aspect-[3/4] flex flex-col overflow-hidden rounded-xl bg-white border-2 border-zinc-300 drop-shadow-lg hover:shadow-2xl transition hover:translate-y-[-8px]">
@@ -35,7 +35,7 @@ export default function MockUpPosterCard({
       <div className="relative w-full aspect-video flex-shrink-0 bg-zinc-300">
         <Image
           src={imgSrc}
-          alt={alt || fullTitle || "Poster"}
+          alt={alt || title || "Poster"}
           fill
           unoptimized={!isLocal}
           sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 300px"
@@ -45,9 +45,9 @@ export default function MockUpPosterCard({
 
       {/* Content */}
       <div className="flex flex-col gap-1 px-4 py-3 md:py-4 flex-1">
-        {fullTitle && (
+        {title && (
           <h3 className="text-zinc-900 text-xs md:text-lg font-bold leading-5 line-clamp-2 flex-shrink">
-            {fullTitle}
+            {title}
           </h3>
         )}
         {prevdescription && (

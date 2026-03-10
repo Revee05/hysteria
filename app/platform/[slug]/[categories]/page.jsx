@@ -18,9 +18,25 @@ export async function generateMetadata({ params }) {
       getPublicPlatform(slug),
     ]);
     if (!item) return {};
+    const logoPath = '/svg/Logo-hysteria.svg';
+    const ogImage = item.image || platform?.head?.images?.[0]?.src || logoPath;
+
     return {
       title: item.title || platform?.head?.title || slug,
       description: item.imageSubtitle || platform?.head?.description || undefined,
+      icons: {
+        icon: logoPath,
+        shortcut: logoPath,
+        apple: logoPath,
+      },
+      openGraph: {
+        title: item.title || platform?.head?.title || slug,
+        description: item.imageSubtitle || platform?.head?.description || undefined,
+        images: [{ url: ogImage, alt: item.title || platform?.head?.title || 'Hysteria' }],
+      },
+      twitter: {
+        images: [ogImage],
+      },
     };
   } catch {
     return {};
