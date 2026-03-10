@@ -283,6 +283,59 @@ model PlatformImage {
   @@index([type])
 }
 
+model PlatformContent {
+  id Int @id @default(autoincrement())
+
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  // Kategori konten — mengacu ke CategoryItem (sub-nav platform)
+  categoryItem   CategoryItem? @relation(fields: [categoryItemId], references: [id], onDelete: SetNull)
+  categoryItemId Int?
+
+  title    String   @db.VarChar(500)
+  url      String?  @db.VarChar(500)
+  instagram String? @db.VarChar(500)
+  youtube   String? @db.VarChar(500)
+  prevdescription String? @db.Text
+  description String? @db.Text
+  host     String?  @db.VarChar(255)
+  guests   String[]             // array tamu, disimpan as text[]
+  year     Int?
+  meta     Json?                // flexible metadata (JSON)
+  tags     String[]             // array tag bebas, disimpan as text[]
+  order    Int      @default(0)
+  isActive Boolean  @default(true)
+
+  images PlatformContentImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([platformId])
+  @@index([categoryItemId])
+  @@index([order])
+  @@index([isActive])
+}
+
+model PlatformContentImage {
+  id Int @id @default(autoincrement())
+
+  content   PlatformContent @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  contentId Int
+
+  imageUrl String? @db.VarChar(500)
+  type     String  @default("thumbnail") @db.VarChar(50) // thumbnail | gallery | cover
+  alt      String? @db.VarChar(255)
+  order    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contentId])
+  @@index([type])
+}
+
 model TentangVisiMisi {
   id          Int      @id @default(autoincrement())
   pageSlug    String   @unique @default("tentang") @db.VarChar(100)

@@ -4,11 +4,15 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useDebounce } from '@/hooks/use-debounce';
 import SearchField from '@/components/adminUI/SearchField';
-import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import DataTable from '@/components/ui/DataTable';
 import PageFilter from '@/components/ui/PageFilter';
 import SubForm from './form/sub.form';
+
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const FALLBACK_ITEMS = [
   { id: 1, no: 1, title: 'example', year: 2026, url: 'https://example.com' },
@@ -49,6 +53,15 @@ export default function PlatformIndex({
   onEdit,
   onDelete,
   showImageUpload = false,
+  showTags = false,
+  showMeta = false,
+  showURL = false,
+  showInstagram = false,
+  showYoutube = false,
+  showPrevDescription = false,
+  showDescription = false,
+  showHost = false,
+  showGuests = false,
 }) {
   const [searchQuery, setSearchQuery]   = useState('');
   const [perPage, setPerPage]           = useState(10);
@@ -74,6 +87,7 @@ export default function PlatformIndex({
       setLoading(true);
       setApiError(null);
       const params = new URLSearchParams();
+      params.set('minimal', 'true');
       if (platformSlug) {
         params.set('platformSlug', platformSlug);
         if (categoryItemSlug) params.set('categoryItemSlug', categoryItemSlug);
@@ -82,7 +96,7 @@ export default function PlatformIndex({
         if (categoryItemId) params.set('categoryItemId', String(categoryItemId));
       }
 
-      const res = await fetch(`/api/admin/platform-content?${params.toString()}`);
+      const res = await fetch(`/api/admin/platform-content/content?${params.toString()}`);
       const json = await res.json();
 
       if (!res.ok) throw new Error(json?.message ?? 'Gagal mengambil data');
@@ -114,13 +128,21 @@ export default function PlatformIndex({
       fd.append('title', rest.title ?? '');
       if (rest.year != null && rest.year !== '') fd.append('year', String(rest.year));
       if (rest.url) fd.append('url', rest.url);
+      if (rest.meta != null) fd.append('meta', typeof rest.meta === 'object' ? JSON.stringify(rest.meta) : rest.meta);
+      if (rest.instagram != null) fd.append('instagram', rest.instagram);
+      if (rest.youtube != null) fd.append('youtube', rest.youtube);
+      if (rest.prevdescription != null) fd.append('prevdescription', rest.prevdescription);
+      if (rest.description != null) fd.append('description', rest.description);
+      if (rest.tags != null) fd.append('tags', JSON.stringify(rest.tags));
       if (platformSlug) fd.append('platformSlug', platformSlug);
       else fd.append('platformId', String(platformId));
       if (categoryItemSlug) fd.append('categoryItemSlug', categoryItemSlug);
       else if (categoryItemId) fd.append('categoryItemId', String(categoryItemId));
+      if (rest.host != null) fd.append('host', rest.host);
+      if (rest.guests != null) fd.append('guests', JSON.stringify(rest.guests));
       for (const file of imageFiles) fd.append('images', file);
 
-      const res  = await fetch('/api/admin/platform-content', { method: 'POST', body: fd });
+      const res  = await fetch('/api/admin/platform-content/content', { method: 'POST', body: fd });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message ?? 'Gagal menyimpan data');
 
@@ -141,7 +163,15 @@ export default function PlatformIndex({
       const fd = new FormData();
       if (rest.title != null) fd.append('title', rest.title);
       if (rest.year != null && rest.year !== '') fd.append('year', String(rest.year));
+      if (rest.meta != null) fd.append('meta', typeof rest.meta === 'object' ? JSON.stringify(rest.meta) : rest.meta);
       if (rest.url != null) fd.append('url', rest.url);
+      if (rest.instagram != null) fd.append('instagram', rest.instagram);
+      if (rest.youtube != null) fd.append('youtube', rest.youtube);
+      if (rest.prevdescription != null) fd.append('prevdescription', rest.prevdescription);
+      if (rest.description != null) fd.append('description', rest.description);
+      if (rest.tags != null) fd.append('tags', JSON.stringify(rest.tags));
+      if (rest.host != null) fd.append('host', rest.host);
+      if (rest.guests != null) fd.append('guests', JSON.stringify(rest.guests));
       for (const file of imageFiles) fd.append('images', file);
 
       const res  = await fetch(`/api/admin/platform-content/${id}`, { method: 'PATCH', body: fd });
@@ -178,23 +208,12 @@ export default function PlatformIndex({
   // build default columns inside component so handlers are in scope
   const defaultColumns = [
     { field: 'no', headerName: 'No.', width: 60, freeze:true},
-    { field: 'title', headerName: 'Judul', width: 250 },
-    {
-      field: 'url',
-      width: 250,
-      headerName: 'URL',
-      render: (row) => (
-        row?.url ? (
-          <a href={row.url} target="_blank" rel="noreferrer" className="text-blue-600 underline break-all">{row.url}</a>
-        ) : (
-          <span className="text-gray-500">—</span>
-        )
-      ),
-    },
-    {
+    { field: 'title', headerName: 'Judul', width: 250, freeze:true },
+    ...(showImageUpload ? [{
       field: 'image',
       headerName: 'Gambar',
       width: 120,
+      freeze: true,
       render: (row) => (
         row?.images && row.images.length > 0 ? (
           <Image
@@ -209,7 +228,101 @@ export default function PlatformIndex({
           <span className="text-gray-400">—</span>
         )
       ),
-    },
+    }] : []),
+    ...(showPrevDescription ? [{
+      field: 'prevdescription',
+      headerName: 'Ringkasan',
+      width: 250,
+      render: (row) => (
+        row?.prevdescription
+          ? <span className="text-zinc-700 text-sm line-clamp-2">{row.prevdescription}</span>
+          : <span className="text-gray-400">—</span>
+      ),
+    }] : []),
+    ...(showDescription ? [{
+      field: 'description',
+      headerName: 'Deskripsi',
+      width: 250,
+      render: (row) => (
+        row?.description
+          ? <span className="text-zinc-700 text-sm line-clamp-2">{row.description}</span>
+          : <span className="text-gray-400">—</span>
+      ),
+    }] : []),
+    ...(showYoutube ? [{
+      field: 'youtube',
+      headerName: 'YouTube',
+      width: 180,
+      render: (row) => (
+        (row?.platform?.youtube || row?.youtube) ? (
+          <a href={(row?.platform?.youtube || row?.youtube)} target="_blank" rel="noreferrer" className="text-blue-600 underline break-all">{row?.platform?.youtube || row?.youtube}</a>
+        ) : (
+          <span className="text-gray-500">—</span>
+        )
+      ),
+    }] : []),
+    ...(showInstagram ? [{
+      field: 'instagram',
+      headerName: 'Instagram',
+      width: 180,
+      render: (row) => (
+        (row?.platform?.instagram || row?.instagram) ? (
+          <a href={(row?.platform?.instagram || row?.instagram)} target="_blank" rel="noreferrer" className="text-blue-600 underline break-all">{row?.platform?.instagram || row?.instagram}</a>
+        ) : (
+          <span className="text-gray-500">—</span>
+        )
+      ),
+    }] : []),
+    ...(showURL ? [{
+      field: 'url',
+      width: 250,
+      headerName: 'URL',
+      render: (row) => (
+        row?.url ? (
+          <a href={row.url} target="_blank" rel="noreferrer" className="text-blue-600 underline break-all">{row.url}</a>
+        ) : (
+          <span className="text-gray-500">—</span>
+        )
+      ),
+    }] : []),
+    ...(showHost ? [{
+        field: 'host',
+        headerName: 'Host',
+        width: 150,
+        render: (row) => <span className="text-zinc-700 text-sm">{row.host || '—'}</span>,
+      },
+    ] : []),
+    ...(showGuests ? [{
+        field: 'guests',
+        headerName: 'Guests',
+        width: 200,
+        render: (row) => {
+          const list = Array.isArray(row.guests) ? row.guests.filter(Boolean) : [];
+          return list.length > 0
+            ? <span className="text-zinc-700 text-sm">{list.join(', ')}</span>
+            : <span className="text-gray-400">—</span>;
+        },
+      },
+    ] : []),
+    ...(showTags ? [{
+      field: 'tags',
+      headerName: 'Tags',
+      width: 200,
+      render: (row) => {
+        const list = Array.isArray(row.tags) ? row.tags.filter(Boolean) : [];
+        return list.length > 0
+          ? <span className="text-zinc-700 text-sm">{list.join(', ')}</span>
+          : <span className="text-gray-400">—</span>;
+      },
+    }] : []),
+    ...(showMeta ? [{
+      field: 'meta',
+      headerName: 'Meta',
+      width: 180,
+      render: (row) => (
+        row?.meta ? <span className="text-zinc-700 text-sm line-clamp-2">{typeof row.meta === 'string' ? row.meta : JSON.stringify(row.meta)}</span> : <span className="text-gray-400">—</span>
+      ),
+    }] : []),
     { field: 'year', headerName: 'Tahun', width: 100, align: 'center', headerAlign: 'center' },
     {
       field: 'aksi',
@@ -218,19 +331,17 @@ export default function PlatformIndex({
       align: 'center',
       headerAlign: 'justify-center',
       render: (row) => (
-        <div className="flex flex-wrap gap-2 justify-start items-center ">
-          <button
-            onClick={() => handleEdit(row)}
-            className="text-white bg-pink-500 px-2 py-1 rounded-md text-xs cursor-pointer hover:bg-pink-600"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => effectiveDelete?.(row)}
-            className="text-white bg-[#43334C] px-2 py-1 rounded-md text-xs cursor-pointer hover:bg-red-500"
-          >
-            ✕
-          </button>
+        <div className="flex gap-1 justify-start items-center">
+          <Tooltip title="Edit" arrow>
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleEdit(row); }} sx={{ color: '#ec4899', '&:hover': { color: '#db2777' } }}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Hapus" arrow>
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); effectiveDelete?.(row); }} sx={{ color: '#43334C', '&:hover': { color: '#ef4444' } }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </div>
       ),
     },
@@ -276,26 +387,35 @@ export default function PlatformIndex({
       {/* Header */}
       <div className="flex w-full items-start justify-between mb-4 gap-4">
         <div>
-          <h3 className="text-2xl font-extrabold">{title}</h3>
-          {/* <p className="text-sm text-gray-600 mt-1">{subtitle}</p> */}
+          <h3 className="text-2xl text-zinc-600 font-extrabold">{title}</h3>
+          <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
         </div>
         <div className="ml-auto flex flex-end items-end md:flex-row md:items-start gap-2">
-          <button
-            type="button"
-            onClick={() => handleAdd()}
-            disabled={saving}
-            className="px-3 py-2 bg-[#43334C] hover:bg-[#2e2237] text-white rounded-md shadow-md font-semibold cursor-pointer disabled:opacity-60"
-          >
-            {actionLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => close?.()}
-            aria-label="close"
-            className="px-3 py-2 text-zinc-100 bg-red-500 rounded-md hover:bg-red-600 cursor-pointer"
-          >
-            ✕
-          </button>
+          <Tooltip title="tambah postingan" arrow>
+            <span>
+              <button
+                type="button"
+                onClick={() => handleAdd()}
+                disabled={saving}
+                className="px-3 py-2 bg-[#43334C] hover:bg-[#2e2237] text-white rounded-md shadow-md font-semibold cursor-pointer disabled:opacity-60"
+              >
+                {actionLabel}
+              </button>
+            </span>
+          </Tooltip>
+
+          <Tooltip title="close" arrow>
+            <span>
+              <button
+                type="button"
+                onClick={() => close?.()}
+                aria-label="close"
+                className="px-3 py-2 text-zinc-100 bg-red-500 rounded-md hover:bg-red-600 cursor-pointer"
+              >
+                ✕
+              </button>
+            </span>
+          </Tooltip>
         </div>
       </div>
 
@@ -345,10 +465,20 @@ export default function PlatformIndex({
         open={isFormOpen}
         mode={formMode}
         initialData={selectedRow}
+        categoryItemSlug={categoryItemSlug}
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleFormSubmit}
         saving={saving}
         showImageUpload={showImageUpload}
+        showTags={showTags}
+        showInstagram={showInstagram}
+        showYoutube={showYoutube}
+        showURL={showURL}
+        showPrevDescription={showPrevDescription}
+        showDescription={showDescription}
+        showHost={showHost}
+        showGuests={showGuests}
+        showMeta={showMeta}
       />
     </div>
   );

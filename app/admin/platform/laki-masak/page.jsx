@@ -36,6 +36,8 @@ export default function LakiMasakPage() {
   const [modalInitial, setModalInitial] = useState({});
   const [modalPlaceholders, setModalPlaceholders] = useState({});
   const [modalApiEndpoint, setModalApiEndpoint] = useState('');
+  const [modalIsPhone, setModalIsPhone] = useState(false);
+  const [modalPrefix, setModalPrefix] = useState('');
 
   const [platformModal, setPlatformModal] = useState({ open: false, title: '', subtitle: '', categoryItemSlug: '', showImageUpload: false });
 
@@ -46,7 +48,7 @@ export default function LakiMasakPage() {
 
   const openModalForCategory = async (cat) => {
     if (cat.id === 1) {
-      setPlatformModal({ open: true, title: 'Homecooked', subtitle: 'Kelola konten Homecooked', categoryItemSlug: 'homecooked', showImageUpload: true });
+      setPlatformModal({ open: true, title: 'Homecooked', subtitle: 'Kelola konten Homecooked', categoryItemSlug: 'homecooked', showImageUpload: true, showInstagram: true, showYoutube: true, showDescription: true, showTags: true, showURL: true });
       return;
     }
     if (cat.id === 2) {
@@ -55,7 +57,8 @@ export default function LakiMasakPage() {
     }
     // cat id 3 → LinkForm modal (Pre-Order)
     const endpoint = '/api/admin/platform-content/laki-masak/pre-order';
-    const placeholdersObj = cat.id === 3 ? { input: 'https://api.whatsapp.com/send/?phone=62' } : { input: 'text . . . . . ' };
+    // For Pre-Order use phone mode with WhatsApp prefix, otherwise plain text
+    const placeholdersObj = cat.id === 3 ? { input: 'contoh: 085535235339' } : { input: 'text . . . . . ' };
 
     let currentUrl = '';
     try {
@@ -71,6 +74,14 @@ export default function LakiMasakPage() {
     setModalTitle(`Kelola ${cat.title}`);
     setModalInitial({ categoryId: cat.id, categoryTitle: cat.title, input: currentUrl });
     setModalPlaceholders(placeholdersObj);
+    // set phone mode only for Pre-Order
+    if (cat.id === 3) {
+      setModalIsPhone(true);
+      setModalPrefix('https://api.whatsapp.com/send/?phone=62');
+    } else {
+      setModalIsPhone(false);
+      setModalPrefix('');
+    }
     setModalApiEndpoint(endpoint);
     setModalOpen(true);
   };
@@ -145,7 +156,7 @@ export default function LakiMasakPage() {
             <div className="max-w-6xl mx-auto mt-12">
               <div className='flex flex-col md:flex-row md:gap-0 justify-between items-start md:items-center mb-6 md:mb-0'>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-extrabold mb-1 font-poppins">Meramu</h2>
+                  <h2 className="text-2xl md:text-3xl text-zinc-700 font-extrabold mb-1 font-poppins">Meramu</h2>
                   <p className="text-sm text-gray-600 mb-6 font-poppins">
                     Kumpulan postingan dari Meramu, salah satu kegiatan di Laki Masak
                   </p>
@@ -211,7 +222,14 @@ export default function LakiMasakPage() {
                     <div className="mx-auto w-full sm:max-w-lg md:max-w-6xl p-2 bg-white rounded-lg shadow-lg">
                       <PlatformIndex
                         platformSlug="laki-masak"
-                        categoryItemSlug={platformModal.categoryItemSlug}                        showImageUpload={platformModal.showImageUpload}                        title={platformModal.title}
+                        categoryItemSlug={platformModal.categoryItemSlug}
+                        showImageUpload={platformModal.showImageUpload}
+                        showDescription={platformModal.showDescription}
+                        showInstagram={platformModal.showInstagram}
+                        showYoutube={platformModal.showYoutube}
+                        showTags={platformModal.showTags}
+                        showURL={platformModal.showURL}
+                        title={platformModal.title}
                         subtitle={platformModal.subtitle}
                         actionLabel="+add"
                         searchPlaceholder="Cari konten..."
@@ -230,8 +248,11 @@ export default function LakiMasakPage() {
                     <LinkForm
                       close={() => setModalOpen(false)}
                       title={modalTitle}
+                      subtitle={modalIsPhone ? 'edit dengan nomor hp/whatsapp yang aktif' : ''}
                       initial={modalInitial}
                       placeholders={modalPlaceholders}
+                      isPhone={modalIsPhone}
+                      prefix={modalPrefix}
                       onSave={handleSaveFromForm}
                     />
                   </div>

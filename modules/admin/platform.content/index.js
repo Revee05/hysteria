@@ -12,10 +12,10 @@
 
 export * from "./repository/platformContent.repository.js";
 export * from "./validators/platformContent.validator.js";
-export * from "./servies/platformContent.service.js";
+export * from "./services/platformContent.service.js";
 
 // Named convenience exports — dipakai langsung oleh API routes
-import * as svc from "./servies/platformContent.service.js";
+import * as svc from "./services/platformContent.service.js";
 export const listPlatformContents        = svc.listPlatformContents;
 export const listPlatformContentsBySlug  = svc.listPlatformContentsBySlug;
 export const getPlatformContent    = svc.getPlatformContent;

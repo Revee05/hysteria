@@ -276,7 +276,7 @@ function DesktopSubmenuPanel({ activeSub, categoryCache, teamCache, loading, err
                   className="text-right"
                   style={{ breakInside: "avoid", marginBottom: "0.5rem" }}>
                   <Link
-                    href={"tentang" || "#"}
+                    href={"/tentang" || "#"}
                     onClick={handleClose}
                     className="block text-[#E83C91] font-bold text-lg px-2 py-1 rounded hover:bg-gray-50 text-right leading-tight">
                     Tentang Hysteria
@@ -302,7 +302,7 @@ function DesktopSubmenuPanel({ activeSub, categoryCache, teamCache, loading, err
                   className="text-right"
                   style={{ breakInside: "avoid", marginBottom: "0.5rem" }}>
                   <Link
-                    href={"tim" || "#"}
+                    href={"/tim" || "#"}
                     onClick={handleClose}
                     className="block text-[#E83C91] font-bold text-lg px-2 py-1 rounded hover:bg-gray-50 text-right leading-tight">
                     Tim Hysteria

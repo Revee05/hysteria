@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+"use client";
+
+import { useState, useRef, useEffect, use } from "react";
 import Image from "next/image";
 
 /**
@@ -14,8 +16,8 @@ import Image from "next/image";
  *   badge    : string  — teks badge (e.g. "Akan Berlangsung", "Telah Berakhir")
  *   meta     : string  — info kecil (e.g. tanggal)
  */
-export default function PosterCard({ src, alt, title, subtitle, badge, meta }) {
-  const imgSrc = src || "/image/DummyPoster.webp";
+export default function PosterCard({ imageUrl, alt, title, description, tags, meta }) {
+  const imgSrc = imageUrl || "/image/DummyPoster.webp";
   const isLocal = typeof imgSrc === "string" && imgSrc.startsWith("/");
 
   const [isOpen, setIsOpen] = useState(false);
@@ -96,11 +98,11 @@ export default function PosterCard({ src, alt, title, subtitle, badge, meta }) {
               : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto")
           }
         >
-          {/* Badge positioned near top-left inside overlay */}
-          {badge && (
+          {/* Badge positioned near top-left inside overlay (first tag) */}
+          {(tags && tags.length > 0) && (
             <div className="absolute top-3 left-3 z-30 pointer-events-auto">
-              <span className="bg-pink-500 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow">
-                {badge}
+              <span className="bg-pink-500 text-white text-[10px] md:text-md font-semibold px-3 py-1 rounded-full shadow">
+                {tags[0]}
               </span>
             </div>
           )}
@@ -110,15 +112,15 @@ export default function PosterCard({ src, alt, title, subtitle, badge, meta }) {
             <div className="bg-transparent py-3">
               {/* Title */}
               {title && (
-                <h3 className="text-white text-sm md:text-base font-bold leading-tight drop-shadow-md">
+                <h3 className="text-white text-xs md:text-base font-bold leading-tight drop-shadow-md">
                   {title}
                 </h3>
               )}
 
-              {/* Subtitle */}
-              {subtitle && (
-                <p className="text-white/80 text-xs leading-tight mt-1 drop-shadow-md">
-                  {subtitle}
+              {/* Description */}
+              {description && (
+                <p className="text-white/80 text-xs md:text-base leading-tight mt-1 drop-shadow-md">
+                  {description}
                 </p>
               )}
 
@@ -126,8 +128,8 @@ export default function PosterCard({ src, alt, title, subtitle, badge, meta }) {
               {meta && <p className="text-white/90 text-[11px] mt-1">{meta}</p>}
 
               {/* CTA button */}
-              <div className="mt-3">
-                <span className="inline-block bg-gradient-to-r from-pink-500 to-orange-400 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-shadow">
+              <div className="mt-3 flex justify-center">
+                <span className="z-1000 inline-block bg-gradient-to-r from-pink-500 to-orange-400 text-white text-xs font-semibold px-4 py-2 rounded-lg">
                   {ctaText}
                 </span>
               </div>

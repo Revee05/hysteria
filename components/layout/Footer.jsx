@@ -1,13 +1,56 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { IconInstagram, IconFacebook, IconYoutube, IconX, IconEnvelope, IconTelephone, IconMap } from "../ui/icon";
 
 export default function Footer() {
+  const [contactInfo, setContactInfo] = useState({
+    instagramUrl: "https://instagram.com/grobakhysteria",
+    facebookUrl: "https://facebook.com/kolektifhysteria",
+    youtubeUrl: "https://youtube.com/@kolektifhysteria",
+    twitterUrl: "https://twitter.com/grobakhysteria",
+    email: "hysteriakita59@gmail.com",
+    whatsappNumber: "628121272483",
+    locationAddress: "Jl Stonen No.29 Gajahmungkur, Kota Semarang, Jawa Tengah 50233",
+  });
+
   const pathname = usePathname() || "";
   if (pathname.startsWith("/admin")) return null;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadContact() {
+      try {
+        const res = await fetch("/api/contact");
+        const json = await res.json().catch(() => null);
+        const contact = json?.data?.contact;
+
+        if (!isMounted || !contact) return;
+
+        setContactInfo((prev) => ({
+          instagramUrl: contact.instagramUrl || prev.instagramUrl,
+          facebookUrl: contact.facebookUrl || prev.facebookUrl,
+          youtubeUrl: contact.youtubeUrl || prev.youtubeUrl,
+          twitterUrl: contact.twitterUrl || prev.twitterUrl,
+          email: contact.email || prev.email,
+          whatsappNumber: contact.whatsappNumber || prev.whatsappNumber,
+          locationAddress: contact.locationAddress || prev.locationAddress,
+        }));
+      } catch {
+        // Keep fallback links when API is unavailable.
+      }
+    }
+
+    loadContact();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const year = new Date().getFullYear();
   return (
@@ -30,18 +73,18 @@ export default function Footer() {
             <div className="mt-2 text-sm font-bold text-white">Ikuti kami</div>
 
             <div className="flex items-center gap-3 text-white">
-              <Link href="#" className="hover:opacity-90" aria-label="Instagram">
+              <a href={contactInfo.instagramUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-90" aria-label="Instagram">
                 <IconInstagram className="w-5 h-5 text-white" size={20} />
-              </Link>
-              <Link href="#" className="hover:opacity-90" aria-label="Facebook">
+              </a>
+              <a href={contactInfo.facebookUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-90" aria-label="Facebook">
                 <IconFacebook className="w-5 h-5 text-white" size={20} />
-              </Link>
-              <Link href="#" className="hover:opacity-90" aria-label="YouTube">
+              </a>
+              <a href={contactInfo.youtubeUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-90" aria-label="YouTube">
                 <IconYoutube className="w-5 h-5 text-white" size={20} />
-              </Link>
-              <Link href="#" className="hover:opacity-90" aria-label="X">
+              </a>
+              <a href={contactInfo.twitterUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-90" aria-label="X">
                 <IconX className="w-5 h-5 text-white" size={20} />
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -78,21 +121,21 @@ export default function Footer() {
                     <div>
                       <IconEnvelope className="w-4 h-4 text-white" size={16} />
                     </div>
-                    <span>hysteriaicta58@gmail.com</span>
+                    <span>{contactInfo.email}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <div>
                       <IconTelephone className="w-4 h-4 text-white" size={16} />
                     </div>
-                    <span>+62 812 1427 2483</span>
+                    <span>{contactInfo.whatsappNumber}</span>
                   </div>
 
                   <div className="flex items-start gap-2">
                     <div>
                       <IconMap className="w-4 h-4 text-white mt-0.5" size={16} />
                     </div>
-                    <span>Jl Stonen No.29 Gajahmungkur, Kota Semarang, Jawa Tengah 50233</span>
+                    <span className="whitespace-pre-line">{contactInfo.locationAddress}</span>
                   </div>
                 </div>
             </div>

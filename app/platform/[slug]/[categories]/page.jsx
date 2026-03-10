@@ -3,23 +3,52 @@ import { notFound } from "next/navigation";
 import HeroSection from "./_component/HeroSection";
 import CarouselBody from "./_BodyComponent/CarouselBody";
 import GridBody from "./_BodyComponent/GridBody";
-import { listPlatforms, listCategories, getCategory, getPlatform } from "../../apiData";
+import {
+  listPublicPlatforms,
+  getPublicPlatform,
+  getPublicCategory,
+} from "../../../../modules/public/platform/services/platform.public.service.js";
+
+export async function generateMetadata({ params }) {
+  const { slug, categories } = (await params) || {};
+  if (!slug) return {};
+  try {
+    const [item, platform] = await Promise.all([
+      getPublicCategory(slug, categories),
+      getPublicPlatform(slug),
+    ]);
+    if (!item) return {};
+    return {
+      title: item.title || platform?.head?.title || slug,
+      description: item.imageSubtitle || platform?.head?.description || undefined,
+    };
+  } catch {
+    return {};
+  }
+}
 
 export async function generateStaticParams() {
-  return listPlatforms().flatMap(({ slug }) =>
-    (listCategories(slug) || []).map((c) => ({
-      slug,
-      categories: c.slug || (c.title || "").toLowerCase().replace(/\s+/g, "-"),
-    }))
-  );
+  try {
+    const platforms = await listPublicPlatforms();
+    return platforms.flatMap(({ slug, categories }) =>
+      (categories || []).map((c) => ({
+        slug,
+        categories: c.slug || (c.title || "").toLowerCase().replace(/\s+/g, "-"),
+      }))
+    );
+  } catch {
+    return [];
+  }
 }
 
 export default async function Page({ params }) {
   const { slug, categories } = (await params) || {};
   if (!slug) return notFound();
 
-  const item = getCategory(slug, categories);
-  const platform = getPlatform(slug);
+  const [item, platform] = await Promise.all([
+    getPublicCategory(slug, categories),
+    getPublicPlatform(slug),
+  ]);
   if (!platform || !item) return notFound();
 
   // Determine layout — default to 'grid' when not specified
@@ -27,19 +56,19 @@ export default async function Page({ params }) {
 
   return (
     <div className="bg-white">
-      <main className="font-sans w-full max-w-[1920px] mx-auto bg-white min-h-screen">
+      <main className="font-sans w-full max-w-[1920px] mx-auto bg-zinc-100 min-h-screen">
         {/* Shared hero section — same component, different metadata */}
         <HeroSection
-          imageUrl={item.image || platform.head?.images?.[0]?.src || "/image/ilustrasi-menu.png"}
-          title={item.title || platform.head?.title || "Platform"}
-          description={item.description || platform.head?.description || "Explore our platform categories"}
+          imageUrl={item.image || "/image/ilustrasi-menu.png"}
+          title={item.imageTitle || item.title || platform.head?.title || "Platform"}
+          description={item.imageSubtitle || "Explore our platform categories"}
         />
 
         {/* Dynamic body based on layout type */}
         {layout === "carousel" ? (
           <CarouselBody subCategories={item.subCategories || []} />
         ) : (
-          <GridBody items={item.items || []} filters={item.filters || []} />
+          <GridBody items={item.items || []} filters={item.filters || []} cardType={item.cardType || "poster"} />
         )}
       </main>
     </div>

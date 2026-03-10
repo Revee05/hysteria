@@ -66,9 +66,9 @@ export const PLATFORM_DATA = {
             cardType: 'video',
             linkUrl: '#',
             items: [
-              { src: 'https://youtu.be/D0UnqGm_miA', alt: 'Anitalk 1', title: 'Anitalk Episode 1', timestamp: '22.00' },
-              { src: '/image/video.webp', alt: 'Anitalk 2', title: 'Anitalk Episode 2', timestamp: '22.00' },
-              { src: '/image/video.webp', alt: 'Anitalk 3', title: 'Anitalk Episode 3', timestamp: '22.00' },
+              { src: 'https://youtu.be/D0UnqGm_miA', alt: 'Anitalk 1', title: 'AniTalk #1 - The Existence of Kebaya in Modern Society', description: 'Deskripsi Anitalk Episode 1 test test Deskripsi Anitalk Episode 1 Deskripsi Anitalk Episode 1 Deskripsi Anitalk Episode 1 Deskripsi Anitalk Episode 1 Deskripsi Anitalk Episode 1', host: 'Anita', guests: ['Guest 1', 'Guest 2'], timestamp: '22.00' },
+              { src: 'https://www.youtube.com/shorts/bcsGz0BiHAw?feature=share', alt: 'Anitalk 2', title: 'Anitalk Episode 2', description: 'Deskripsi Anitalk Episode 2', timestamp: '22.00' },
+              { src: '/image/video.webp', alt: 'Anitalk 3', title: 'Anitalk Episode 3', description: 'Deskripsi Anitalk Episode 3', timestamp: '22.00' },
             ]
           },
           {

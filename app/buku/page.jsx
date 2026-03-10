@@ -1,5 +1,10 @@
 import Image from "next/image";
 
+export const metadata = {
+  title: 'Buku',
+  description: 'Koleksi buku pilihan dari Hysteria.',
+};
+
 const books = [
   {
     id: 1,

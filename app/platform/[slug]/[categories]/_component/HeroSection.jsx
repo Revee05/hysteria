@@ -5,7 +5,7 @@ export default function TimHero({ imageUrl, title, description }) {
   const resolvedImage = imageUrl || "/image/tim-hero.png";
   const resolvedTitle = title || "Hysteria";
   const resolvedDescription = description || "Hysteria, Colaboratorium and Creative Impact Hub";
-  const isLocalImage = resolvedImage.startsWith("/");
+  // const isLocalImage = resolvedImage.startsWith("/");
 
   return (
     <div className="relative w-full h-[500px] md:h-[650px] bg-[#d9d9d9] flex flex-col justify-center items-center text-white overflow-hidden">
@@ -15,7 +15,7 @@ export default function TimHero({ imageUrl, title, description }) {
           src={resolvedImage}
           alt="Tim Hero Background"
           fill
-          unoptimized={!isLocalImage}
+          // unoptimized={!isLocalImage}
           className="object-cover brightness-50"
         />
       </div>

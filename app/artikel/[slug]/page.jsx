@@ -1,7 +1,22 @@
 import { Person, Instagram, Facebook, X as XIcon } from "@mui/icons-material";
 import TiptapRenderer from "@/components/tiptap/TiptapRenderer";
-import { getPublicArticleDetail } from "@/modules/public/articles/services/article.public.service";
-import { getRecommendedArticles } from "@/modules/public/articles/services/article.public.service";
+import { getPublicArticleDetail, getRecommendedArticles } from "@/modules/public/articles/services/article.public.service";
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const article = await getPublicArticleDetail(slug);
+  if (!article) return {};
+  return {
+    title: article.title,
+    description: article.excerpt || undefined,
+    openGraph: {
+      title: article.title,
+      ...(article.excerpt && { description: article.excerpt }),
+      ...(article.featuredImage && { images: [article.featuredImage] }),
+      type: 'article',
+    },
+  };
+}
 import ArticleCard from "@/components/ui/ArticleCard";
 
 export default async function ArtikelDetail({ params }) {

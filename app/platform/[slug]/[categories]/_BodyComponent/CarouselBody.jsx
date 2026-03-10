@@ -56,10 +56,12 @@ function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster" }) {
   if (!items.length) return null;
 
   // Batasi jumlah item yang dirender
-  const displayedItems = items.slice(0, 7);
+  const displayedItems = items.slice(0, 9);
 
-  // Lebar card bervariasi per tipe
-  const cardWidth = cardType === "video" ? "w-[280px] md:w-[320px]" : "w-[180px] md:w-[220px]";
+  // Lebar card bervariasi per tipe — responsive untuk mobile
+  const cardWidth = cardType === "video"
+    ? "w-[220px] sm:w-[280px] md:w-[320px]"
+    : "w-[180px] md:w-[220px]";
 
   return (
     <section className="w-full max-w-[1920px] mx-auto mt-12 px-4 md:px-24">
@@ -94,7 +96,7 @@ function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster" }) {
 
         <div
           ref={scrollRef}
-          className="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 scroll-smooth"
+          className="py-4 flex gap-5 overflow-x-auto snap-x snap-mandatory pb-4 scroll-smooth"
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
@@ -133,11 +135,15 @@ function CardSwitch({ cardType, item }) {
   if (cardType === "video") {
     return (
       <VideoCard
-        src={item.src}
+        imageUrl={item.imageUrl || item.src}
+        youtube={item.youtube}
+        url={item.url}
         alt={item.alt}
         title={item.title}
-        timestamp={item.timestamp || item.subtitle}
-        badge={item.badge}
+        description={item.description}
+        tags={item.tags}
+        host={item.host}
+        guests={item.guests}
       />
     );
   }
@@ -145,12 +151,14 @@ function CardSwitch({ cardType, item }) {
   if (cardType === "artist") {
     return (
       <ArtistCard
-        src={item.src}
+        imageUrl={item.imageUrl || item.src}
         alt={item.alt}
-        name={item.name || item.title}
-        role={item.role}
-        episode={item.episode}
-        subtitle={item.subtitle}
+        title={item.title}
+        prevdescription={item.prevdescription}
+        host={item.host}
+        guests={item.guests}
+        url={item.url}
+        tags={item.tags}
       />
     );
   }
@@ -158,11 +166,11 @@ function CardSwitch({ cardType, item }) {
   // default: poster
   return (
     <PosterCard
-      src={item.src}
+      imageUrl={item.imageUrl || item.src}
       alt={item.alt}
       title={item.title}
-      subtitle={item.subtitle}
-      badge={item.badge}
+      description={item.description || item.subtitle}
+      tags={item.tags || (item.badge ? [item.badge] : [])}
       meta={item.meta}
     />
   );
