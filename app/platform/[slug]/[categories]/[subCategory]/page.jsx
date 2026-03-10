@@ -10,6 +10,7 @@ import {
   getPublicCategory,
 } from "../../../../../modules/public/platform/services/platform.public.service.js";
 import AnitalkInteractiveSection from "./_components/AnitalkInteractiveSection";
+import GenericSubCategorySection from "./_components/GenericSubCategorySection";
 
 const ANITALK_SLUG = "anitalk";
 
@@ -104,7 +105,7 @@ export default async function Page({ params }) {
   const isAnitalkPage = subCategory === ANITALK_SLUG;
   return (
     <div className="bg-[#f3f3f3] overflow-x-hidden">
-      <main className="font-sans w-full max-w-480 mx-auto min-h-screen overflow-x-hidden">
+      <main className="font-sans w-full w-[1920px] mx-auto min-h-screen">
         <HeroSection
           imageUrl={categoryData.image || "/image/ilustrasi-menu.png"}
           title={selectedSub.title || categoryData.title || platformData.head?.title || "Platform"}
@@ -118,26 +119,6 @@ export default async function Page({ params }) {
         )}
       </main>
     </div>
-  );
-}
-
-function GenericSubCategorySection({ selectedSub, cardType, items }) {
-  return (
-    <section className="w-full max-w-480 mx-auto px-4 md:px-24 py-10 md:py-14 bg-white">
-      <h2 className="font-poppins font-bold text-[24px] md:text-[32px] text-black mb-8">
-        {selectedSub.title}
-      </h2>
-
-      {!items.length ? (
-        <p className="text-zinc-500">Belum ada konten untuk kategori ini.</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-          {items.map((item, idx) => (
-            <CardByType key={`${selectedSub.slug}-${idx}`} cardType={cardType} item={item} />
-          ))}
-        </div>
-      )}
-    </section>
   );
 }
 

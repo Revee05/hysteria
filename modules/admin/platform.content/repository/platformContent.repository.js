@@ -34,7 +34,7 @@ const MINIMAL_SELECT = {
   // isActive: true,
   // ambil hanya satu gambar preview
   images: {
-    orderBy: [{ order: "asc" }, { id: "asc" }],
+    orderBy: [{ order: "desc" }, { id: "desc" }],
     take: 1,
     select: { id: true, imageUrl: true, type: true, alt: true },
   },
@@ -61,13 +61,13 @@ export async function findContentsByPlatformId(
     return prisma.platformContent.findMany({
       where,
       select: MINIMAL_SELECT,
-      orderBy: [{ order: "asc" }, { id: "asc" }],
+      orderBy: [{ order: "desc" }, { id: "desc" }],
     });
   }
   return prisma.platformContent.findMany({
     where,
     include: CONTENT_INCLUDE,
-    orderBy: [{ order: "asc" }, { id: "asc" }],
+    orderBy: [{ order: "desc" }, { id: "desc" }],
   });
 }
 
@@ -89,13 +89,13 @@ export async function findContentsByPlatformSlug(
     return prisma.platformContent.findMany({
       where,
       select: MINIMAL_SELECT,
-      orderBy: [{ order: "asc" }, { id: "asc" }],
+      orderBy: [{ order: "desc" }, { id: "desc" }],
     });
   }
   return prisma.platformContent.findMany({
     where,
     include: CONTENT_INCLUDE,
-    orderBy: [{ order: "asc" }, { id: "asc" }],
+    orderBy: [{ order: "desc" }, { id: "desc" }],
   });
 }
 
@@ -181,7 +181,7 @@ export async function deleteContentById(id) {
 export async function findImagesByContentId(contentId) {
   return prisma.platformContentImage.findMany({
     where: { contentId },
-    orderBy: [{ order: "asc" }, { id: "asc" }],
+    orderBy: [{ order: "desc" }, { id: "desc" }],
   });
 }
 

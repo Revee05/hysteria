@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import PosterCard from "./cards/PosterCard";
 import MockUpPosterCard from "./cards/MockUpPosterCard";
 import KomikRamuanCard from "./cards/KomikRamuanCard";
+import VideoCard from "./cards/VideoCard";
 import Tooltip from '@mui/material/Tooltip';
 import SortMenu from "@/components/ui/SortMenu";
 import Pagination from "@/components/ui/Pagination";
@@ -335,7 +336,7 @@ export default function GridBody({ items = [], filters = [], cardType = "poster"
 
   /* ---------- pagination ---------- */
   const isKomikRamuan = cardType === "komik-ramuan";
-  const isMockupLayout = isKomikRamuan || resolvedItems.some((item) => item.meta === "mockup");
+  const isMockupLayout = isKomikRamuan || resolvedItems.some((item) => item.meta === "mockup" || item.meta === "video");
   const itemsPerPage = isMockupLayout ? 8 : DEFAULT_ITEMS_PER_PAGE;
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
@@ -439,11 +440,12 @@ export default function GridBody({ items = [], filters = [], cardType = "poster"
                 alt={item.alt}
                 year={item.year || item.meta || item.date}
                 title={item.title}
-                prevdescription={item.prevdescription || item.description}
+                prevdescription={item.prevdescription}
                 href={item.href || item.url}
                 buttonLabel={item.buttonLabel}
               />
             ) : item.meta === "mockup" ? (
+              // ini untuk mockup view
               <MockUpPosterCard
                 key={i}
                 imageUrl={item.imageUrl}
@@ -453,6 +455,19 @@ export default function GridBody({ items = [], filters = [], cardType = "poster"
                 prevdescription={item.prevdescription}
                 href={item.href || item.url}
                 buttonLabel={item.buttonLabel}
+              />
+            ) : (item.meta === "video") ? (
+              // ini untuk homecooked view
+              <VideoCard
+                key={i}
+                imageUrl={item.imageUrl || item.src}
+                youtube={item.youtube}
+                url={item.url}
+                alt={item.alt}
+                title={item.title}
+                prevdescription={item.prevdescription}
+                host={item.host}
+                guests={item.guests}
               />
             ) : (
               <PosterCard

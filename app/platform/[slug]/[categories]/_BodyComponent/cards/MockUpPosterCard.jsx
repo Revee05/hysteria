@@ -30,7 +30,7 @@ export default function MockUpPosterCard({
   const fullTitle = year && title ? `${year} - ${title}` : title || year || "";
 
   return (
-    <div className="w-full md:max-w-[380px] md:aspect-[3/4] flex flex-col overflow-hidden rounded-xl bg-white border-2 border-zinc-300 drop-shadow-lg hover:shadow-2xl transition hover:translate-y-[-8px]">
+    <div className="w-full md:max-w-[380px] md:aspect-[3/4] flex flex-col overflow-hidden rounded-xl bg-white border-2 border-zinc-300 drop-shadow-lg hover:shadow-2xl transition hover:translate-y-[-8px] cursor-pointer">
       {/* Image */}
       <div className="relative w-full aspect-video flex-shrink-0 bg-zinc-300">
         <Image
@@ -44,14 +44,14 @@ export default function MockUpPosterCard({
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-1 px-4 py-3 md:py-4 flex-1">
+      <div className="flex flex-col gap-1 px-3 py-2 md:py-3 flex-1">
         {fullTitle && (
-          <h3 className="text-zinc-900 text-xs md:text-lg font-bold leading-5 line-clamp-2 flex-shrink">
+          <h3 className="text-zinc-900 text-[11px] md:text-[14px] font-bold leading-[14px] md:leading-[18px] line-clamp-2 flex-shrink">
             {fullTitle}
           </h3>
         )}
         {prevdescription && (
-          <p className="text-zinc-600 text-xs md:text-md leading-4 md:leading-6 line-clamp-4">
+          <p className="text-zinc-600 text-[10px] md:text-[12px] leading-[14px] md:leading-[18px] line-clamp-4 mb-1.5 md:mb-2">
             {prevdescription}
           </p>
         )}
@@ -61,14 +61,14 @@ export default function MockUpPosterCard({
           {href ? (
             <Link
               href={href}
-              className="block w-full rounded-xl bg-zinc-900 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-zinc-700 md:mb-5"
+              className="block rounded-lg bg-[#43334C] py-1 text-center text-sm font-semibold text-white transition-colors hover:bg-transparent hover:text-[#43334C] hover:border-1 border-[#43334C] md:mb-1"
             >
               {buttonLabel}
             </Link>
           ) : (
             <button
               type="button"
-              className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 mb-1"
+              className="block w-full rounded-lg bg-[#43334C] py-1 text-sm font-semibold text-white transition-colors hover:bg-transparent hover:text-[#43334C] hover:border-1 border-[#43334C] mb-1"
             >
               {buttonLabel}
             </button>
