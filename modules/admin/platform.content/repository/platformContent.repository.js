@@ -23,7 +23,9 @@ const MINIMAL_SELECT = {
   url: true,
   instagram: true,
   youtube: true,
+  prevdescription: true,
   description: true,
+  meta: true,
   host: true,
   guests: true,
   year: true,
@@ -36,7 +38,7 @@ const MINIMAL_SELECT = {
     take: 1,
     select: { id: true, imageUrl: true, type: true, alt: true },
   },
-  categoryItem: { select: { id: true, title: true, slug: true } },
+  categoryItem: { select: { id: true, title: true, slug: true, meta: true } },
 };
 
 // ─── PLATFORM CONTENT ────────────────────────────────────────────────────────

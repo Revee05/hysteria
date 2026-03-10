@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useId, useEffect } from "react";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";

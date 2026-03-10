@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from "react";
 import PosterCard from "./cards/PosterCard";
+import MockUpPosterCard from "./cards/MockUpPosterCard";
 import Tooltip from '@mui/material/Tooltip';
+import SortMenu from "@/components/ui/SortMenu";
 import Pagination from "@/components/ui/Pagination";
 
 /**
@@ -235,7 +237,7 @@ const DUMMY_ITEMS = [
   { src: "/image/DummyPoster.webp", title: "BOOKBINDING WORKSHOP", tag: "Having Fun Artlab", badge: null, meta: null },
 ];
 
-const ITEMS_PER_PAGE = 10; // 5 kolom × 2 baris
+const DEFAULT_ITEMS_PER_PAGE = 10; // default: 5 kolom × 2 baris
 
 export default function GridBody({ items = [], filters = [] }) {
   const resolvedItems = items.length > 0 ? items : DUMMY_ITEMS;
@@ -331,8 +333,11 @@ export default function GridBody({ items = [], filters = [] }) {
   }, [resolvedItems, activeFilter, search, sortMode]);
 
   /* ---------- pagination ---------- */
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
-  const paginatedItems = filteredItems.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const isMockupLayout = resolvedItems.some((item) => item.meta === "mockup");
+  const itemsPerPage = isMockupLayout ? 8 : DEFAULT_ITEMS_PER_PAGE;
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+  const paginatedItems = filteredItems.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   // Reset page when filter/search changes
   const handleFilterChange = (f) => {
@@ -344,10 +349,7 @@ export default function GridBody({ items = [], filters = [] }) {
     setPage(1);
   };
 
-  const handleSortChange = (e) => {
-    setSortMode(e.target.value);
-    setPage(1);
-  };
+  
 
   const allFilters = ["Semua", ...resolvedFilters];
  
@@ -375,43 +377,38 @@ export default function GridBody({ items = [], filters = [] }) {
           </span>
         </div>
 
-        {/* Action icons filter tag*/}
-        <Tooltip title="Filter Tag" arrow>
-          <button
-            className="flex-none w-10 h-10 border border-zinc-300 rounded-full bg-white shadow-md flex items-center justify-center text-pink-500 hover:bg-pink-50 transition cursor-pointer"
-            aria-label="Toggle filter tags"
-            aria-expanded={showFilters}
-            aria-controls="filter-tags"
-            onClick={toggleFilters}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
-          </button>
-        </Tooltip>
-        {/* sort select */}
-        <Tooltip title="Sort By" arrow>
-          <div className="flex-none">
-            <select
-              value={sortMode}
-              onChange={handleSortChange}
-              aria-label="Urutkan item"
-              className="h-10 border border-zinc-300 rounded-full bg-white px-3 text-sm text-pink-500 shadow-md hover:bg-pink-50 transition cursor-pointer"
+        {/* Action icons filter tag (hidden for mockup layout) */}
+        {!isMockupLayout && (
+          <Tooltip title="Filter Tag" arrow>
+            <button
+              className="flex-none w-10 h-10 border border-zinc-300 rounded-full bg-white shadow-md flex items-center justify-center text-pink-500 hover:bg-pink-50 transition cursor-pointer"
+              aria-label="Toggle filter tags"
+              aria-expanded={showFilters}
+              aria-controls="filter-tags"
+              onClick={toggleFilters}
             >
-              <option value="terbaru">Terbaru</option>
-              <option value="terlama">Terlama</option>
-              <option value="a-z">A → Z</option>
-              <option value="z-a">Z → A</option>
-            </select>
-          </div>
-        </Tooltip>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            </button>
+          </Tooltip>
+        )}
+        {/* shared sort menu component (icon-only control) */}
+        <SortMenu
+          value={sortMode}
+          onChange={(m) => {
+            setSortMode(m);
+            setPage(1);
+          }}
+          className="flex-none"
+        />
       </div>
 
-      {/* Filter */}
-      {resolvedFilters.length > 0 && (
+      {/* Filter (hidden for mockup layout) */}
+      {resolvedFilters.length > 0 && !isMockupLayout && (
         <div id="filter-tags" className={`${showFilters ? "block" : "hidden"} flex flex-wrap gap-2 justify-center mb-8`}>
           {allFilters.map((f) => (
             <button
@@ -431,18 +428,31 @@ export default function GridBody({ items = [], filters = [] }) {
 
       {/* Grid — Tailwind-based cards */}
       {paginatedItems.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
-          {paginatedItems.map((item, i) => (
-            <PosterCard
-              key={i}
-              src={item.src}
-              alt={item.alt}
-              title={item.title}
-              subtitle={item.subtitle}
-              badge={item.badge}
-              meta={item.meta}
-            />
-          ))}
+        <div className={`grid gap-5 ${ isMockupLayout ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-5' }`}>
+          {paginatedItems.map((item, i) =>
+            item.meta === "mockup" ? (
+              <MockUpPosterCard
+                key={i}
+                imageUrl={item.imageUrl}
+                alt={item.alt}
+                year={item.year}
+                title={item.title}
+                prevdescription={item.prevdescription}
+                href={item.href || item.url}
+                buttonLabel={item.buttonLabel}
+              />
+            ) : (
+              <PosterCard
+                key={i}
+                imageUrl={item.imageUrl || item.src}
+                alt={item.alt}
+                title={item.title}
+                description={item.description}
+                tags={item.tags}
+                meta={item.year}
+              />
+            )
+          )}
         </div>
       ) : (
         <div className="py-20 text-center text-zinc-400">

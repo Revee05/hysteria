@@ -8,24 +8,25 @@ import Image from "next/image";
  * Digunakan untuk: Artist Radar, dll.
  *
  * Props:
- *   src      : string
- *   alt      : string
- *   title    : string  — nama artist
- *   role     : string  — peran/deskripsi singkat (e.g. "Vocalist & Lyricist")
- *   episode  : string  — info episode (opsional, e.g. "Edisi 8")
- *   subtitle : string  — fallback teks bawah jika role tidak ada
+ *   src          : string
+ *   alt          : string
+ *   title        : string  — nama artist
+ *   role         : string  — peran/deskripsi singkat (e.g. "Vocalist & Lyricist")
+ *   episode      : string  — info episode (opsional, e.g. "Edisi 8")
+ *   subtitle     : string  — fallback teks bawah jika role tidak ada
+ *   predescription: string  — teks ringkasan/preview sebelum deskripsi penuh
  */
 export default function ArtistCard({
   imageUrl,
   alt,
   title,
-  description,
+  prevdescription,
   host,  
   guests,
   tags,
 }) {
   const imgSrc = imageUrl || "/image/artist.webp";
-  // const isLocal = typeof imgSrc === "string" && imgSrc.startsWith("/");
+  const isLocal = typeof imgSrc === "string" && imgSrc.startsWith("/");
   const guestText = Array.isArray(guests)
     ? guests.filter(Boolean).join(", ")
     : guests;
@@ -37,7 +38,7 @@ export default function ArtistCard({
         src={imgSrc}
         alt={alt || title || "Artist image"}
         fill
-        // unoptimized={!isLocal}
+        unoptimized={!isLocal}
         sizes="(max-width:640px) 50vw, 260px"
         className="object-cover brightness-75 transition-transform duration-300"
       />
@@ -47,8 +48,8 @@ export default function ArtistCard({
           {title && (
             <h3 className="text-white text-sm font-bold leading-tight">{title}</h3>
           )}
-          { description && (
-            <p className="text-white/90 text-xs font-semibold mt-0.5 line-clamp-2">{description}</p>
+          {prevdescription && (
+            <p className="text-white/90 text-xs font-semibold mt-0.5 line-clamp-4">{prevdescription}</p>
           )}
           {host != null && (
             <p className="text-xs font-medium mt-1">
@@ -57,8 +58,8 @@ export default function ArtistCard({
             </p>
           )}
           {guests && (
-            <p className="text-xs font-medium mt-1 flex flex-row">
-              <span style={{ color: "#E83C91" }} className="mr-1">Guests:</span>
+            <p className="text-xs font-medium mt-1 flex flex-row mb-3">
+              <span style={{ color: "#E83C91" }} className="mr-1">Collabrator:</span>
               <span className="text-white">{Array.isArray(guests) ? guests.join(", ") : guests}</span>
             </p>
           )}

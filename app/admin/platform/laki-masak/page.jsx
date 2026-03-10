@@ -156,7 +156,7 @@ export default function LakiMasakPage() {
             <div className="max-w-6xl mx-auto mt-12">
               <div className='flex flex-col md:flex-row md:gap-0 justify-between items-start md:items-center mb-6 md:mb-0'>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-extrabold mb-1 font-poppins">Meramu</h2>
+                  <h2 className="text-2xl md:text-3xl text-zinc-700 font-extrabold mb-1 font-poppins">Meramu</h2>
                   <p className="text-sm text-gray-600 mb-6 font-poppins">
                     Kumpulan postingan dari Meramu, salah satu kegiatan di Laki Masak
                   </p>

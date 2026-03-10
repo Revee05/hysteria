@@ -64,6 +64,7 @@ export default function AdminSidebar({ collapsed, onClose, onToggleCollapse, onN
         { key: "tentang", label: "Tentang", view: "tentang", icon: IconBusiness, enabled: true },
         { key: "contact", label: "Contact", view: "contact", icon: IconSocial, enabled: true },
         { key: "collaboration", label: "Kolaborasi", view: "collaboration", icon: IconSocial, enabled: true },
+        { key: "metadata", label: "Metadata", view: "metadata", icon: IconSettings, enabled: false },
       ],
     },
   ];

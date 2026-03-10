@@ -12,6 +12,17 @@ const optionalText = (max, message) =>
     z.string().max(max, message).optional(),
   );
 
+/**
+ * Helper untuk UPDATE: string nullable dengan batas panjang.
+ * Kosong / null → null  (artinya "hapus nilai ini di DB").
+ * undefined           → undefined (artinya "jangan ubah field ini").
+ */
+const clearableText = (max, message) =>
+  z.preprocess(
+    (val) => (val === "" || val === "null" ? null : val === undefined ? undefined : val),
+    z.string().max(max, message).nullable().optional(),
+  );
+
 /** Pola domain yang diizinkan untuk field URL konten. */
 const ALLOWED_URL_PATTERN =
   /^https?:\/\/(www\.)?(instagram\.com|instagr\.am|youtube\.com|youtu\.be|drive\.google\.com)/i;
@@ -108,6 +119,18 @@ const optionalGuestsArray = z.preprocess(
   z.array(z.string().max(255)).max(50, "Maksimal 50 guests").optional(),
 );
 
+/** Helper: flexible meta field — menerima JSON string atau nilai bebas. */
+const optionalMeta = z.preprocess(
+  (val) => {
+    if (val === undefined || val === null || val === "" || val === "null") return undefined;
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return val; }
+    }
+    return val;
+  },
+  z.any().optional(),
+);
+
 // ─── CONTENT SCHEMAS ─────────────────────────────────────────────────────────
 
 /** Schema validasi saat membuat konten baru (POST). */
@@ -118,10 +141,12 @@ export const createContentSchema = z.object({
   ),
   categoryItemId: optionalInt(1),
   title: z.string().min(1, "Judul wajib diisi").max(500, "Judul terlalu panjang"),
+  prevdescription: optionalText(140, "Prev description terlalu panjang"),
   description: optionalText(5000, "Deskripsi terlalu panjang"),
   url: optionalUrl(500),
   instagram: optionalInstagramUrl(500),
   youtube: optionalYoutubeUrl(500),
+  meta: optionalMeta,
   host: optionalText(255, "Host terlalu panjang"),
   guests: optionalGuestsArray,
   year: optionalYear,
@@ -142,15 +167,17 @@ export const updateContentSchema = z
       z.number().int().positive().nullable().optional(),
     ),
     title: optionalText(500, "Judul terlalu panjang"),
-    description: optionalText(5000, "Deskripsi terlalu panjang"),
+    description: clearableText(5000, "Deskripsi terlalu panjang"),
+    prevdescription: clearableText(140, "Prev description terlalu panjang"),
     url: optionalUrl(500),
     instagram: optionalInstagramUrl(500),
     youtube: optionalYoutubeUrl(500),
+    meta: optionalMeta,
     year: optionalYear,
     tags: optionalTagsArray,
     order: optionalInt(0),
     isActive: optionalBool,
-    host: optionalText(255, "Host terlalu panjang"),
+    host: clearableText(255, "Host terlalu panjang"),
     guests: optionalGuestsArray,
   })
   .refine((data) => Object.values(data).some((v) => v !== undefined), {

@@ -48,7 +48,7 @@ export default function HysteriaArtlabPage() {
     <div className="p-2 md:p-6 bg-white border border-gray-200 rounded-lg shadow min-h-screen">
       {/* Bagian atas  */}
       <div className="max-w-6xl mx-auto px-4 py-6">
-          <h1 className="text-2xl md:text-3xl font-extrabold mb-1 font-poppins">Hysteria Artlab</h1>
+          <h1 className="text-2xl md:text-3xl text-zinc-700 font-extrabold mb-1 font-poppins">Hysteria Artlab</h1>
           <p className="text-sm text-gray-700 mb-6 font-poppins">Kelola semua konten dari platform Hysteria Artlab</p>
 
           <div className="grid md:grid-cols-7 gap-6">
@@ -163,6 +163,7 @@ export default function HysteriaArtlabPage() {
                 showDescription={true}
                 showGuests={true}
                 showHost={true}
+                showMeta={true}
                 close={() => setOpenAntalk(false)}
               />
             </div>
@@ -187,9 +188,11 @@ export default function HysteriaArtlabPage() {
                 showTags={true}
                 showInstagram={true}
                 showYoutube={true}
+                showPrevDescription={true}
                 showDescription={true}
                 showHost={true}
                 showGuests={true}
+                showMeta={true}
                 close={() => setOpenArtistRadar(false)}
               />
             </div>
@@ -199,7 +202,7 @@ export default function HysteriaArtlabPage() {
 
       {/* Bagian bawah */}
       <div className="max-w-6xl mx-auto px-4 py-6">
-        <h2 className="text-2xl md:text-3xl font-extrabold mb-1 font-poppins">Semua Postingan</h2>
+        <h2 className="text-2xl md:text-3xl text-zinc-700 font-extrabold mb-1 font-poppins">Semua Postingan</h2>
         <p className="text-sm text-gray-700 mb-6 font-poppins">
           Kumpulan postingan dari Podcast Artlab, Workshop Artlab, Screening Film, dan Untuk Perhatian
         </p>

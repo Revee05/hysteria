@@ -97,7 +97,7 @@ export default function VideoCard({ imageUrl, youtube, url, alt, title, tags, de
 
         {/* Deskripsi */}
         {description && (
-          <div className="px-3 py-2 md:px-4 md:py-2 md:pb-2 flex-shrink-0">
+          <div className="px-3 md:px-4 md:pb-2 flex-shrink-0">
             <p className="text-zinc-600 text-xs leading-tight mt-1 line-clamp-4">{description}</p>
           </div>
         )}

@@ -17,7 +17,20 @@ function normalizeUrl(raw) {
 }
 
 export function validateSubForm(data) {
-  const errors = { title: '', year: '', url: '', instagram: '', youtube: '', description: '' };
+  const errors = {
+    title: '',
+    year: '',
+    url: '',
+    instagram: '',
+    youtube: '',
+    prevdescription: '',
+    description: '',
+    tags: '',
+    meta: '',
+    host: '',
+    guests: '',
+    image: '',
+  };
 
   // title — wajib diisi (sync: z.string().min(1).max(500))
   if (!data.title || String(data.title).trim() === '') {
@@ -29,8 +42,10 @@ export function validateSubForm(data) {
   // year — opsional, integer 1900-2100 (sync: z.number().int().min(1900).max(2100))
   if (data.year !== undefined && data.year !== null && String(data.year).trim() !== '') {
     const n = Number(data.year);
-    if (Number.isNaN(n) || !Number.isInteger(n) || n < 1900 || n > 2100) {
-      errors.year = 'Tahun tidak valid (1900-2100)';
+    if (Number.isNaN(n) || !Number.isInteger(n)) {
+      errors.year = 'Tahun harus berupa angka bulat (contoh: 2024)';
+    } else if (n < 1900 || n > 2100) {
+      errors.year = 'Tahun tidak valid — harus antara 1900 dan 2100';
     }
   }
 
@@ -39,13 +54,13 @@ export function validateSubForm(data) {
   if (urlVal !== undefined) {
     try {
       new URL(urlVal);
-      if (!ALLOWED_URL_PATTERN.test(urlVal)) {
-        errors.url = 'URL hanya boleh dari Instagram, YouTube, atau Google Drive';
-      } else if (urlVal.length > 500) {
+      if (urlVal.length > 500) {
         errors.url = 'URL tidak boleh lebih dari 500 karakter';
+      } else if (!ALLOWED_URL_PATTERN.test(urlVal)) {
+        errors.url = 'URL hanya boleh dari Instagram, YouTube, atau Google Drive';
       }
     } catch {
-      errors.url = 'URL tidak valid';
+      errors.url = 'URL tidak valid — pastikan formatnya benar (contoh: https://youtube.com/...)';
     }
   }
 
@@ -54,13 +69,13 @@ export function validateSubForm(data) {
   if (igVal !== undefined) {
     try {
       new URL(igVal);
-      if (!INSTAGRAM_URL_PATTERN.test(igVal)) {
-        errors.instagram = 'URL hanya boleh dari Instagram (instagram.com)';
-      } else if (igVal.length > 500) {
+      if (igVal.length > 500) {
         errors.instagram = 'URL tidak boleh lebih dari 500 karakter';
+      } else if (!INSTAGRAM_URL_PATTERN.test(igVal)) {
+        errors.instagram = 'URL hanya boleh dari Instagram (instagram.com atau instagr.am)';
       }
     } catch {
-      errors.instagram = 'URL Instagram tidak valid';
+      errors.instagram = 'URL Instagram tidak valid — gunakan format https://instagram.com/...';
     }
   }
 
@@ -69,22 +84,62 @@ export function validateSubForm(data) {
   if (ytVal !== undefined) {
     try {
       new URL(ytVal);
-      if (!YOUTUBE_URL_PATTERN.test(ytVal)) {
-        errors.youtube = 'URL hanya boleh dari YouTube (youtube.com / youtu.be)';
-      } else if (ytVal.length > 500) {
+      if (ytVal.length > 500) {
         errors.youtube = 'URL tidak boleh lebih dari 500 karakter';
+      } else if (!YOUTUBE_URL_PATTERN.test(ytVal)) {
+        errors.youtube = 'URL hanya boleh dari YouTube (youtube.com atau youtu.be)';
       }
     } catch {
-      errors.youtube = 'URL YouTube tidak valid';
+      errors.youtube = 'URL YouTube tidak valid — gunakan format https://youtube.com/...';
+    }
+  }
+
+  // prevdescription — opsional, maks 140 karakter (sync: optionalText(140))
+  if (data.prevdescription !== undefined && data.prevdescription !== null && String(data.prevdescription).trim() !== '') {
+    if (String(data.prevdescription).length > 140) {
+      errors.prevdescription = `Preview deskripsi terlalu panjang — ${String(data.prevdescription).length}/140 karakter`;
     }
   }
 
   // description — opsional, maks 5000 karakter (sync: optionalText(5000))
   if (data.description !== undefined && data.description !== null && String(data.description).trim() !== '') {
     if (String(data.description).length > 5000) {
-      errors.description = 'Deskripsi terlalu panjang (maks 5000 karakter)';
+      errors.description = `Deskripsi terlalu panjang — ${String(data.description).length}/5000 karakter`;
     }
   }
+
+  // host — opsional, maks 255 karakter (sync: optionalText(255))
+  if (data.host !== undefined && data.host !== null && String(data.host).trim() !== '') {
+    if (String(data.host).length > 255) {
+      errors.host = 'Nama host terlalu panjang (maks 255 karakter)';
+    }
+  }
+
+  // guests — opsional, array maks 50 item, tiap item maks 255 karakter (sync: optionalGuestsArray)
+  if (Array.isArray(data.guests) && data.guests.length > 0) {
+    if (data.guests.length > 50) {
+      errors.guests = 'Maksimal 50 guests';
+    } else {
+      const longGuest = data.guests.find((g) => String(g).length > 255);
+      if (longGuest) {
+        errors.guests = 'Nama guest terlalu panjang (maks 255 karakter per guest)';
+      }
+    }
+  }
+
+  // tags — opsional, array maks 50 item, tiap item maks 100 karakter (sync: optionalTagsArray)
+  if (Array.isArray(data.tags) && data.tags.length > 0) {
+    if (data.tags.length > 50) {
+      errors.tags = 'Maksimal 50 tag';
+    } else {
+      const longTag = data.tags.find((t) => String(t).length > 100);
+      if (longTag) {
+        errors.tags = 'Tag terlalu panjang (maks 100 karakter per tag)';
+      }
+    }
+  }
+
+  // meta — tidak ada validasi khusus di frontend (diterima string / JSON / apapun)
 
   return errors;
 }

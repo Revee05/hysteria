@@ -154,7 +154,7 @@ function CardSwitch({ cardType, item }) {
         imageUrl={item.imageUrl || item.src}
         alt={item.alt}
         title={item.title}
-        description={item.description}
+        prevdescription={item.prevdescription}
         host={item.host}
         guests={item.guests}
         url={item.url}

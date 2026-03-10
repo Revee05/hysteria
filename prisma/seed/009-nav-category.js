@@ -140,7 +140,7 @@ module.exports = async function seed() {
 			const categoryId = categoryMap[it.categorySlug]
 			if (!categoryId) throw new Error(`Category not found: ${it.categorySlug}`)
 
-			// Try find existing
+			// Try find <existing></existing>
 			const found = await client.query(
 				`SELECT id FROM "CategoryItem" WHERE "slug" = $1 AND "categoryId" = $2 LIMIT 1`,
 				[it.slug, categoryId]

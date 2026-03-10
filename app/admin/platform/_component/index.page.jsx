@@ -54,9 +54,11 @@ export default function PlatformIndex({
   onDelete,
   showImageUpload = false,
   showTags = false,
+  showMeta = false,
   showURL = false,
   showInstagram = false,
   showYoutube = false,
+  showPrevDescription = false,
   showDescription = false,
   showHost = false,
   showGuests = false,
@@ -126,8 +128,10 @@ export default function PlatformIndex({
       fd.append('title', rest.title ?? '');
       if (rest.year != null && rest.year !== '') fd.append('year', String(rest.year));
       if (rest.url) fd.append('url', rest.url);
+      if (rest.meta != null) fd.append('meta', typeof rest.meta === 'object' ? JSON.stringify(rest.meta) : rest.meta);
       if (rest.instagram != null) fd.append('instagram', rest.instagram);
       if (rest.youtube != null) fd.append('youtube', rest.youtube);
+      if (rest.prevdescription != null) fd.append('prevdescription', rest.prevdescription);
       if (rest.description != null) fd.append('description', rest.description);
       if (rest.tags != null) fd.append('tags', JSON.stringify(rest.tags));
       if (platformSlug) fd.append('platformSlug', platformSlug);
@@ -159,9 +163,11 @@ export default function PlatformIndex({
       const fd = new FormData();
       if (rest.title != null) fd.append('title', rest.title);
       if (rest.year != null && rest.year !== '') fd.append('year', String(rest.year));
+      if (rest.meta != null) fd.append('meta', typeof rest.meta === 'object' ? JSON.stringify(rest.meta) : rest.meta);
       if (rest.url != null) fd.append('url', rest.url);
       if (rest.instagram != null) fd.append('instagram', rest.instagram);
       if (rest.youtube != null) fd.append('youtube', rest.youtube);
+      if (rest.prevdescription != null) fd.append('prevdescription', rest.prevdescription);
       if (rest.description != null) fd.append('description', rest.description);
       if (rest.tags != null) fd.append('tags', JSON.stringify(rest.tags));
       if (rest.host != null) fd.append('host', rest.host);
@@ -185,7 +191,7 @@ export default function PlatformIndex({
     if (!row?.id) return;
     if (!confirm(`Hapus "${row.title}"?`)) return;
     try {
-      const res  = await fetch(`/api/admin/platform-content/content/${row.id}`, { method: 'DELETE' });
+      const res  = await fetch(`/api/admin/platform-content/${row.id}`, { method: 'DELETE' });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message ?? 'Gagal menghapus data');
 
@@ -221,6 +227,16 @@ export default function PlatformIndex({
         ) : (
           <span className="text-gray-400">—</span>
         )
+      ),
+    }] : []),
+    ...(showPrevDescription ? [{
+      field: 'prevdescription',
+      headerName: 'Ringkasan',
+      width: 250,
+      render: (row) => (
+        row?.prevdescription
+          ? <span className="text-zinc-700 text-sm line-clamp-2">{row.prevdescription}</span>
+          : <span className="text-gray-400">—</span>
       ),
     }] : []),
     ...(showDescription ? [{
@@ -299,6 +315,14 @@ export default function PlatformIndex({
           : <span className="text-gray-400">—</span>;
       },
     }] : []),
+    ...(showMeta ? [{
+      field: 'meta',
+      headerName: 'Meta',
+      width: 180,
+      render: (row) => (
+        row?.meta ? <span className="text-zinc-700 text-sm line-clamp-2">{typeof row.meta === 'string' ? row.meta : JSON.stringify(row.meta)}</span> : <span className="text-gray-400">—</span>
+      ),
+    }] : []),
     { field: 'year', headerName: 'Tahun', width: 100, align: 'center', headerAlign: 'center' },
     {
       field: 'aksi',
@@ -363,7 +387,7 @@ export default function PlatformIndex({
       {/* Header */}
       <div className="flex w-full items-start justify-between mb-4 gap-4">
         <div>
-          <h3 className="text-2xl font-extrabold">{title}</h3>
+          <h3 className="text-2xl text-zinc-600 font-extrabold">{title}</h3>
           <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
         </div>
         <div className="ml-auto flex flex-end items-end md:flex-row md:items-start gap-2">
@@ -450,9 +474,11 @@ export default function PlatformIndex({
         showInstagram={showInstagram}
         showYoutube={showYoutube}
         showURL={showURL}
+        showPrevDescription={showPrevDescription}
         showDescription={showDescription}
         showHost={showHost}
         showGuests={showGuests}
+        showMeta={showMeta}
       />
     </div>
   );

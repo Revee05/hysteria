@@ -6,7 +6,8 @@ import ArtikelHysteria from "../_sectionComponents/halaman_utama/artikel_hysteri
 import Colaboration from "../_sectionComponents/halaman_utama/colaboration";
 
 export const metadata = {
-  title: "Home",
+  title: { absolute: 'Hysteria' },
+  description: 'Hysteria adalah ruang kolektif seni, riset, dan budaya yang berbasis di Semarang.',
 };
 
 export default function Home() {

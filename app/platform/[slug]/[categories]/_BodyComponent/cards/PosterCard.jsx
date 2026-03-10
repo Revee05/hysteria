@@ -82,7 +82,7 @@ export default function PosterCard({ imageUrl, alt, title, description, tags, me
           src={imgSrc}
           alt={alt || title || "Poster"}
           fill
-          // unoptimized={!isLocal}
+          unoptimized={!isLocal}
           priority={true}
           sizes="(max-width:640px) 50vw, 260px"
           className="object-cover block group-hover:scale-110"

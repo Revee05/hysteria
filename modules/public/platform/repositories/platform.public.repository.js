@@ -34,7 +34,7 @@ const PLATFORM_SELECT = {
     //   order: true,
     //   isActive: true,
       categoryItem: {
-        select: { id: true, title: true, slug: true, url: true },
+        select: { id: true, title: true, slug: true, url: true, meta: true },
       },
     },
   },
@@ -43,6 +43,7 @@ const PLATFORM_SELECT = {
 const CONTENT_SELECT = {
   id: true,
   title: true,
+  prevdescription: true,
   description: true,
   url: true,
   youtube: true,
@@ -50,6 +51,7 @@ const CONTENT_SELECT = {
   host: true,
   guests: true,
   year: true,
+  meta: true,
   tags: true,
   images: {
     orderBy: [{ order: "asc" }, { id: "asc" }],
