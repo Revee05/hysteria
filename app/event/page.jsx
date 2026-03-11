@@ -197,17 +197,19 @@ export default function EventsPage() {
                 <div
                   className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"
                 >
-                    {event.status && (
-                      <span className="inline-flex w-fit items-center justify-start px-3 h-[20px] rounded-[10px] border border-[var(--Color-1)] bg-[var(--Color-3)] text-[var(--Color-1)] font-poppins text-[12px] font-normal leading-[150%]">
-                       {event.status}
+                  <div className="inline-flex gap-2 mb-3">
+                    {event.eventCategories?.[0]?.categoryItem?.title && (
+                      <span className="inline-flex items-center justify-center px-3 h-[26px] rounded-[10px] border border-[var(--Color-1)] bg-[var(--Color-3)] text-[var(--Color-1)] font-poppins text-[12px] font-normal leading-[150%]">
+                        {event.eventCategories[0].categoryItem.title}
                       </span>
                     )}
+                  </div>
 
-                  <h2 className="text-[16px] font-poppins font-bold leading-[150%] text-[var(--Color-3)]">
+                  <h2 className="mt-2 text-[12px] font-poppins font-bold leading-[150%] text-[var(--Color-3)]">
                     {event.title}
                   </h2>
 
-                  <p className="text-[10px] font-poppins font-normal leading-[150%] text-[var(--Color-3)]">
+                  <p className="mt-1 text-[10px] font-poppins font-normal leading-[150%] text-[var(--Color-3)]">
                     {new Date(event.startAt).toLocaleDateString("id-ID", {
                       weekday: "long",
                       day: "numeric",
@@ -217,21 +219,38 @@ export default function EventsPage() {
                   </p>
 
                   {event.status === "UPCOMING" && event.registerLink && (
-                    <span className="mt-2 inline-flex items-center justify-center px-3 h-[30px] rounded-[10px] bg-[var(--Color-1)] text-[var(--Color-3)] font-poppins text-[12px] font-normal leading-[150%]">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(event.registerLink, "_blank");
+                      }}
+                      className="mt-3 flex items-center justify-center w-[140px] h-[35px] rounded-[8px] bg-[var(--Color-1)] text-white font-poppins text-[12px] font-medium shadow transition hover:opacity-90"
+                    > 
                       Ikuti Sekarang
-                    </span>
+                    </button>
                   )}
 
                   {event.status === "ONGOING" && event.registerLink && (
-                    <span className="inline-flex w-fit items-center justify-start px-3 h-[26px] rounded-[10px] border border-[var(--Color-1)] bg-[var(--Color-3)] text-[var(--Color-1)] font-poppins text-[12px] font-normal leading-[150%]">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(event.registerLink, "_blank");
+                      }}
+                      className="mt-3 flex items-center justify-center w-[140px] h-[35px] rounded-[8px] bg-[var(--Color-1)] text-white font-poppins text-[12px] font-medium shadow transition hover:opacity-90"
+                    >
                       Sedang Berlangsung
-                    </span>
+                    </button>
                   )}
 
                   {event.status === "FINISHED" && (
-                    <span className="inline-flex w-fit items-center justify-start px-3 h-[26px] rounded-[10px] border border-[var(--Color-1)] bg-[var(--Color-3)] text-[var(--Color-1)] font-poppins text-[12px] font-normal leading-[150%]">
+                    <button
+                      disabled
+                      className="mt-3 flex items-center justify-center w-[140px] h-[35px] rounded-[8px] bg-[var(--Color-1)] text-white font-poppins text-[12px] font-medium shadow transition hover:opacity-90"
+                    >
                       Event Telah Berakhir
-                    </span>
+                    </button>
                   )}
                 </div>
               </Link>

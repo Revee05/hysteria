@@ -27,6 +27,7 @@ export async function GET(req) {
       },
     ];
   } else if (statusFilter === "finished") {
+    // event selesai sebelum hari ini
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 

@@ -14,7 +14,6 @@ export default function ArticleTextEditor({ value, onChange }) {
   return (
     <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
       <TextEditor
-        key={value}
         content={value}
         onUpdate={({ editor }) => onChange(editor.getHTML())}
       />

@@ -21,19 +21,32 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
   const router = useRouter();
 
   const [organizerItems, setOrganizerItems] = useState([]);
-  const [platformTree, setPlatformTree] = useState([]);
   const [programTree, setProgramTree] = useState([]);
-  
+  const [platformTree, setPlatformTree] = useState([]);
+
   const [loading, setLoading] = useState(false);
-  const [organizerOpen, setOrganizerOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
-  
-  const [categoryItems, setCategoryItems] = useState([]);
+  const [organizerOpen, setOrganizerOpen] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const organizerRef = useRef(null);
   const categoryRef = useRef(null);
+  
+  const HYSTERIA_ORGANIZER = {
+    id: "__HYSTERIA__",
+    title: "Hysteria",
+    isVirtual: true,
+  };
 
-  const PROGRAM_ORGANIZER_ID = "PROGRAM-HYSTERIA";
+  const getOrganizerTitle = (id) => {
+    if (id === "__HYSTERIA__") return "Hysteria";
+    return organizerItems.find(o => o.id === id)?.title || id;
+  };
+
+  const getCategoryTitle = (id) =>
+    filteredCategoryItems.find(
+      (c) => Number(c.id) === Number(id)
+    )?.title || id;
 
   const [form, setForm] = useState({
     title: "",
@@ -54,126 +67,40 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     youtubeLink: "", 
     instagramLink: "",
     drivebukuLink: "",
-    instagramLiveLink: "",
-    tiktokLiveLink: "",
-    youtubeLiveLink: "",
     tags: [],
     isFlexibleTime : false,
   });
 
-  /* FETCH ORGANIZER DATA */
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [platformRes, programRes] = await Promise.all([
-          fetch("/api/categories/platform"),
-          fetch("/api/categories/program-hysteria"),
-        ]);
-
-        const platformJson = await platformRes.json();
-        const programJson = await programRes.json();
-
-        const platformItems = platformJson?.data?.items || [];
-        const programItems = programJson?.data?.items || [];
-
-        setPlatformTree(platformItems);
-        setProgramTree(programItems);
-
-        const organizers = [
-          ...platformItems.map(item => ({
-            id: Number(item.id),
-            title: item.title
-          })),
-          {
-            id: PROGRAM_ORGANIZER_ID,
-            title: "Hysteria"
-          }
-        ].sort((a, b) =>
-          a.title.localeCompare(b.title, "id-ID", { sensitivity: "base" })
-        );
-        setOrganizerItems(organizers);
-      } catch (err) {
-        console.error("fetch organizer error", err);
-      }
-    };
-    fetchData();
-  }, []);
-
-  /* FETCH CATEGORY DATA */
-  useEffect(() => {
-    const fetchCategories = async () => {
-      if (!form.organizerIds.length) {
-        setCategoryItems([]);
-        return;
-      }
-
-      const organizerItemIds = form.organizerIds.map(id => {
-        if (id === PROGRAM_ORGANIZER_ID) {
-          const parent = programTree.find(item => !item.parentId);
-          return parent?.id;
-        }
-        return id;
-      }).filter(Boolean);
-
-      try {
-        const res = await fetch(
-          `/api/admin/events/categories?organizerIds=${organizerItemIds.join(",")}`
-        );
-        if (!res.ok) return;
-
-        const data = await res.json();
-
-        setCategoryItems(data);
-      } catch (err) {
-        console.error("fetch categories error", err);
-      }
-    };
-    fetchCategories();
-  }, [form.organizerIds, programTree]);
-
-  /* CLEAN CATEGORY WHEN ORGANIZER CHANGE */
-  useEffect(() => {
-      setForm(prev => ({
-        ...prev,
-        categoryItemIds: prev.categoryItemIds.filter(id =>
-          categoryItems.some(c => c.id === id)
-        )
-      }));
-    }, [categoryItems]);
-
-  /* PREFILL EDIT */
+  // PREFILL EDIT
   useEffect(() => {
     if (!initialData) return;
-    if (!platformTree.length && !programTree.length) return;
 
     const start = new Date(initialData.startAt);
     const end = initialData.endAt ? new Date(initialData.endAt) : null;
+
     const isFlexible = Boolean(initialData.isFlexibleTime);
 
     setForm((prev) => ({
       ...prev,
-      title: initialData.title || "",
-      organizerIds: [
-        ...new Set(
-          initialData.organizers?.map(o => {
-            const isProgram = programTree.some(
-              item => Number(item.id) === Number(o.categoryItemId)
-            );
 
-            return isProgram
-              ? PROGRAM_ORGANIZER_ID
-              : Number(o.categoryItemId);
-          }) || []
-        )
-      ],
+      title: initialData.title || "",
+
       categoryItemIds:
         initialData.eventCategories?.map(ec =>
           Number(ec.categoryItemId)
         ) || [],
 
+      organizerIds:
+        initialData.organizers?.map(o =>
+          Number(o.categoryItemId)
+        ) || [],
+
       description: initialData.description || "",
+
       startDate: start.toISOString().slice(0, 10),
+
       startTime: isFlexible ? "" : start.toTimeString().slice(0, 5),
+
       endDate: end ? end.toISOString().slice(0, 10) : "",
       endTime: isFlexible
         ? ""
@@ -183,30 +110,147 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       registerLink: initialData.registerLink || "",
       poster: initialData.poster || "",
       status: initialData.isPublished ? "PUBLISHED" : "DRAFT",
+
       driveLink: initialData.driveLink || "",
       youtubeLink: initialData.youtubeLink || "",
       instagramLink: initialData.instagramLink || "",
       drivebukuLink: initialData.drivebukuLink || "",
-      instagramLiveLink: initialData.instagramLiveLink || "",
-      tiktokLiveLink: initialData.tiktokLiveLink || "",
-      youtubeLiveLink: initialData.youtubeLiveLink || "",
+
       tags:
         initialData.tags?.map(t =>
           t.tag?.name
         ).filter(Boolean) || [],
+
       mapsEmbed: initialData.mapsEmbedSrc
         ? `<iframe src="${initialData.mapsEmbedSrc}" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>`
         : "",
+
       isFlexibleTime: isFlexible,
     }));
-  }, [initialData, platformTree, programTree]);
+  }, [initialData]);
+
+  useEffect(() => {
+    if (form.isFlexibleTime) {
+      setForm(prev => ({
+        ...prev,
+        startTime: "",
+        endTime: "",
+      }));
+    }
+  }, [form.isFlexibleTime]);
+
+  // CLOSE DROPDOWN ON OUTSIDE CLICK
+  useEffect(() => {
+    const handler = (e) => {
+      if (organizerRef.current && !organizerRef.current.contains(e.target))
+        setOrganizerOpen(false);
+      if (categoryRef.current && !categoryRef.current.contains(e.target))
+        setCategoryOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // FETCH CATEGORIES
+  useEffect(() => {
+    const fetchData = async () => {
+      const [platformRes, programRes] = await Promise.all([
+        fetch("/api/categories/platform"),
+        fetch("/api/categories/program-hysteria"),
+      ]);
+
+      const platformItems = (await platformRes.json())?.data?.items || [];
+      const programItems = (await programRes.json())?.data?.items || [];
+
+      const sortAZ = (a, b) =>
+        a.title.localeCompare(b.title, "id-ID", { sensitivity: "base" });
+
+      setPlatformTree(platformItems);
+      setProgramTree(programItems);
+
+      const organizers = platformItems
+        .map(p => ({ id: p.id, title: p.title }))
+        .sort(sortAZ);
+      
+      setOrganizerItems([
+        ...organizers,
+        HYSTERIA_ORGANIZER,
+      ]);
+    };
+
+    fetchData();
+  }, []);
+
+  // SUB CATEGORY LOGIC
+  const getPlatformSubCategories = () => {
+    const subs = [];
+
+    for (const organizer of platformTree) {
+      if (!form.organizerIds.includes(Number(organizer.id))) continue;
+
+      for (const child of organizer.children || []) {
+        subs.push({
+          id: child.id,
+          title: child.title,
+          source: organizer.title,
+        });
+      }
+    }
+    return subs;
+  };
+
+  const getHysteriaSubCategories = () => {
+    if (!form.organizerIds.includes("__HYSTERIA__")) return [];
+
+    const result = [];
+
+    for (const group of programTree) {
+      for (const child of group.children || []) {
+        result.push({
+          id: child.id,
+          title: child.title,
+          source: "Hysteria",
+        });
+      }
+    }
+    return result;
+  };
+  
+  const filteredCategoryItems = useMemo(() => {
+    return [
+      ...getPlatformSubCategories(),
+      ...getHysteriaSubCategories(),
+    ];
+  }, [form.organizerIds, platformTree, programTree]);
+  
+  // CLEAN CATEGORY WHEN ORGANIZER CHANGES
+  useEffect(() => {
+    if (!form.organizerIds.length) return;
+    if (!filteredCategoryItems.length) return;
+
+    setForm((prev) => ({
+      ...prev,
+      categoryItemIds: prev.categoryItemIds.filter((id) =>
+        filteredCategoryItems.some(
+          (c) => Number(c.id) === Number(id)
+        )
+      ),
+    }));
+  }, [form.organizerIds]);
+
+  const normalizeId = (id) => {
+    if (id === "__HYSTERIA__") return "__HYSTERIA__";
+    return Number(id);
+  };
 
   const toggleOrganizer = (id) => {
-    setForm(prev => ({
+    const normalized = normalizeId(id);
+
+    setForm((prev) => ({
       ...prev,
-      organizerIds: prev.organizerIds.includes(id)
-        ? prev.organizerIds.filter(x => x !== id)
-        : [...prev.organizerIds, id],
+      organizerIds: prev.organizerIds.includes(normalized)
+        ? prev.organizerIds.filter((x) => x !== normalized)
+        : [...prev.organizerIds, normalized],
     }));
   };
 
@@ -223,102 +267,53 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  useEffect(() => {
-    if (form.isFlexibleTime) {
-      setForm(prev => ({
-        ...prev,
-        startTime: "",
-        endTime: "",
-      }));
-    }
-  }, [form.isFlexibleTime]);
-
-  const getOrganizerTitle = (id) => {
-    if (id === PROGRAM_ORGANIZER_ID) return "Hysteria";
-
-    return organizerItems.find(item => item.id === id)?.title || "";
+  const extractMapSrc = (iframeHtml) => {
+    if (!iframeHtml) return null;
+    const match = iframeHtml.match(/src="([^"]+)"/);
+    return match ? match[1] : null;
   };
+  const mapSrc = extractMapSrc(form.mapsEmbed);
 
-  const getCategoryTitle = (id) => {
-    const found = categoryItems.find(c => c.id === id);
-
-    if (found) return found.title;
-
-    const fromInitial = initialData?.eventCategories?.find(
-      ec => Number(ec.categoryItemId) === Number(id)
-    );
-
-    return fromInitial?.categoryItem?.title || "";
-  };
-
-  /* CLOSE DROPDOWN ON OUTSIDE CLICK */
-  useEffect(() => {
-    const handler = (e) => {
-      if (organizerRef.current && !organizerRef.current.contains(e.target))
-        setOrganizerOpen(false);
-      if (categoryRef.current && !categoryRef.current.contains(e.target))
-        setCategoryOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  /* GOOGLE MAP EMBED */
-  const convertGoogleMapsToEmbed = (input) => {
-    if (!input) return null;
-
-    if (input.includes("<iframe")) {
-      const match = input.match(/src="([^"]+)"/);
-      return match ? match[1] : null;
-    }
-
-    if (input.includes("maps.app.goo.gl")) {
-      return input;
-    }
-
-    if (input.includes("google.com/maps")) {
-      if (input.includes("/embed")) return input;
-
-      if (input.includes("?")) {
-        return `${input}&output=embed`;
-      }
-
-      return `${input}?output=embed`;
-    }
-    return null;
-  };
-
-  const isIframeEmbed = (input) => {
-    if (!input) return false;
-    return input.includes("<iframe");
-  };
-
-  const mapSrc = isIframeEmbed(form.mapsEmbed)
-    ? convertGoogleMapsToEmbed(form.mapsEmbed)
-    : null;
-
-  /* SUBMIT */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const organizerItemIds = form.organizerIds.flatMap(id => {
+    // Validasi
+    const missingFields = [];
 
-      // kalau Hysteria → pakai parent PROGRAM-HYSTERIA
-      if (id === PROGRAM_ORGANIZER_ID) {
-        const parent = programTree.find(item => !item.parentId);
-        return parent ? [Number(parent.id)] : [];
-      }
-      return [Number(id)];
-    }).filter(Boolean);
+    if (!form.title) missingFields.push("Judul Event");
+    if (!Array.isArray(form.categoryItemIds) || form.categoryItemIds.length === 0)
+      missingFields.push("Kategori");
+    if (!form.startDate)
+      missingFields.push("Tanggal Mulai");
+    if (!form.isFlexibleTime && !form.startTime)
+      missingFields.push("Waktu Mulai");
+    if (!form.poster) missingFields.push("Poster Event");
+    if (!form.location) missingFields.push("Lokasi");
+
+    if (missingFields.length > 0) {
+      alert("Field berikut belum diisi:\n- " + missingFields.join("\n- "));
+      setLoading(false);
+      return;
+    }
 
     const payload = {
       title           : form.title,
-      organizerItemIds,
       categoryItemIds : form.categoryItemIds,
+
+      organizerItemIds: form.organizerIds.filter(
+        (id) => id !== "__HYSTERIA__"
+      ),
+      
       description     : form.description,
 
       startAt: form.isFlexibleTime
@@ -333,17 +328,14 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       
       location        : form.location,
       registerLink    : form.registerLink,
-      mapsEmbedSrc    : convertGoogleMapsToEmbed(form.mapsEmbed),
+      mapsEmbedSrc    : extractMapSrc(form.mapsEmbed),
       poster          : form.poster,
       isPublished     : form.status === "PUBLISHED", 
       driveLink       : form.driveLink,                
       youtubeLink     : form.youtubeLink,
       instagramLink   : form.instagramLink,
       drivebukuLink   : form.drivebukuLink,
-      instagramLiveLink   : form.drivebukuLink,
-      tiktokLiveLink  : form.drivebukuLink,
-      youtubeLink     : form.drivebukuLink,
-      isFlexibleTime  : form.isFlexibleTime,
+      isFlexibleTime: form.isFlexibleTime,
       tagNames: Array.isArray(form.tags)
         ? form.tags.filter(Boolean)
         : [],
@@ -361,9 +353,9 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     if (!res.ok) {
       const err = await res.json();
       alert(err.message);
-      setLoading(false);
       return;
     }
+
     router.push("/admin/events");
   };
 
@@ -378,11 +370,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       <div className="right items-right justify-between">
         {/* ACTION */}
         <div className="flex justify-end">
-          <button type="submit" className="px-5 py-2 rounded-2xl bg-[var(--Color-1)] text-white
-               transition-all duration-300 ease-out
-               hover:bg-[#5c4a65] hover:shadow-xl hover:-translate-y-1
-               active:translate-y-0 active:shadow-md active:scale-95"
-          >
+          <button type="submit">
             {loading ? "Menyimpan..." : "Simpan Event"}
           </button>
         </div>
@@ -454,7 +442,6 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
 
           <Card title="Arsip Kegiatan">
             <div className="space-y-3">
-
               <p className="text-xs text-gray-500 mt-2">Link Drive Dokumentasi</p>
               <input
                 type="url"
@@ -495,40 +482,9 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
                 className={inputClass}
               />
 
-              <p className="text-xs text-gray-500 mt-2">Link Instagram Live</p>
-              <input
-                type="url"
-                name="instagramLiveLink"
-                value={form.instagramLiveLink}
-                onChange={handleChange}
-                placeholder="https://www.instagram.com/..."
-                className={inputClass}
-              />
-
-              <p className="text-xs text-gray-500 mt-2">Link TikTok Live</p>
-              <input
-                type="url"
-                name="tiktokLiveLink"
-                value={form.tiktokLiveLink}
-                onChange={handleChange}
-                placeholder="https://www.tiktok.com/..."
-                className={inputClass}
-              />
-
-              <p className="text-xs text-gray-500 mt-2">Link YouTube Live</p>
-              <input
-                type="url"
-                name="youtubeLiveLink"
-                value={form.youtubeLiveLink}
-                onChange={handleChange}
-                placeholder="https://www.youtube.com/live/..."
-                className={inputClass}
-              />
-
               <p className="text-xs text-pink-600">
                 Lakukan pengisian link sesuai dengan kebutuhan
               </p>
-
             </div>
           </Card>
         </div>
@@ -642,7 +598,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
               {/* DROPDOWN */}
               {categoryOpen && (
                 <div className="absolute z-20 mt-2 w-full max-h-64 overflow-auto rounded-lg border bg-white shadow">
-                  {categoryItems.map((item) => (
+                  {filteredCategoryItems.map((item) => (
                     <label
                       key={item.id}
                       className="flex items-start gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
@@ -655,12 +611,12 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
                       />
                       <div>
                         <p className="text-sm text-black">{item.title}</p>
-                        <p className="text-xs text-gray-500">{item.category?.title}</p>
+                        <p className="text-xs text-gray-500">{item.source}</p>
                       </div>
                     </label>
                   ))}
 
-                  {categoryItems.length === 0 && (
+                  {filteredCategoryItems.length === 0 && (
                     <p className="px-3 py-2 text-sm text-gray-500">
                       Tidak ada kategori
                     </p>

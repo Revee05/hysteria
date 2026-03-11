@@ -7,49 +7,59 @@ datasource db {
 }
 
 model UserStatus {
-  id          Int                 @id @default(autoincrement())
-  key         String              @unique @db.VarChar(50)
-  name        String?             @db.VarChar(255)
-  createdAt   DateTime            @default(now())
-  description String?
-  users       User[]
-  histories   UserStatusHistory[]
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(50) // ACTIVE, SUSPENDED, BANNED, dll
+  name        String?  @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  users     User[]
+  histories UserStatusHistory[]
 }
 
 model Role {
-  id              Int              @id @default(autoincrement())
-  key             String           @unique @db.VarChar(100)
-  name            String?          @db.VarChar(255)
-  createdAt       DateTime         @default(now())
-  description     String?
-  rolePermissions RolePermission[]
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(100)
+  name        String?  @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+
   userRoles       UserRole[]
+  rolePermissions RolePermission[]
 }
 
 model User {
-  id              Int                 @id @default(autoincrement())
-  email           String              @unique @db.VarChar(255)
-  name            String?             @db.VarChar(255)
-  password        String              @db.VarChar(255)
-  createdAt       DateTime            @default(now())
-  statusId        Int
-  updatedAt       DateTime            @updatedAt
-  lastLoginAt     DateTime?
-  tokenVersion    Int                 @default(0)
-  avatar          String?             @db.VarChar(255)
-  tokens          RefreshToken[]
-  status          UserStatus          @relation(fields: [statusId], references: [id])
+  id       Int     @id @default(autoincrement())
+  email    String  @unique @db.VarChar(255)
+  name     String? @db.VarChar(255)
+  avatar   String? @db.VarChar(255)
+  password String  @db.VarChar(255)
+
+  status   UserStatus @relation(fields: [statusId], references: [id])
+  statusId Int
+
+  // Increment this when user's roles/permissions change to invalidate existing access tokens
+  tokenVersion Int @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
   roles           UserRole[]
+  tokens          RefreshToken[]
   statusHistories UserStatusHistory[]
 }
 
 model UserRole {
-  id         Int      @id @default(autoincrement())
-  userId     Int
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId Int
+
   assignedAt DateTime @default(now())
-  roleId     Int
-  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, roleId])
   @@index([userId])
@@ -57,28 +67,33 @@ model UserRole {
 }
 
 model RefreshToken {
-  id                  Int       @id @default(autoincrement())
-  userId              Int
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
   tokenHash           String    @db.VarChar(255)
+  replacedByTokenHash String?   @db.VarChar(255)
   expiresAt           DateTime
   revokedAt           DateTime?
   createdAt           DateTime  @default(now())
-  replacedByTokenHash String?   @db.VarChar(255)
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model UserStatusHistory {
-  id        Int        @id @default(autoincrement())
-  userId    Int
-  statusId  Int
-  startAt   DateTime   @default(now())
-  endAt     DateTime?
-  reason    String?
-  createdAt DateTime   @default(now())
-  status    UserStatus @relation(fields: [statusId], references: [id])
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  status   UserStatus @relation(fields: [statusId], references: [id])
+  statusId Int
+
+  startAt   DateTime  @default(now())
+  endAt     DateTime? // null = permanen
+  reason    String?   @db.Text
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@index([statusId])
@@ -90,34 +105,41 @@ model Test {
   createdAt DateTime @default(now())
 }
 
+// Permission models for RBAC
 model PermissionGroup {
-  id          Int          @id @default(autoincrement())
-  key         String       @unique @db.VarChar(150)
-  name        String?      @db.VarChar(255)
-  description String?
-  createdAt   DateTime     @default(now())
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(150)
+  name        String?  @db.VarChar(255)
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+
   permissions Permission[]
 }
 
 model Permission {
-  id              Int              @id @default(autoincrement())
-  key             String           @unique @db.VarChar(150)
-  name            String?          @db.VarChar(255)
-  description     String?
-  groupId         Int?
-  createdAt       DateTime         @default(now())
-  categories      Category[]
-  group           PermissionGroup? @relation(fields: [groupId], references: [id])
+  id          Int              @id @default(autoincrement())
+  key         String           @unique @db.VarChar(150) // e.g. users.create, users.view
+  name        String?          @db.VarChar(255)
+  description String?          @db.Text
+  group       PermissionGroup? @relation(fields: [groupId], references: [id])
+  groupId     Int?
+  createdAt   DateTime         @default(now())
+
+  categories Category[]
+
   rolePermissions RolePermission[]
 }
 
 model RolePermission {
-  id           Int        @id @default(autoincrement())
-  roleId       Int
-  permissionId Int
-  assignedAt   DateTime   @default(now())
+  id Int @id @default(autoincrement())
+
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId Int
+
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId Int
+
+  assignedAt DateTime @default(now())
 
   @@unique([roleId, permissionId])
   @@index([roleId])
@@ -126,79 +148,107 @@ model RolePermission {
 
 model HeroSection {
   id          Int      @id @default(autoincrement())
-  source      String
+  source      String   @db.Text // URL video atau gambar
   title       String   @db.VarChar(500)
-  description String
+  description String   @db.Text
   isActive    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model PageHero {
-  id        Int      @id @default(autoincrement())
-  pageSlug  String   @unique @db.VarChar(100)
-  imageUrl  String?  @db.VarChar(500)
-  title     String?  @db.VarChar(500)
-  subtitle  String?
+  id       Int     @id @default(autoincrement())
+  pageSlug String  @unique @db.VarChar(100)
+  imageUrl String? @db.VarChar(500)
+  title    String? @db.VarChar(500)
+  subtitle String? @db.Text
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([pageSlug])
 }
 
+// ====================================
+// NAVIGASI & KATEGORI
+// ====================================
+
 model Category {
-  id                   Int            @id @default(autoincrement())
-  title                String         @db.VarChar(255)
-  slug                 String         @unique @db.VarChar(255)
-  description          String?
-  order                Int            @default(0)
-  isActive             Boolean        @default(true)
+  id          Int     @id @default(autoincrement())
+  title       String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  // Optional: Permission gating untuk visibility kategori
   requiredPermissionId Int?
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
-  requiredPermission   Permission?    @relation(fields: [requiredPermissionId], references: [id])
-  items                CategoryItem[]
+  requiredPermission   Permission? @relation(fields: [requiredPermissionId], references: [id])
+
+  items CategoryItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([order])
 }
 
 model CategoryItem {
-  id                 Int                @id @default(autoincrement())
-  categoryId         Int
-  parentId           Int?
-  title              String             @db.VarChar(255)
-  slug               String?            @db.VarChar(255)
-  url                String?            @db.VarChar(500)
-  order              Int                @default(0)
-  meta               Json?
-  isActive           Boolean            @default(true)
-  isIndependent      Boolean            @default(false)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  articles           ArticleCategory[]
-  category           Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  parent             CategoryItem?      @relation("CatChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children           CategoryItem[]     @relation("CatChildren")
+  id Int @id @default(autoincrement())
+
+  // Relasi ke category parent
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  // Self-referential untuk hirarki multi-level
+  parent   CategoryItem?  @relation("CatChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId Int?
+  children CategoryItem[] @relation("CatChildren")
+
+  title String  @db.VarChar(255)
+  slug  String? @db.VarChar(255)
+  url   String? @db.VarChar(500)
+
+  // Order untuk sorting
+  order Int @default(0)
+
+  // Metadata flexible (JSON)
+  meta Json? @db.JsonB
+
+  isActive Boolean @default(true)
+
   eventCategories    EventCategory[]
-  eventOrganizers    EventOrganizer[]
   platformCategories PlatformCategory[]
+  eventOrganizers    EventOrganizer[]
+  platformContents   PlatformContent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  articles ArticleCategory[]
 
   @@index([categoryId])
   @@index([parentId])
   @@index([order])
 }
 
+// ====================================
+// TEAM
+// ====================================
+
 model TeamCategory {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(255)
-  slug        String       @db.VarChar(255)
-  description String?
-  order       Int          @default(0)
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  members     TeamMember[]
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(255)
+  slug        String  @db.VarChar(255)
+  description String? @db.Text
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  members TeamMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([slug, name])
   @@index([slug])
@@ -206,57 +256,72 @@ model TeamCategory {
 }
 
 model TeamMember {
-  id         Int          @id @default(autoincrement())
-  categoryId Int
-  name       String       @db.VarChar(255)
-  slug       String       @db.VarChar(255)
-  role       String       @db.VarChar(255)
-  imageUrl   String?      @db.VarChar(500)
-  email      String?      @db.VarChar(255)
-  instagram  String?      @db.VarChar(255)
-  order      Int          @default(0)
-  isActive   Boolean      @default(true)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id Int @id @default(autoincrement())
+
   category   TeamCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  name      String  @db.VarChar(255)
+  slug      String  @db.VarChar(255)
+  role      String  @db.VarChar(255)
+  imageUrl  String? @db.VarChar(500)
+  email     String? @db.VarChar(255)
+  instagram String? @db.VarChar(255)
+  order     Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([slug, name])
   @@index([categoryId])
   @@index([order])
 }
 
+// ====================================
+// PLATFORM
+// ====================================
+
 model Platform {
-  id             Int                @id @default(autoincrement())
-  slug           String             @unique @db.VarChar(100)
-  name           String             @db.VarChar(255)
-  headline       String?            @db.VarChar(500)
-  subHeadline    String?
-  instagram      String?            @db.VarChar(500)
-  youtube        String?            @db.VarChar(500)
-  youtubeProfile String?            @db.VarChar(500)
-  mainImageUrl   String?            @db.VarChar(500)
-  isActive       Boolean            @default(true)
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-  categories     PlatformCategory[]
-  images         PlatformImage[]
+  id             Int     @id @default(autoincrement())
+  slug           String  @unique @db.VarChar(100)
+  name           String  @db.VarChar(255)
+  headline       String? @db.VarChar(500)
+  subHeadline    String? @db.Text
+  instagram      String? @db.VarChar(500)
+  youtube        String? @db.VarChar(500)
+  youtubeProfile String? @db.VarChar(500)
+  mainImageUrl   String? @db.VarChar(500)
+  isActive       Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images     PlatformImage[]
+  categories PlatformCategory[]
+  contents   PlatformContent[]
 
   @@index([slug])
 }
 
 model PlatformCategory {
-  id             Int          @id @default(autoincrement())
-  platformId     Int
-  categoryItemId Int
-  layout         String       @default("grid") @db.VarChar(50)
-  description    String?
-  filters        Json?
-  order          Int          @default(0)
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id         Int      @id @default(autoincrement())
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  // Sumber title, slug, url diambil dari CategoryItem (nav tree)
   categoryItem   CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
-  platform       Platform     @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  categoryItemId Int
+
+  // Metadata visual khusus halaman platform
+  layout      String  @default("grid") @db.VarChar(50) // 'grid' | 'carousel'
+  description String? @db.Text
+  filters     Json?   @db.JsonB // string[] untuk filter grid
+  order       Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([platformId, categoryItemId])
   @@index([platformId])
@@ -266,17 +331,19 @@ model PlatformCategory {
 
 model PlatformImage {
   id         Int      @id @default(autoincrement())
-  platformId Int
-  key        String   @db.VarChar(100)
-  type       String   @db.VarChar(50)
-  label      String   @db.VarChar(255)
-  title      String?  @db.VarChar(500)
-  subtitle   String?
-  imageUrl   String?  @db.VarChar(500)
-  order      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
   platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  platformId Int
+
+  key      String  @db.VarChar(100)
+  type     String  @db.VarChar(50)
+  label    String  @db.VarChar(255)
+  title    String? @db.VarChar(500)
+  subtitle String? @db.Text
+  imageUrl String? @db.VarChar(500)
+  order    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([platformId, key])
   @@index([platformId])
@@ -337,23 +404,27 @@ model PlatformContentImage {
 }
 
 model TentangVisiMisi {
-  id          Int      @id @default(autoincrement())
-  pageSlug    String   @unique @default("tentang") @db.VarChar(100)
-  visi        String
-  misi        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  description String
+  id       Int    @id @default(autoincrement())
+  pageSlug String @unique @default("tentang") @db.VarChar(100)
+
+  description String @db.Text
+  visi        String @db.Text
+  misi        String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([pageSlug])
 }
 
 model TentangSejarahItem {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  imageUrl  String?  @db.VarChar(500)
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
+  id Int @id @default(autoincrement())
+
+  title    String  @db.VarChar(255)
+  imageUrl String? @db.VarChar(500)
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -362,11 +433,13 @@ model TentangSejarahItem {
 }
 
 model TentangPanduanVisual {
-  id        Int      @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  link      String?  @db.VarChar(500)
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
+  id Int @id @default(autoincrement())
+
+  title    String  @db.VarChar(255)
+  link     String? @db.VarChar(500)
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -374,33 +447,45 @@ model TentangPanduanVisual {
   @@index([isActive])
 }
 
+// ====================================
+// EVENT
+// ====================================
+
 model Event {
-  id                Int              @id @default(autoincrement())
-  title             String           @db.VarChar(255)
-  slug              String           @unique @db.VarChar(255)
-  description       String?
-  poster            String?          @db.VarChar(500)
-  startAt           DateTime
-  endAt             DateTime?
-  location          String?          @db.VarChar(255)
-  mapsEmbedSrc      String?
-  registerLink      String?          @db.VarChar(500)
-  isPublished       Boolean          @default(false)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  driveLink         String?          @db.VarChar(500)
-  youtubeLink       String?          @db.VarChar(500)
-  drivebukuLink     String?          @db.VarChar(500)
-  instagramLink     String?          @db.VarChar(500)
+  id Int @id @default(autoincrement())
 
-  instagramLiveLink String?          @db.VarChar(500)
-  tiktokLiveLink    String?          @db.VarChar(500)
-  youtubeLiveLink   String?          @db.VarChar(500)
+  // BASIC INFO
+  title       String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+  poster      String? @db.VarChar(500)
 
-  isFlexibleTime    Boolean          @default(false)
-  eventCategories   EventCategory[]
-  organizers        EventOrganizer[]
-  tags              EventTag[]
+  // RELASI (MANY TO MANY)
+  organizers      EventOrganizer[]
+  eventCategories EventCategory[]
+  tags            EventTag[]
+
+  // WAKTU
+  startAt        DateTime
+  endAt          DateTime?
+  isFlexibleTime Boolean   @default(false)
+
+  // LOKASI
+  location     String? @db.VarChar(255)
+  mapsEmbedSrc String? @db.Text
+
+  // LINK
+  registerLink  String? @db.VarChar(500)
+  driveLink     String? @db.VarChar(500)
+  youtubeLink   String? @db.VarChar(500)
+  instagramLink String? @db.VarChar(500)
+  drivebukuLink String? @db.VarChar(500)
+
+  // PUBLISH
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([startAt])
   @@index([endAt])
@@ -410,10 +495,14 @@ model Event {
 model EventCategory {
   eventId        Int
   categoryItemId Int
-  isPrimary      Boolean      @default(false)
-  order          Int          @default(0)
-  categoryItem   CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
-  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // RELASI
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  categoryItem CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
+
+  // OPTIONAL META (future-proof)
+  isPrimary Boolean @default(false)
+  order     Int     @default(0)
 
   @@id([eventId, categoryItemId])
   @@index([eventId])
@@ -423,8 +512,9 @@ model EventCategory {
 model EventOrganizer {
   eventId        Int
   categoryItemId Int
-  categoryItem   CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
-  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  categoryItem CategoryItem @relation(fields: [categoryItemId], references: [id], onDelete: Cascade)
 
   @@id([eventId, categoryItemId])
   @@index([eventId])
@@ -434,32 +524,55 @@ model EventOrganizer {
 model EventTag {
   eventId Int
   tagId   Int
-  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([eventId, tagId])
   @@index([tagId])
   @@index([eventId])
 }
 
+// ====================================
+// ARTICLES / BLOG / NEWS SYSTEM
+// ====================================
+
 model Article {
-  id            Int               @id @default(autoincrement())
-  title         String            @db.VarChar(255)
-  slug          String            @unique @db.VarChar(255)
-  content       String
-  excerpt       String?
-  featuredImage String?           @db.VarChar(500)
-  authorName    String            @db.VarChar(255)
-  editorName    String?           @db.VarChar(255)
-  status        ArticleStatus     @default(DRAFT)
-  publishedAt   DateTime?
-  views         Int               @default(0)
-  isDeleted     Boolean           @default(false)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  categories    ArticleCategory[]
-  media         ArticleMedia[]
-  tags          ArticleTag[]
+  id Int @id @default(autoincrement())
+
+  title String @db.VarChar(255)
+  slug  String @unique @db.VarChar(255)
+
+  content       String  @db.Text
+  excerpt       String? @db.Text
+  featuredImage String? @db.VarChar(500)
+
+  // ================= AUTHOR (MANUAL) =================
+  authorName String  @db.VarChar(255)
+  editorName String? @db.VarChar(255)
+
+  // ================= RELATIONS =================
+
+  // Category (pakai tabel Category)
+  categories ArticleCategory[]
+
+  // Tags
+  tags  ArticleTag[]
+  // Media
+  media ArticleMedia[]
+
+  // ================= PUBLISHING =================
+
+  status      ArticleStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  // ================= SYSTEM =================
+
+  views     Int     @default(0)
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([slug])
   @@index([status])
@@ -469,17 +582,19 @@ model Article {
 model ArticleCategory {
   articleId  Int
   categoryId Int
-  article    Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  category   CategoryItem @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  article  Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  category CategoryItem @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([articleId, categoryId])
   @@index([categoryId])
 }
 
 model Tag {
-  id       Int          @id @default(autoincrement())
-  name     String       @db.VarChar(100)
-  slug     String       @unique @db.VarChar(100)
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+  slug String @unique @db.VarChar(100)
+
   articles ArticleTag[]
   events   EventTag[]
 }
@@ -487,29 +602,34 @@ model Tag {
 model ArticleTag {
   articleId Int
   tagId     Int
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([articleId, tagId])
-}
-
-model ArticleMedia {
-  id        Int       @id @default(autoincrement())
-  articleId Int
-  type      MediaType
-  url       String    @db.VarChar(500)
-  title     String?   @db.VarChar(255)
-  order     Int       @default(0)
-  createdAt DateTime  @default(now())
-  article   Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
-
-  @@index([articleId])
 }
 
 enum ArticleStatus {
   DRAFT
   PUBLISHED
   SCHEDULED
+}
+
+model ArticleMedia {
+  id Int @id @default(autoincrement())
+
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  articleId Int
+
+  type  MediaType
+  url   String    @db.VarChar(500)
+  title String?   @db.VarChar(255)
+
+  order Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([articleId])
 }
 
 enum MediaType {
