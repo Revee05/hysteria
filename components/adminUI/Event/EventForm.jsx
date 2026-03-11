@@ -31,15 +31,8 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
 
   const organizerRef = useRef(null);
   const categoryRef = useRef(null);
-  
-  const HYSTERIA_ORGANIZER = {
-    id: "__HYSTERIA__",
-    title: "Hysteria",
-    isVirtual: true,
-  };
 
   const getOrganizerTitle = (id) => {
-    if (id === "__HYSTERIA__") return "Hysteria";
     return organizerItems.find(o => o.id === id)?.title || id;
   };
 
@@ -77,7 +70,6 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
 
     const start = new Date(initialData.startAt);
     const end = initialData.endAt ? new Date(initialData.endAt) : null;
-
     const isFlexible = Boolean(initialData.isFlexibleTime);
 
     setForm((prev) => ({
@@ -96,11 +88,8 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
         ) || [],
 
       description: initialData.description || "",
-
       startDate: start.toISOString().slice(0, 10),
-
       startTime: isFlexible ? "" : start.toTimeString().slice(0, 5),
-
       endDate: end ? end.toISOString().slice(0, 10) : "",
       endTime: isFlexible
         ? ""
@@ -110,7 +99,6 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       registerLink: initialData.registerLink || "",
       poster: initialData.poster || "",
       status: initialData.isPublished ? "PUBLISHED" : "DRAFT",
-
       driveLink: initialData.driveLink || "",
       youtubeLink: initialData.youtubeLink || "",
       instagramLink: initialData.instagramLink || "",
@@ -159,22 +147,40 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
         fetch("/api/categories/program-hysteria"),
       ]);
 
-      const platformItems = (await platformRes.json())?.data?.items || [];
-      const programItems = (await programRes.json())?.data?.items || [];
+      const platformItemsRaw = (await platformRes.json())?.data?.items || [];
+      const programItemsRaw = (await programRes.json())?.data?.items || [];
 
-      const sortAZ = (a, b) =>
-        a.title.localeCompare(b.title, "id-ID", { sensitivity: "base" });
+      /* FILTER SUB CATEGORY */
+      const filterChildren = (items) => {
+        return (items || []).map((item) => ({
+          ...item,
+          children: filterChildren(
+            (item.children || []).filter((child) => !child.isIndependent)
+          ),
+        }));
+      };
 
+      const platformItems = filterChildren(platformItemsRaw);
+      const programItems = filterChildren(programItemsRaw);
+      
       setPlatformTree(platformItems);
       setProgramTree(programItems);
+      
+      const sortAZ = (a, b) =>
+        a.title.localeCompare(b.title, "id-ID", { sensitivity: "base" });
 
       const organizers = platformItems
         .map(p => ({ id: p.id, title: p.title }))
         .sort(sortAZ);
       
+      const hysteriaId = programItemsRaw?.[0]?.id;
+
       setOrganizerItems([
         ...organizers,
-        HYSTERIA_ORGANIZER,
+        {
+          id: hysteriaId,
+          title: "Hysteria",
+        },
       ]);
     };
 
@@ -189,6 +195,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
       if (!form.organizerIds.includes(Number(organizer.id))) continue;
 
       for (const child of organizer.children || []) {
+        if (child.isIndependent) continue;
         subs.push({
           id: child.id,
           title: child.title,
@@ -200,12 +207,13 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
   };
 
   const getHysteriaSubCategories = () => {
-    if (!form.organizerIds.includes("__HYSTERIA__")) return [];
+    if (!form.organizerIds.includes(programTree[0]?.id)) return [];
 
     const result = [];
 
     for (const group of programTree) {
       for (const child of group.children || []) {
+        if (child.isIndependent) continue;
         result.push({
           id: child.id,
           title: child.title,
@@ -238,10 +246,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     }));
   }, [form.organizerIds]);
 
-  const normalizeId = (id) => {
-    if (id === "__HYSTERIA__") return "__HYSTERIA__";
-    return Number(id);
-  };
+  const normalizeId = (id) => Number(id);
 
   const toggleOrganizer = (id) => {
     const normalized = normalizeId(id);
@@ -276,12 +281,37 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const extractMapSrc = (iframeHtml) => {
-    if (!iframeHtml) return null;
-    const match = iframeHtml.match(/src="([^"]+)"/);
-    return match ? match[1] : null;
+  const extractMapSrc = (input) => {
+    if (!input) return null;
+
+    const value = input.trim();
+
+    // iframe
+    if (value.includes("<iframe")) {
+      const match = value.match(/src="([^"]+)"/);
+      return match ? match[1] : null;
+    }
+
+    // link biasa
+    if (value.startsWith("http")) {
+      return value;
+    }
+
+    return null;
   };
-  const mapSrc = extractMapSrc(form.mapsEmbed);
+
+  const getPreviewSrc = (input) => {
+    if (!input) return null;
+
+    if (input.includes("<iframe")) {
+      const match = input.match(/src="([^"]+)"/);
+      return match ? match[1] : null;
+    }
+
+    return null;
+  };
+
+  const mapSrc = getPreviewSrc(form.mapsEmbed);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -309,11 +339,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
     const payload = {
       title           : form.title,
       categoryItemIds : form.categoryItemIds,
-
-      organizerItemIds: form.organizerIds.filter(
-        (id) => id !== "__HYSTERIA__"
-      ),
-      
+      organizerItemIds: form.organizerIds,
       description     : form.description,
 
       startAt: form.isFlexibleTime
@@ -389,6 +415,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
           {/* DESCRIPTION */}
           <Card title="Deskripsi *">
             <EventDescriptionEditor
+              key={form.description}
               value={form.description}
               onChange={(html) =>
                 setForm((prev) => ({ ...prev, description: html }))

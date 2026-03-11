@@ -216,13 +216,14 @@ model CategoryItem {
   // Metadata flexible (JSON)
   meta Json? @db.JsonB
 
-  isActive Boolean @default(true)
+  isActive      Boolean @default(true)
+  isIndependent Boolean @default(false)
 
   eventCategories    EventCategory[]
   platformCategories PlatformCategory[]
   eventOrganizers    EventOrganizer[]
   platformContents   PlatformContent[]
-
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -480,6 +481,9 @@ model Event {
   youtubeLink   String? @db.VarChar(500)
   instagramLink String? @db.VarChar(500)
   drivebukuLink String? @db.VarChar(500)
+  instagramLiveLink String? @db.VarChar(500)
+  tiktokLiveLink    String? @db.VarChar(500)
+  youtubeLiveLink   String? @db.VarChar(500)
 
   // PUBLISH
   isPublished Boolean @default(false)

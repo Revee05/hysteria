@@ -21,98 +21,99 @@ module.exports = async function seed() {
 
 	const items = [
 		// Program Hysteria (category: program-hysteria)
-		{ categorySlug: 'program-hysteria', title: 'Festival dan Pameran', slug: 'festival-dan-pameran', url: '/program/festival-and-pameran', order: 0, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'Festival Kampung', slug: 'festival-kampung', url: '/program/festival-and-pameran/festival-kampung', order: 0, parentSlug: 'festival-dan-pameran' },
-				{ categorySlug: 'program-hysteria', title: 'Gebyuran Bustaman', slug: 'gebyuran-bustaman', url: '/program/festival-and-pameran/festival-kampung/gebyuran-bustaman', order: 0, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Nginguk Githok', slug: 'nginguk-githok', url: '/program/festival-and-pameran/festival-kampung/nginguk-githok', order: 1, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Festival Bukit Jatiwayang', slug: 'festival-bukit-jatiwayang', url: '/program/festival-and-pameran/festival-kampung/festival-bukit-jatiwayang', order: 2, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Sobo Roworejo', slug: 'sobo-roworejo', url: '/program/festival-and-pameran/festival-kampung/sobo-roworejo', order: 3, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Srawung Sendang', slug: 'srawung-sendang', url: '/program/festival-and-pameran/festival-kampung/srawung-sendang', order: 4, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Festival Ngijo', slug: 'festival-ngijo', url: '/program/festival-and-pameran/festival-kampung/festival-ngijo', order: 5, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Banyu Pitu', slug: 'banyu-pitu', url: '/program/festival-and-pameran/festival-kampung/banyu-pitu', order: 6, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Bulusan Fest', slug: 'bulusan-fest', url: '/program/festival-and-pameran/festival-kampung/bulusan-fest', order: 7, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Labuhan Kali', slug: 'labuhan-kali', url: '/program/festival-and-pameran/festival-kampung/labuhan-kali', order: 8, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Iki Buntu Fest', slug: 'iki-buntu-fest', url: '/program/festival-and-pameran/festival-kampung/iki-buntu-fest', order: 9, parentSlug: 'festival-kampung' },
-				{ categorySlug: 'program-hysteria', title: 'Festival ke Tugu', slug: 'festival-ke-tugu', url: '/program/festival-and-pameran/festival-kampung/festival-ke-tugu', order: 10, parentSlug: 'festival-kampung' },
+		{ categorySlug: 'program-hysteria', title: 'Festival dan Pameran', slug: 'festival-dan-pameran', url: '/program/festival-and-pameran', order: 0, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Festival Kampung', slug: 'festival-kampung', url: '/program/festival-and-pameran/festival-kampung', order: 0, parentSlug: 'festival-dan-pameran', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Gebyuran Bustaman', slug: 'gebyuran-bustaman', url: '/program/festival-and-pameran/festival-kampung/gebyuran-bustaman', order: 0, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Nginguk Githok', slug: 'nginguk-githok', url: '/program/festival-and-pameran/festival-kampung/nginguk-githok', order: 1, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Festival Bukit Jatiwayang', slug: 'festival-bukit-jatiwayang', url: '/program/festival-and-pameran/festival-kampung/festival-bukit-jatiwayang', order: 2, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Sobo Roworejo', slug: 'sobo-roworejo', url: '/program/festival-and-pameran/festival-kampung/sobo-roworejo', order: 3, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Srawung Sendang', slug: 'srawung-sendang', url: '/program/festival-and-pameran/festival-kampung/srawung-sendang', order: 4, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Festival Ngijo', slug: 'festival-ngijo', url: '/program/festival-and-pameran/festival-kampung/festival-ngijo', order: 5, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Banyu Pitu', slug: 'banyu-pitu', url: '/program/festival-and-pameran/festival-kampung/banyu-pitu', order: 6, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Bulusan Fest', slug: 'bulusan-fest', url: '/program/festival-and-pameran/festival-kampung/bulusan-fest', order: 7, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Labuhan Kali', slug: 'labuhan-kali', url: '/program/festival-and-pameran/festival-kampung/labuhan-kali', order: 8, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Iki Buntu Fest', slug: 'iki-buntu-fest', url: '/program/festival-and-pameran/festival-kampung/iki-buntu-fest', order: 9, parentSlug: 'festival-kampung', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Festival ke Tugu', slug: 'festival-ke-tugu', url: '/program/festival-and-pameran/festival-kampung/festival-ke-tugu', order: 10, parentSlug: 'festival-kampung', isIndependent: false },
 
-			{ categorySlug: 'program-hysteria', title: 'Festival Kota', slug: 'festival-kota', url: '/program/festival-kota', order: 1, parentSlug: 'festival-dan-pameran' },
-				{ categorySlug: 'program-hysteria', title: 'Zine Fest', slug: 'zine-fest', url: '/program/festival-kota/zine-fest', order: 0, parentSlug: 'festival-kota' },
-				{ categorySlug: 'program-hysteria', title: 'Semarang Writers Week', slug: 'semarang-writers-week', url: '/program/festival-kota/semarang-writers-week', order: 1, parentSlug: 'festival-kota' },
-				{ categorySlug: 'program-hysteria', title: 'City Canvas', slug: 'city-canvas', url: '/program/festival-kota/city-canvas', order: 2, parentSlug: 'festival-kota' },
-				{ categorySlug: 'program-hysteria', title: 'Dokumentaria', slug: 'dokumentaria', url: '/program/festival-kota/dokumentaria', order: 3, parentSlug: 'festival-kota' },
+			{ categorySlug: 'program-hysteria', title: 'Festival Kota', slug: 'festival-kota', url: '/program/festival-kota', order: 1, parentSlug: 'festival-dan-pameran', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Zine Fest', slug: 'zine-fest', url: '/program/festival-kota/zine-fest', order: 0, parentSlug: 'festival-kota', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Semarang Writers Week', slug: 'semarang-writers-week', url: '/program/festival-kota/semarang-writers-week', order: 1, parentSlug: 'festival-kota', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'City Canvas', slug: 'city-canvas', url: '/program/festival-kota/city-canvas', order: 2, parentSlug: 'festival-kota', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Dokumentaria', slug: 'dokumentaria', url: '/program/festival-kota/dokumentaria', order: 3, parentSlug: 'festival-kota', isIndependent: false },
 
-			{ categorySlug: 'program-hysteria', title: 'Biennale', slug: 'biennale', url: '/program/festival-biennale', order: 2, parentSlug: 'festival-dan-pameran' },
-				{ categorySlug: 'program-hysteria', title: 'Penta K Labs', slug: 'penta-k-labs', url: '/program/festival-biennale/penta-k-labs', order: 0, parentSlug: 'biennale' },
-				{ categorySlug: 'program-hysteria', title: 'Tengok Bustaman', slug: 'tengok-bustaman', url: '/program/festival-biennale/tengok-bustaman', order: 1, parentSlug: 'biennale' },
+			{ categorySlug: 'program-hysteria', title: 'Biennale', slug: 'biennale', url: '/program/festival-biennale', order: 2, parentSlug: 'festival-dan-pameran', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Penta K Labs', slug: 'penta-k-labs', url: '/program/festival-biennale/penta-k-labs', order: 0, parentSlug: 'biennale', isIndependent: false },
+				{ categorySlug: 'program-hysteria', title: 'Tengok Bustaman', slug: 'tengok-bustaman', url: '/program/festival-biennale/tengok-bustaman', order: 1, parentSlug: 'biennale', isIndependent: false },
 
-		{ categorySlug: 'program-hysteria', title: 'Forum', slug: 'forum', url: '/program/forum', order: 1, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'Temu Jejaring', slug: 'temu-jejaring', url: '/program/forum/temu-jejaring', order: 0, parentSlug: 'forum' },
-			{ categorySlug: 'program-hysteria', title: 'Buah tangan', slug: 'buah-tangan', url: '/program/forum/buah-tangan', order: 1, parentSlug: 'forum' },
-			{ categorySlug: 'program-hysteria', title: 'Lawatan Jalan Terus', slug: 'lawatan-jalan-terus', url: '/program/forum/lawatan-jalan-terus', order: 2, parentSlug: 'forum' },
-			{ categorySlug: 'program-hysteria', title: 'Simposium', slug: 'simposium', url: '/program/forum/simposium', order: 3, parentSlug: 'forum' },				{ categorySlug: 'program-hysteria', title: 'Meditasi', slug: 'meditasi', url: '/program/forum/meditasi', order: 4, parentSlug: 'forum' },
+		{ categorySlug: 'program-hysteria', title: 'Forum', slug: 'forum', url: '/program/forum', order: 1, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Temu Jejaring', slug: 'temu-jejaring', url: '/program/forum/temu-jejaring', order: 0, parentSlug: 'forum', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Buah tangan', slug: 'buah-tangan', url: '/program/forum/buah-tangan', order: 1, parentSlug: 'forum', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Lawatan Jalan Terus', slug: 'lawatan-jalan-terus', url: '/program/forum/lawatan-jalan-terus', order: 2, parentSlug: 'forum', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Simposium', slug: 'simposium', url: '/program/forum/simposium', order: 3, parentSlug: 'forum', isIndependent: false },				
+			{ categorySlug: 'program-hysteria', title: 'Meditasi', slug: 'meditasi', url: '/program/forum/meditasi', order: 4, parentSlug: 'forum', isIndependent: false },
 
-		{ categorySlug: 'program-hysteria', title: 'Music', slug: 'music', url: '/program/music', order: 2, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'SGRT', slug: 'sgrt', url: '/program/music/sgrt', order: 0, parentSlug: 'music' },
-			{ categorySlug: 'program-hysteria', title: 'Kotak Listrik', slug: 'kotak-listrik', url: '/program/music/kotak-listrik', order: 1, parentSlug: 'music' },
-			{ categorySlug: 'program-hysteria', title: 'Di(e)gital', slug: 'die-gital', url: '/program/music/die-gital', order: 2, parentSlug: 'music' },
-			{ categorySlug: 'program-hysteria', title: 'Bunyi Halaman Belakang', slug: 'bunyi-halaman-belakang', url: '/program/music/bunyi-halaman-belakang', order: 3, parentSlug: 'music' },
-			{ categorySlug: 'program-hysteria', title: 'Folk Me Up', slug: 'folk-me-up', url: '/program/music/folk-me-up', order: 4, parentSlug: 'music' },
+		{ categorySlug: 'program-hysteria', title: 'Music', slug: 'music', url: '/program/music', order: 2, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'SGRT', slug: 'sgrt', url: '/program/music/sgrt', order: 0, parentSlug: 'music', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Kotak Listrik', slug: 'kotak-listrik', url: '/program/music/kotak-listrik', order: 1, parentSlug: 'music', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Di(e)gital', slug: 'die-gital', url: '/program/music/die-gital', order: 2, parentSlug: 'music', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Bunyi Halaman Belakang', slug: 'bunyi-halaman-belakang', url: '/program/music/bunyi-halaman-belakang', order: 3, parentSlug: 'music', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Folk Me Up', slug: 'folk-me-up', url: '/program/music/folk-me-up', order: 4, parentSlug: 'music', isIndependent: false },
 			
-		{ categorySlug: 'program-hysteria', title: 'Residensi dan Workshop', slug: 'residensi-dan-workshop', url: '/program/residensi-workshop', order: 3, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'Flash Residency', slug: 'flash-residency', url: '/program/residensi-workshop/flash-residency', order: 0, parentSlug: 'residensi-dan-workshop' },
-			{ categorySlug: 'program-hysteria', title: 'Kandang Tandang', slug: 'kandang-tandang', url: '/program/residensi-workshop/kandang-tandang', order: 1, parentSlug: 'residensi-dan-workshop' },
+		{ categorySlug: 'program-hysteria', title: 'Residensi dan Workshop', slug: 'residensi-dan-workshop', url: '/program/residensi-workshop', order: 3, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Flash Residency', slug: 'flash-residency', url: '/program/residensi-workshop/flash-residency', order: 0, parentSlug: 'residensi-dan-workshop', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Kandang Tandang', slug: 'kandang-tandang', url: '/program/residensi-workshop/kandang-tandang', order: 1, parentSlug: 'residensi-dan-workshop', isIndependent: false },
 		
-		{ categorySlug: 'program-hysteria', title: 'Podcast', slug: 'podcast', url: '/program/podcast', order: 4, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'Safari Memori', slug: 'safari-memori', url: '/program/podcast/safari-memori', order: 0, parentSlug: 'podcast' },
-			{ categorySlug: 'program-hysteria', title: 'Aston', slug: 'aston', url: '/program/podcast/aston', order: 1, parentSlug: 'podcast' },
-			{ categorySlug: 'program-hysteria', title: 'Sore di Stonen', slug: 'sore-di-stonen', url: '/program/podcast/sore-di-stonen', order: 2, parentSlug: 'podcast' },
+		{ categorySlug: 'program-hysteria', title: 'Podcast', slug: 'podcast', url: '/program/podcast', order: 4, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Safari Memori', slug: 'safari-memori', url: '/program/podcast/safari-memori', order: 0, parentSlug: 'podcast', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Aston', slug: 'aston', url: '/program/podcast/aston', order: 1, parentSlug: 'podcast', isIndependent: true },
+			{ categorySlug: 'program-hysteria', title: 'Sore di Stonen', slug: 'sore-di-stonen', url: '/program/podcast/sore-di-stonen', order: 2, parentSlug: 'podcast', isIndependent: true },
 
-		{ categorySlug: 'program-hysteria', title: 'Pemutaran Film', slug: 'pemutaran-film', url: '/program/pemutaran-film', order: 5, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'Screening AM', slug: 'screening-am-film', url: '/program/pemutaran-film/screening-am', order: 0, parentSlug: 'pemutaran-film' },
-			{ categorySlug: 'program-hysteria', title: 'Lawatan Bandeng Keliling', slug: 'lawatan-bandeng-keliling', url: '/program/pemutaran-film/lawatan-bandeng-keliling', order: 1, parentSlug: 'pemutaran-film' },
+		{ categorySlug: 'program-hysteria', title: 'Pemutaran Film', slug: 'pemutaran-film', url: '/program/pemutaran-film', order: 5, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Screening AM', slug: 'screening-am-film', url: '/program/pemutaran-film/screening-am', order: 0, parentSlug: 'pemutaran-film', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Lawatan Bandeng Keliling', slug: 'lawatan-bandeng-keliling', url: '/program/pemutaran-film/lawatan-bandeng-keliling', order: 1, parentSlug: 'pemutaran-film', isIndependent: false },
 
-		{ categorySlug: 'program-hysteria', title: 'Video Series', slug: 'video-series', url: '/program/video-series', order: 6, parentSlug: null },
-			{ categorySlug: 'program-hysteria', title: 'Sapa Warga', slug: 'sapa-warga', url: '/program/video-series/sapa-warga', order: 0, parentSlug: 'video-series' },
-			{ categorySlug: 'program-hysteria', title: 'Hysteria Berkelana', slug: 'hysteria-berkelana', url: '/program/video-series/hysteria-berkelana', order: 1, parentSlug: 'video-series' },
+		{ categorySlug: 'program-hysteria', title: 'Video Series', slug: 'video-series', url: '/program/video-series', order: 6, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Sapa Warga', slug: 'sapa-warga', url: '/program/video-series/sapa-warga', order: 0, parentSlug: 'video-series', isIndependent: false },
+			{ categorySlug: 'program-hysteria', title: 'Hysteria Berkelana', slug: 'hysteria-berkelana', url: '/program/video-series/hysteria-berkelana', order: 1, parentSlug: 'video-series', isIndependent: true },
 
 		// Platform (category: platform)
-		{ categorySlug: 'platform', title: 'Hysteria Artlab', slug: 'hysteria-artlab', url: '/platform/hysteria-artlab', order: 0, parentSlug: null },
-			{ categorySlug: 'platform', title: 'Merchandise', slug: 'merchandise', url: '/platform/hysteria-artlab/merchandise', order: 0, parentSlug: 'hysteria-artlab' },
-			{ categorySlug: 'platform', title: 'Podcast Artlab', slug: 'podcast-artlab', url: '/platform/hysteria-artlab/podcast-artlab', order: 1, parentSlug: 'hysteria-artlab' },
-				{ categorySlug: 'platform', title: 'Stonen 29 Radio Show', slug: 'stonen-29-radio-show', url: '/platform/hysteria-artlab/podcast-artlab/stonen-29-radio-show', order: 0, parentSlug: 'podcast-artlab' },
-				{ categorySlug: 'platform', title: 'Anitalk', slug: 'anitalk', url: '/platform/hysteria-artlab/podcast-artlab/anitalk', order: 1, parentSlug: 'podcast-artlab' },
-				{ categorySlug: 'platform', title: 'Artist Radar', slug: 'artist-radar', url: '/platform/hysteria-artlab/podcast-artlab/artist-radar', order: 2, parentSlug: 'podcast-artlab' },
-			{ categorySlug: 'platform', title: 'Workshop', slug: 'workshop', url: '/platform/hysteria-artlab/workshop', order: 2, parentSlug: 'hysteria-artlab' },
-				{ categorySlug: 'platform', title: 'Having Fun Artlab', slug: 'having-fun-artlab', url: '/platform/hysteria-artlab/workshop/having-fun-artlab', order: 0, parentSlug: 'workshop' },
-				{ categorySlug: 'platform', title: 'Peltoe', slug: 'peltoe', url: '/platform/hysteria-artlab/workshop/peltoe', order: 1, parentSlug: 'workshop' },
-			{ categorySlug: 'platform', title: 'Screening Film', slug: 'screening-film', url: '/platform/hysteria-artlab/screening-film', order: 2, parentSlug: 'hysteria-artlab' },
-				{ categorySlug: 'platform', title: 'Making Artist', slug: 'making-artist', url: '/platform/hysteria-artlab/screening-film/making-artist', order: 0, parentSlug: 'screening-film' },
-				{ categorySlug: 'platform', title: 'Usil', slug: 'usil', url: '/platform/hysteria-artlab/screening-film/usil', order: 1, parentSlug: 'screening-film' },
-			{ categorySlug: 'platform', title: 'Untuk Perhatian', slug: 'untuk-perhatian', url: '/platform/hysteria-artlab/untuk-perhatian', order: 3, parentSlug: 'hysteria-artlab' },
+		{ categorySlug: 'platform', title: 'Hysteria Artlab', slug: 'hysteria-artlab', url: '/platform/hysteria-artlab', order: 0, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'platform', title: 'Merchandise', slug: 'merchandise', url: '/platform/hysteria-artlab/merchandise', order: 0, parentSlug: 'hysteria-artlab', isIndependent: false },
+			{ categorySlug: 'platform', title: 'Podcast Artlab', slug: 'podcast-artlab', url: '/platform/hysteria-artlab/podcast-artlab', order: 1, parentSlug: 'hysteria-artlab', isIndependent: false },
+				{ categorySlug: 'platform', title: 'Stonen 29 Radio Show', slug: 'stonen-29-radio-show', url: '/platform/hysteria-artlab/podcast-artlab/stonen-29-radio-show', order: 0, parentSlug: 'podcast-artlab', isIndependent: false },
+				{ categorySlug: 'platform', title: 'Anitalk', slug: 'anitalk', url: '/platform/hysteria-artlab/podcast-artlab/anitalk', order: 1, parentSlug: 'podcast-artlab', isIndependent: true },
+				{ categorySlug: 'platform', title: 'Artist Radar', slug: 'artist-radar', url: '/platform/hysteria-artlab/podcast-artlab/artist-radar', order: 2, parentSlug: 'podcast-artlab', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Workshop', slug: 'workshop', url: '/platform/hysteria-artlab/workshop', order: 2, parentSlug: 'hysteria-artlab', isIndependent: false },
+				{ categorySlug: 'platform', title: 'Having Fun Artlab', slug: 'having-fun-artlab', url: '/platform/hysteria-artlab/workshop/having-fun-artlab', order: 0, parentSlug: 'workshop', isIndependent: false },
+				{ categorySlug: 'platform', title: 'Peltoe', slug: 'peltoe', url: '/platform/hysteria-artlab/workshop/peltoe', order: 1, parentSlug: 'workshop', isIndependent: false },
+			{ categorySlug: 'platform', title: 'Screening Film', slug: 'screening-film', url: '/platform/hysteria-artlab/screening-film', order: 2, parentSlug: 'hysteria-artlab', isIndependent: false },
+				{ categorySlug: 'platform', title: 'Making Artist', slug: 'making-artist', url: '/platform/hysteria-artlab/screening-film/making-artist', order: 0, parentSlug: 'screening-film', isIndependent: false },
+				{ categorySlug: 'platform', title: 'Usil', slug: 'usil', url: '/platform/hysteria-artlab/screening-film/usil', order: 1, parentSlug: 'screening-film', isIndependent: false },
+			{ categorySlug: 'platform', title: 'Untuk Perhatian', slug: 'untuk-perhatian', url: '/platform/hysteria-artlab/untuk-perhatian', order: 3, parentSlug: 'hysteria-artlab', isIndependent: false },
 
-		{ categorySlug: 'platform', title: 'Ditampart', slug: 'ditampart', url: '/platform/ditampart', order: 1, parentSlug: null },
-			{ categorySlug: 'platform', title: '3D', slug: '3d', url: '/platform/ditampart/3d', order: 0, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Foto Kegiatan', slug: 'foto-kegiatan', url: '/platform/ditampart/foto-kegiatan', order: 1, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Mockup dan Poster', slug: 'mockup-dan-poster', url: '/platform/ditampart/mockup-dan-poster', order: 2, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Short Film Dokumenter', slug: 'short-film-dokumenter', url: '/platform/ditampart/short-film-dokumenter', order: 3, parentSlug: 'ditampart' },
-			{ categorySlug: 'platform', title: 'Event Ditampart', slug: 'event-ditampart', url: '/platform/ditampart/event-ditampart', order: 4, parentSlug: 'ditampart' },
+		{ categorySlug: 'platform', title: 'Ditampart', slug: 'ditampart', url: '/platform/ditampart', order: 1, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'platform', title: '3D', slug: '3d', url: '/platform/ditampart/3d', order: 0, parentSlug: 'ditampart', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Foto Kegiatan', slug: 'foto-kegiatan', url: '/platform/ditampart/foto-kegiatan', order: 1, parentSlug: 'ditampart', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Mockup dan Poster', slug: 'mockup-dan-poster', url: '/platform/ditampart/mockup-dan-poster', order: 2, parentSlug: 'ditampart', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Short Film Dokumenter', slug: 'short-film-dokumenter', url: '/platform/ditampart/short-film-dokumenter', order: 3, parentSlug: 'ditampart', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Event Ditampart', slug: 'event-ditampart', url: '/platform/ditampart/event-ditampart', order: 4, parentSlug: 'ditampart', isIndependent: false },
 
-		{ categorySlug: 'platform', title: 'Laki Masak', slug: 'laki-masak', url: '/platform/laki-masak', order: 2, parentSlug: null },
-			{ categorySlug: 'platform', title: 'Meramu', slug: 'meramu', url: '/platform/laki-masak/meramu', order: 0, parentSlug: 'laki-masak' },
-			{ categorySlug: 'platform', title: 'Homecooked', slug: 'homecooked', url: '/platform/laki-masak/homecooked', order: 1, parentSlug: 'laki-masak' },
-			{ categorySlug: 'platform', title: 'Komik Ramuan', slug: 'komik-ramuan', url: '/platform/laki-masak/komik-ramuan', order: 2, parentSlug: 'laki-masak' },
-			{ categorySlug: 'platform', title: 'Pre-Order', slug: 'pre-order', url: '/platform/laki-masak/pre-order', order: 3, parentSlug: 'laki-masak' },
+		{ categorySlug: 'platform', title: 'Laki Masak', slug: 'laki-masak', url: '/platform/laki-masak', order: 2, parentSlug: null, isIndependent: false },
+			{ categorySlug: 'platform', title: 'Meramu', slug: 'meramu', url: '/platform/laki-masak/meramu', order: 0, parentSlug: 'laki-masak', isIndependent: false },
+			{ categorySlug: 'platform', title: 'Homecooked', slug: 'homecooked', url: '/platform/laki-masak/homecooked', order: 1, parentSlug: 'laki-masak', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Komik Ramuan', slug: 'komik-ramuan', url: '/platform/laki-masak/komik-ramuan', order: 2, parentSlug: 'laki-masak', isIndependent: true },
+			{ categorySlug: 'platform', title: 'Pre-Order', slug: 'pre-order', url: '/platform/laki-masak/pre-order', order: 3, parentSlug: 'laki-masak', isIndependent: false },
 
-		{ categorySlug: 'platform', title: 'Pekakota', slug: 'pekakota', url: '/platform/pekakota', order: 3, parentSlug: null },
-		{ categorySlug: 'platform', title: 'Bukit Buku', slug: 'bukit-buku', url: '/platform/bukit-buku', order: 4, parentSlug: null },
+		{ categorySlug: 'platform', title: 'Pekakota', slug: 'pekakota', url: '/platform/pekakota', order: 3, parentSlug: null, isIndependent: false },
+		{ categorySlug: 'platform', title: 'Bukit Buku', slug: 'bukit-buku', url: '/platform/bukit-buku', order: 4, parentSlug: null, isIndependent: false },
 
 		// Artikel (category: artikel)
-		{ categorySlug: 'artikel', title: 'Esai', slug: 'esai', url: '/artikel/esai', order: 0, parentSlug: null },
-		{ categorySlug: 'artikel', title: 'Bedah Buku', slug: 'bedah-buku', url: '/artikel/bedah-buku', order: 1, parentSlug: null },
-		{ categorySlug: 'artikel', title: 'Zine', slug: 'zine', url: '/artikel/zine', order: 2, parentSlug: null },
-		{ categorySlug: 'artikel', title: 'Media Partner', slug: 'media-partner', url: '/artikel/media-partner', order: 3, parentSlug: null },
-		{ categorySlug: 'artikel', title: 'Rilisan Buku', slug: 'rilisan-buku', url: '/artikel/rilisan-buku', order: 4, parentSlug: null },
-		{ categorySlug: 'artikel', title: 'Rilisan lainnya', slug: 'rilisan-lainnya', url: '/artikel/rilisan-lainnya', order: 5, parentSlug: null },
+		{ categorySlug: 'artikel', title: 'Esai', slug: 'esai', url: '/artikel/esai', order: 0, parentSlug: null, isIndependent: false },
+		{ categorySlug: 'artikel', title: 'Bedah Buku', slug: 'bedah-buku', url: '/artikel/bedah-buku', order: 1, parentSlug: null, isIndependent: false },
+		{ categorySlug: 'artikel', title: 'Zine', slug: 'zine', url: '/artikel/zine', order: 2, parentSlug: null, isIndependent: false },
+		{ categorySlug: 'artikel', title: 'Media Partner', slug: 'media-partner', url: '/artikel/media-partner', order: 3, parentSlug: null, isIndependent: false },
+		{ categorySlug: 'artikel', title: 'Rilisan Buku', slug: 'rilisan-buku', url: '/artikel/rilisan-buku', order: 4, parentSlug: null, isIndependent: false },
+		{ categorySlug: 'artikel', title: 'Rilisan lainnya', slug: 'rilisan-lainnya', url: '/artikel/rilisan-lainnya', order: 5, parentSlug: null, isIndependent: false },
 	]
 
 	try {
@@ -150,18 +151,18 @@ module.exports = async function seed() {
 				// update
 				const upd = await client.query(
 					`UPDATE "CategoryItem"
-					 SET "title" = $1, "url" = $2, "order" = $3, "isActive" = true, "updatedAt" = now()
-					 WHERE id = $4
+					 SET "title" = $1, "url" = $2, "order" = $3, "isActive" = true, "isIndependent" = $4, "updatedAt" = now()
+					 WHERE id = $5
 					 RETURNING id`,
-					[it.title, it.url, it.order, found.rows[0].id]
+					[it.title, it.url, it.order, it.isIndependent ?? false, found.rows[0].id]
 				)
 				itemMap[`${it.categorySlug}|${it.slug}`] = upd.rows[0].id
 			} else {
 				const ins = await client.query(
-					`INSERT INTO "CategoryItem" ("categoryId", "parentId", "title", "slug", "url", "order", "meta", "isActive", "createdAt", "updatedAt")
-					 VALUES ($1, NULL, $2, $3, $4, $5, NULL, true, now(), now())
+					`INSERT INTO "CategoryItem" ("categoryId", "parentId", "title", "slug", "url", "order", "meta", "isActive", "isIndependent", "createdAt", "updatedAt")
+					 VALUES ($1, NULL, $2, $3, $4, $5, NULL, true, $6, now(), now())
 					 RETURNING id`,
-					[categoryId, it.title, it.slug, it.url, it.order]
+					[categoryId, it.title, it.slug, it.url, it.order, it.isIndependent ?? false]
 				)
 				itemMap[`${it.categorySlug}|${it.slug}`] = ins.rows[0].id
 			}
