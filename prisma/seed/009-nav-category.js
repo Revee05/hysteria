@@ -23,7 +23,7 @@ module.exports = async function seed() {
 		// Program Hysteria (category: program-hysteria)
         // Program Hysteria (category: program-hysteria)
         { categorySlug: 'program-hysteria', title: 'Festival dan Pameran', slug: 'festival-dan-pameran', url: '/program#festival-dan-pameran', order: 0, parentSlug: null },
-            { categorySlug: 'program-hysteria', title: 'Festival Kampung', slug: 'festival-kampung', url: '/program/festival-and-pameran/festival-kampung', order: 0, parentSlug: 'festival-dan-pameran' },
+            { categorySlug: 'program-hysteria', title: 'Festival Kampung', slug: 'festival-kampung', url: '/program/festival-kampung', order: 0, parentSlug: 'festival-dan-pameran' },
                 { categorySlug: 'program-hysteria', title: 'Gebyuran Bustaman', slug: 'gebyuran-bustaman', url: '/program/festival-and-pameran/festival-kampung?kategori=gebyuran-bustaman', order: 0, parentSlug: 'festival-kampung' },
                 { categorySlug: 'program-hysteria', title: 'Nginguk Githok', slug: 'nginguk-githok', url: '/program/festival-and-pameran/festival-kampung?kategori=nginguk-githok', order: 1, parentSlug: 'festival-kampung' },
                 { categorySlug: 'program-hysteria', title: 'Festival Bukit Jatiwayang', slug: 'festival-bukit-jatiwayang', url: '/program/festival-and-pameran/festival-kampung?kategori=festival-bukit-jatiwayang', order: 2, parentSlug: 'festival-kampung' },

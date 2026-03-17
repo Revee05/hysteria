@@ -7,29 +7,36 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
-export default function ProgramHero({ title, subtitle }) {
+// 1. TANGKAP PROPS "heroImage" DARI PAGE.JSX
+export default function ProgramHero({ title, subtitle, heroImage }) {
+  
+  // 2. SIAPKAN FALLBACK (Kalau admin belum upload, pakai gambar default)
+  const displayImage = heroImage || "/image/bg_program.jpeg";
+
   return (
-    <section className={`relative w-full h-[700px] ${poppins.className}`}>
+    // 3. UBAH UKURAN JADI PRESISI 1920x850 (Tanpa h-[700px] lagi)
+    <section className={`relative w-full aspect-square sm:aspect-video md:aspect-[1920/850] flex flex-col justify-end ${poppins.className}`}>
+      
       {/* BACKGROUND IMAGE */}
       <div className="absolute inset-0">
         <Image 
-          src="/image/bg_program.jpeg" // BG disamakan dengan slug lain
-          alt="Background Hysteria Berkelana" 
+          src={displayImage} 
+          alt={title || "Background Hysteria Berkelana"} 
           fill 
           priority 
-          className="object-cover" 
+          className="object-cover object-center" 
           quality={100} 
         />
-        {/* Overlay gelap agar teks lebih terbaca */}
-        <div className="absolute inset-0 bg-black/10"></div>
+        {/* Overlay disamakan biar konsisten sama halaman lain */}
+        <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
       {/* TEXT CONTENT (Kiri Bawah) */}
-      <div className="relative z-10 w-full px-10 lg:px-20 h-full flex flex-col justify-end pb-24 text-white">
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-md tracking-tight uppercase">
+      <div className="relative z-10 w-full px-10 lg:px-20 pb-10 md:pb-14 text-white mt-auto">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-4 drop-shadow-lg tracking-tight uppercase whitespace-pre-line">
           {title}
         </h1>
-        <p className="text-lg md:text-xl max-w-2xl font-medium opacity-95 leading-relaxed drop-shadow-sm">
+        <p className="text-base md:text-lg lg:text-xl max-w-2xl font-medium opacity-95 leading-relaxed drop-shadow-md whitespace-pre-line">
           {subtitle}
         </p>
       </div>

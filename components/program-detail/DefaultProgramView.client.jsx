@@ -29,8 +29,14 @@ const PROGRAM_DATA = {
   'sapa-warga': { title: 'Sapa Warga', desc: 'Dokumentasi video interaksi warga.', categories: [] }
 };
 
-export default function DefaultProgramView({ actualSlug }) {
+// 1. TAMBAHKAN PROPS "heroData" DI SINI
+export default function DefaultProgramView({ actualSlug, heroData }) {
   const data = PROGRAM_DATA[actualSlug];
+
+  // 2. SIAPKAN VARIABEL TAMPILAN HERO (Utamakan dari Admin, kalau kosong pakai default)
+  const displayTitle = heroData?.title || data?.title || "Program";
+  const displayDesc = heroData?.subtitle || data?.desc || "";
+  const displayImage = heroData?.image || "/image/bg_program.jpeg";
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -181,15 +187,28 @@ export default function DefaultProgramView({ actualSlug }) {
 
   return (
     <main className={`min-h-screen bg-white ${poppins.className}`}>
-      {/* HERO SECTION */}
-      <section className="relative w-full h-[700px]">
+      {/* 3. HERO SECTION DENGAN UKURAN 100% PROPORSIONAL GAMBAR */}
+      <section className="relative w-full aspect-square sm:aspect-video md:aspect-[1920/850] flex flex-col justify-end">
         <div className="absolute inset-0">
-          <Image src="/image/bg_program.jpeg" alt="Background Program" fill priority className="object-cover" quality={100} />
-          <div className="absolute inset-0 bg-black/10"></div>
+          <Image 
+            src={displayImage} 
+            alt={displayTitle} 
+            fill 
+            priority 
+            className="object-cover object-center" 
+            quality={100} 
+          />
+          <div className="absolute inset-0 bg-black/40"></div> 
         </div>
-        <div className="relative z-10 w-full px-10 lg:px-20 h-full flex flex-col justify-end pb-24 text-white">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-md tracking-tight uppercase">{data.title}</h1>
-          <p className="text-lg md:text-xl max-w-2xl font-medium opacity-95 leading-relaxed drop-shadow-sm">{data.desc}</p>
+        
+        {/* Padding bawah (pb) dikurangi sedikit biar teks agak turun dan rapi */}
+        <div className="relative z-10 w-full px-10 lg:px-20 pb-10 md:pb-14 text-white mt-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-4 drop-shadow-lg tracking-tight uppercase whitespace-pre-line">
+            {displayTitle}
+          </h1>
+          <p className="text-base md:text-lg lg:text-xl max-w-2xl font-medium opacity-95 leading-relaxed drop-shadow-md whitespace-pre-line">
+            {displayDesc}
+          </p>
         </div>
       </section>
 
