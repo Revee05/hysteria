@@ -114,14 +114,20 @@ export default async function Page({ params }) {
 
   const cardType = selectedSub.cardType || "poster";
   const items = isEventDriven && eventItems ? eventItems : (selectedSub.items || []);
+
+  // Hero data: gunakan hero spesifik sub-kategori bila tersedia, fallback ke hero kategori
+  const heroImageUrl = selectedSub.heroImage || categoryData.image || "/image/ilustrasi-menu.png";
+  const heroTitle = selectedSub.heroTitle || selectedSub.title || categoryData.imageTitle || categoryData.title || platformData.head?.title || "Platform";
+  const heroDescription = selectedSub.heroSubtitle || categoryData.imageSubtitle || categoryData.description || "Explore content";
+
   const isAnitalkPage = subCategory === ANITALK_SLUG;
   return (
     <div className="bg-[#f3f3f3] overflow-x-hidden">
       <main className="font-sans w-full w-[1920px] mx-auto min-h-screen">
         <HeroSection
-          imageUrl={categoryData.image || "/image/ilustrasi-menu.png"}
-          title={selectedSub.title || categoryData.title || platformData.head?.title || "Platform"}
-          description={categoryData.imageSubtitle || categoryData.description || "Explore content"}
+          imageUrl={heroImageUrl}
+          title={heroTitle}
+          description={heroDescription}
         />
 
         {isAnitalkPage ? (

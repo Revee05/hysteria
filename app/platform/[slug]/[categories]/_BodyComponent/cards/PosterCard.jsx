@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function PosterCard({
   imageUrl,
@@ -11,6 +12,7 @@ export default function PosterCard({
   tags,
   badge,
   meta,
+  slug,
 }) {
   const imgSrc = imageUrl || "/image/DummyPoster.webp";
   const isLocal = typeof imgSrc === "string" && imgSrc.startsWith("/");
@@ -29,13 +31,36 @@ export default function PosterCard({
   }, [isOpen]);
 
   const badgeLabel = badge || (tags && tags.length > 0 ? tags[0] : null);
+  // Determine badge visual style with psychological color choices:
+  // - upcoming: blue (trust, calm, future)
+  // - ongoing: green (action, success, go)
+  // - finished: gray (muted, archival)
+  // - fallback (tags/other): pink accent as before
+  const badgeLabelNorm = (badgeLabel || "").toLowerCase();
+  // More translucent backgrounds + keep readable text colors for glassy effect
+  let badgeClass = "bg-white/40 text-pink-500 border-white/25"; /* fallback (glassy) */
+  if (
+    badgeLabelNorm.includes("akan") ||
+    badgeLabelNorm.includes("upcoming") ||
+    (badgeLabelNorm.includes("berlangsung") && badgeLabelNorm.includes("akan"))
+  ) {
+    badgeClass = "bg-blue-100/40 text-blue-700 border-blue-100/40";
+  } else if (badgeLabelNorm.includes("sedang") || badgeLabelNorm.includes("ongoing")) {
+    badgeClass = "bg-green-100/40 text-green-700 border-green-100/40";
+  } else if (
+    badgeLabelNorm.includes("telah") ||
+    badgeLabelNorm.includes("berakhir") ||
+    badgeLabelNorm.includes("finished")
+  ) {
+    badgeClass = "bg-zinc-100/40 text-zinc-700 border-zinc-100/30";
+  }
 
   return (
     <div
       ref={wrapperRef}
       role="button"
       tabIndex={0}
-      className="group relative w-full aspect-[2/3] overflow-hidden rounded-xl cursor-pointer shadow-xl border-1 border-zinc-300"
+      className="group relative w-full aspect-[2/3] overflow-visible rounded-xl cursor-pointer shadow-xl border-1 border-zinc-300"
       onClick={(e) => {
         const tgt = e.target;
         if (tgt && tgt.tagName) {
@@ -75,6 +100,16 @@ export default function PosterCard({
           }`}
           style={{ objectPosition: "center center" }}
         />
+        
+
+        {/* Badge — left-edge label that slightly overlaps the card */}
+        {badgeLabel && (
+          <div className="absolute top-1   left-0 z-30 transform -translate-x-3">
+            <span className={`border ${badgeClass} backdrop-blur-sm md:backdrop-blur-md text-[9px] md:text-[11px] font-semibold px-3 py-0.5 rounded-r-full shadow-sm whitespace-nowrap`}>
+              {badgeLabel}
+            </span>
+          </div>
+        )}
 
         {/* Hover overlay */}
         <div
@@ -85,15 +120,6 @@ export default function PosterCard({
               : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto")
           }
         >
-          {/* Badge — top-left, white background with pink border */}
-          {badgeLabel && (
-            <div className="absolute top-3 left-3 z-30">
-              <span className="bg-white text-pink-500 border border-pink-400 text-[9px] md:text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm whitespace-nowrap">
-                {badgeLabel}
-              </span>
-            </div>
-          )}
-
           {/* Bottom white info panel */}
           <div className="absolute left-0 right-0 bottom-0 z-30 bg-transparent px-3 pt-3 pb-3 space-y-3">
             {title && (
@@ -106,9 +132,19 @@ export default function PosterCard({
                 {meta}
               </p>
             )}
-            <button className="mt-2 w-full bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[9px] md:text-xs font-semibold py-1.5 rounded-md cursor-pointer">
-              Lihat Sekarang
-            </button>
+            {slug ? (
+              <Link
+                href={`/event/${slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-2 w-full block bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[9px] md:text-xs font-semibold py-1.5 rounded-md cursor-pointer text-center"
+              >
+                Lihat Detail
+              </Link>
+            ) : (
+              <button className="mt-2 w-full bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[9px] md:text-xs font-semibold py-1.5 rounded-md cursor-pointer">
+                Lihat Detail
+              </button>
+            )}
           </div>
         </div>
       </div>

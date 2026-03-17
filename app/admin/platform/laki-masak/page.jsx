@@ -51,8 +51,28 @@ export default function LakiMasakPage() {
   const debouncedSearch = useDebounce(searchQuery);
   const router = useRouter();
 
-  const handleEdit = (row) => console.log("Edit:", row);
-  const handleDelete = (row) => console.log("Delete:", row);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleEdit = useCallback((row) => {
+    router.push(`/admin/events/${row.id}/edit`);
+  }, [router]);
+
+  const handleDelete = useCallback(async (row) => {
+    const confirmed = window.confirm(
+      `Yakin ingin menghapus event "${row.title}"? Tindakan ini tidak dapat dibatalkan.`
+    );
+    if (!confirmed) return;
+    try {
+      setDeletingId(row.id);
+      const res = await fetch(`/api/admin/events/${row.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus event');
+      setRows((prev) => prev.filter((e) => e.id !== row.id));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
 
   // ── fetch event meramu dari API (cursor-based pagination) ──────────────────
   const [nextCursor, setNextCursor] = useState(null);
@@ -180,7 +200,7 @@ export default function LakiMasakPage() {
 
   const columns = useMemo(
     () => buildEventColumns({ onEdit: handleEdit, onDelete: handleDelete }),
-    [],
+    [handleEdit, handleDelete],
   );
 
   return (

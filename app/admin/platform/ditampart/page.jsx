@@ -89,8 +89,28 @@ export default function DitampartPage() {
   }, [nextCursor, loading, debouncedSearch, statusFilter, perPage]);
 
   // ── handlers ──────────────────────────────────────────────────────────────
-  const handleEdit = (row) => console.log("Edit:", row);
-  const handleDelete = (row) => console.log("Delete:", row);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleEdit = useCallback((row) => {
+    router.push(`/admin/events/${row.id}/edit`);
+  }, [router]);
+
+  const handleDelete = useCallback(async (row) => {
+    const confirmed = window.confirm(
+      `Yakin ingin menghapus event "${row.title}"? Tindakan ini tidak dapat dibatalkan.`
+    );
+    if (!confirmed) return;
+    try {
+      setDeletingId(row.id);
+      const res = await fetch(`/api/admin/events/${row.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus event');
+      setRows((prev) => prev.filter((e) => e.id !== row.id));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
 
   const endpointMap = {
     1: "/api/admin/platform-content/ditampart/3d",
@@ -169,7 +189,7 @@ export default function DitampartPage() {
   // ── columns (memoised agar referensi stabil) ──────────────────────────────
   const columns = useMemo(
     () => buildEventColumns({ onEdit: handleEdit, onDelete: handleDelete }),
-    [],
+    [handleEdit, handleDelete],
   );
 
   return (

@@ -23,7 +23,7 @@ import { buildEventColumns } from '../_handler/TablePlatformColom';
 
 // Hanya kategori yang relevan untuk tabel event artlab
 const artlabEventCategoryOptions = [
-  { id: 'workshop-artlab', name: 'Workshop Artlab' },
+  { id: 'workshop', name: 'Workshop Artlab' },
   { id: 'screening-film',  name: 'Screening Film' },
   { id: 'untuk-perhatian', name: 'Untuk Perhatian' },
   { id: 'stonen-29-radio-show', name: 'Stonen 29 Radio Show' },

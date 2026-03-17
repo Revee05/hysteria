@@ -276,12 +276,31 @@ export async function getPublicCategory(platformSlug, categorySlug) {
         items = (sub.platformContents || []).map((c) => mapToCarouselItem(cardType, c));
       }
 
+      // Resolve hero image untuk sub-kategori ini.
+      // Strategi: exact match → normalized exact → semua bagian key ada di slug sub.
+      // Contoh: key "hero-stonen-radio" cocok dengan slug "stonen-29-radio-show"
+      // karena "stonen" dan "radio" keduanya ada di slug tersebut.
+      const subSlug = sub.slug || "";
+      const normalizedSubSlug = subSlug.replace(/-dan-/g, "-");
+      const subHeroImage =
+        heroImages.find((img) => img.key === `hero-${subSlug}`) ||
+        heroImages.find((img) => img.key === `hero-${normalizedSubSlug}`) ||
+        heroImages.find((img) => {
+          if (!img.key) return false;
+          const parts = img.key.replace("hero-", "").split("-").filter(Boolean);
+          return parts.length > 0 && parts.every((part) => subSlug.includes(part));
+        }) ||
+        null;
+
       return {
         title: sub.title,
         slug: sub.slug,
         linkUrl: sub.url || null,
         cardType,
         items,
+        heroImage: subHeroImage?.imageUrl || null,
+        heroTitle: subHeroImage?.title || null,
+        heroSubtitle: subHeroImage?.subtitle || null,
       };
     })
   );
@@ -356,14 +375,21 @@ export async function getPublicEventItems(categorySlug) {
   const events = await findPublicEventsByCategorySlug(categorySlug);
   return events.map((event) => {
     const status = getEventStatus(event.startAt, event.endAt);
+    // Derive sub-category tag: the eventCategories slug that is NOT the parent categorySlug
+    const subCategorySlug =
+      (event.eventCategories || [])
+        .map((ec) => ec.categoryItem?.slug)
+        .find((s) => s && s !== categorySlug) ?? null;
     return {
       id: event.id,
+      slug: event.slug,
       imageUrl: event.poster ?? null,
       alt: event.title,
       title: event.title,
       description: event.description ?? null,
       badge: EVENT_STATUS_LABEL[status] ?? null,
       meta: formatIndonesianDate(event.startAt),
+      tag: subCategorySlug,
       tags: (event.tags || []).map((t) => t.tag?.name).filter(Boolean),
     };
   });
@@ -381,6 +407,7 @@ export async function getPublicEventItemsByOrganizer(organizerSlug) {
     const status = getEventStatus(event.startAt, event.endAt);
     return {
       id: event.id,
+      slug: event.slug,
       imageUrl: event.poster ?? null,
       alt: event.title,
       title: event.title,

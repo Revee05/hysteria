@@ -178,6 +178,7 @@ function CardSwitch({ cardType, item, platformSlug = null, categorySlug = null, 
       tags={item.tags || (item.badge ? [item.badge] : [])}
       meta={item.meta}
       badge={item.badge}
+      slug={item.slug}
     />
   );
 }

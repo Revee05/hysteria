@@ -347,7 +347,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
         : new Date(`${form.startDate}T${form.startTime}`).toISOString(),
 
       endAt: form.isFlexibleTime
-        ? null
+        ? (form.endDate ? new Date(`${form.endDate}T23:59:59`).toISOString() : null)
         : form.endDate && form.endTime
           ? new Date(`${form.endDate}T${form.endTime}`).toISOString()
           : null,

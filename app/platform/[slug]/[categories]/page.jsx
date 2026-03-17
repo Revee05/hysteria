@@ -21,6 +21,12 @@ const EVENT_DRIVEN_CATEGORIES = {
   "event-ditampart":  { type: "organizer", slug: "ditampart" },
 };
 
+// Filter tag statis per kategori (untuk event-driven category yang tidak punya filters dari DB).
+const CATEGORY_FILTERS = {
+  "workshop":       ["having-fun-artlab", "peltoe"],
+  "screening-film": ["making-artist", "usil"],
+};
+
 export async function generateMetadata({ params }) {
   const { slug, categories } = (await params) || {};
   if (!slug) return {};
@@ -87,6 +93,9 @@ export default async function Page({ params }) {
   if (!platform || !item) return notFound();
 
   const resolvedItems = (eventDriven && eventItems) ? eventItems : (item.items || []);
+  const resolvedFilters = (eventDriven && (categories === "untuk-perhatian" || categories === "event-ditampart" || categories === "workshop" || categories === "meramu"))
+    ? []
+    : (CATEGORY_FILTERS[categories] || item.filters || []);
 
   // Determine layout — default to 'grid' when not specified
   const layout = item.layout || "grid";
@@ -107,11 +116,11 @@ export default async function Page({ params }) {
         ) : (
           <GridBody
             items={resolvedItems}
-            filters={item.filters || []}
+            filters={resolvedFilters}
             cardType={item.cardType || "poster"}
-            showFilterIcon={categories !== 'event-ditampart'}
-            itemsPerPageOverride={categories === 'event-ditampart' ? 18 : undefined}
-            gridCols={categories === 'event-ditampart' ? 6 : undefined}
+            showFilterIcon={categories !== 'event-ditampart' && categories !== 'untuk-perhatian'}
+            itemsPerPageOverride={categories === 'event-ditampart' || categories === 'untuk-perhatian' ? 18 : undefined}
+            gridCols={categories === 'event-ditampart' || categories === 'untuk-perhatian' ? 6 : undefined}
           />
         )}
       </main>

@@ -200,6 +200,9 @@ export async function findPublicEventsByCategorySlug(categorySlug) {
       tags: {
         include: { tag: { select: { id: true, name: true } } },
       },
+      eventCategories: {
+        select: { categoryItem: { select: { slug: true } } },
+      },
     },
   });
 }
