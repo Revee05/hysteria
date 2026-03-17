@@ -324,7 +324,7 @@ export default function PageArtlab() {
               onSubmit={handleSaveMain}
               submitting={mainSaving}
               maxSizeMB={MAX_SIZE_MB}
-              mainImageLabel="ukuran 500x516 px, - format file .webp"
+              mainImageLabel="ukuran ratio 3:4, - format file .webp"
             />
           </div>
         ) : (

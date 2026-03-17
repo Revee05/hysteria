@@ -203,7 +203,7 @@ export default function StatusManagement() {
         <div className="flex justify-end gap-2">
           <PermissionGate requiredPermissions={"status.update"}>
             <button 
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" 
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer" 
               onClick={() => {
                 onClose();
                 openEditModal(row);
@@ -212,7 +212,7 @@ export default function StatusManagement() {
               Edit
             </button>
           </PermissionGate>
-          <button className="px-3 py-1 text-sm" onClick={onClose}>Close</button>
+          <button className="px-3 py-1 text-sm border border-red-500 text-red-500 rounded hover:bg-red-500 hover:text-white cursor-pointer" onClick={onClose}>Close</button>
         </div>
       ),
       size: 'md',
@@ -291,7 +291,7 @@ export default function StatusManagement() {
 
   return (
     <PermissionGate requiredPermissions={["status.get"]}>
-      <div className="mx-0 md:mx-2 p-6 bg-white rounded-lg shadow-lg max-w-screen-lg mx-auto min-h-screen">
+      <div className="mx-auto w-full max-w-4xl p-6 bg-white rounded-lg shadow-lg min-h-screen">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-zinc-900">User Status Management</h1>
           <p className="text-sm text-zinc-600 mt-1">Manage available user statuses for the system</p>

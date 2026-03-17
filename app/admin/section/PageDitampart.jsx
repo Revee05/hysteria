@@ -339,7 +339,7 @@ export default function PageDitampart() {
               onSubmit={handleSaveMain}
               submitting={mainSaving}
               maxSizeMB={MAX_SIZE_MB}
-              mainImageLabel="ukuran 480x600 px, - format file .webp"
+              mainImageLabel="ukuran ratio 3:4, - format file .webp"
             />
           </div>
         ) : (

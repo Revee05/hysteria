@@ -24,7 +24,7 @@ import ArtistCard from "./cards/ArtistCard";
  * Props:
  *   subCategories : Array<{ title, slug?, linkUrl?, items: Array<{ src, alt, title, subtitle }> }>
  */
-export default function CarouselBody({ subCategories = [] }) {
+export default function CarouselBody({ subCategories = [], platformSlug = null, categorySlug = null }) {
   if (!subCategories.length) {
     return (
       <div className="py-20 text-center text-zinc-400">
@@ -36,7 +36,7 @@ export default function CarouselBody({ subCategories = [] }) {
   return (
     <div className="w-full pb-16">
       {subCategories.map((sub, idx) => (
-        <SubCategoryRow key={sub.slug || idx} {...sub} />
+        <SubCategoryRow key={sub.slug || idx} {...sub} platformSlug={platformSlug} categorySlug={categorySlug} />
       ))}
     </div>
   );
@@ -44,7 +44,7 @@ export default function CarouselBody({ subCategories = [] }) {
 
 /* ---------- internal: one horizontal row per sub-category ---------- */
 
-function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster" }) {
+function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster", platformSlug = null, categorySlug = null, slug: subSlug = null }) {
   const scrollRef = useRef(null);
 
   const scroll = (dir) => {
@@ -106,7 +106,7 @@ function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster" }) {
         >
           {displayedItems.map((item, i) => (
             <div key={i} className={`flex-none ${cardWidth} snap-start`}>
-              <CardSwitch cardType={cardType} item={item} />
+              <CardSwitch cardType={cardType} item={item} platformSlug={platformSlug} categorySlug={categorySlug} subSlug={subSlug} />
             </div>
           ))}
         </div>
@@ -131,7 +131,7 @@ function SubCategoryRow({ title, linkUrl, items = [], cardType = "poster" }) {
 
 /* ---------- Card switcher ---------- */
 
-function CardSwitch({ cardType, item }) {
+function CardSwitch({ cardType, item, platformSlug = null, categorySlug = null, subSlug = null }) {
   if (cardType === "video") {
     return (
       <VideoCard
@@ -149,6 +149,10 @@ function CardSwitch({ cardType, item }) {
   }
 
   if (cardType === "artist") {
+    // prefer internal detail route when id available
+    const href = item.id && platformSlug && categorySlug && subSlug
+      ? `/platform/${platformSlug}/${categorySlug}/${subSlug}/${item.id}`
+      : item.url || undefined;
     return (
       <ArtistCard
         imageUrl={item.imageUrl || item.src}
@@ -157,6 +161,7 @@ function CardSwitch({ cardType, item }) {
         prevdescription={item.prevdescription}
         host={item.host}
         guests={item.guests}
+        href={href}
         url={item.url}
         tags={item.tags}
       />
@@ -172,6 +177,8 @@ function CardSwitch({ cardType, item }) {
       description={item.description || item.subtitle}
       tags={item.tags || (item.badge ? [item.badge] : [])}
       meta={item.meta}
+      badge={item.badge}
+      slug={item.slug}
     />
   );
 }

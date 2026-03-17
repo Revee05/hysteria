@@ -1,70 +1,78 @@
 "use client";
 
-import { useState, useRef, useEffect, use } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
-/**
- * PosterCard — kartu vertikal 2:3
- * Default: poster full cover tanpa overlay
- * Hover: blur + badge + info + tombol CTA
- *
- * Props:
- *   src      : string
- *   alt      : string
- *   title    : string
- *   subtitle : string
- *   badge    : string  — teks badge (e.g. "Akan Berlangsung", "Telah Berakhir")
- *   meta     : string  — info kecil (e.g. tanggal)
- */
-export default function PosterCard({ imageUrl, alt, title, description, tags, meta }) {
+export default function PosterCard({
+  imageUrl,
+  alt,
+  title,
+  description,
+  tags,
+  badge,
+  meta,
+  slug,
+}) {
   const imgSrc = imageUrl || "/image/DummyPoster.webp";
   const isLocal = typeof imgSrc === "string" && imgSrc.startsWith("/");
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
   const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    // avoid calling setState synchronously inside effect to prevent cascading renders
-    const id = setTimeout(() => setIsTouch(touch), 0);
-    return () => clearTimeout(id);
-  }, []);
-
-  // close overlay when clicking/tapping outside
   useEffect(() => {
     if (!isOpen) return;
     function onDoc(e) {
       if (!wrapperRef.current) return;
-      if (!wrapperRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
+      if (!wrapperRef.current.contains(e.target)) setIsOpen(false);
     }
-
     document.addEventListener("pointerdown", onDoc);
     return () => document.removeEventListener("pointerdown", onDoc);
   }, [isOpen]);
 
-  // CTA text: show "Ikuti Sekarang" when badge indicates upcoming or live,
-  // otherwise show "Detail". Comparison is case-insensitive.
-  const badgeText = typeof badge === "string" ? badge.toLowerCase() : "";
-  const isLiveOrUpcoming =
-    badgeText === "akan dilaksanakan" || badgeText === "sedang berlangsung";
-  const ctaText = isLiveOrUpcoming ? "Ikuti Sekarang" : "Detail";
+  const badgeLabel = badge || (tags && tags.length > 0 ? tags[0] : null);
+  // Determine badge visual style with psychological color choices:
+  // - upcoming: blue (trust, calm, future)
+  // - ongoing: green (action, success, go)
+  // - finished: gray (muted, archival)
+  // - fallback (tags/other): pink accent as before
+  const badgeLabelNorm = (badgeLabel || "").toLowerCase();
+  // More translucent backgrounds + keep readable text colors for glassy effect
+  let badgeClass = "bg-white/40 text-pink-500 border-white/25"; /* fallback (glassy) */
+  if (
+    badgeLabelNorm.includes("akan") ||
+    badgeLabelNorm.includes("upcoming") ||
+    (badgeLabelNorm.includes("berlangsung") && badgeLabelNorm.includes("akan"))
+  ) {
+    badgeClass = "bg-blue-100/40 text-blue-700 border-blue-100/40";
+  } else if (badgeLabelNorm.includes("sedang") || badgeLabelNorm.includes("ongoing")) {
+    badgeClass = "bg-green-100/40 text-green-700 border-green-100/40";
+  } else if (
+    badgeLabelNorm.includes("telah") ||
+    badgeLabelNorm.includes("berakhir") ||
+    badgeLabelNorm.includes("finished")
+  ) {
+    badgeClass = "bg-zinc-100/40 text-zinc-700 border-zinc-100/30";
+  }
 
   return (
     <div
       ref={wrapperRef}
       role="button"
       tabIndex={0}
-      className="group relative w-full aspect-[2/3] overflow-hidden rounded-xl cursor-pointer"
+      className="group relative w-full aspect-[2/3] overflow-visible rounded-xl cursor-pointer shadow-xl border-1 border-zinc-300"
       onClick={(e) => {
-        // avoid toggling when clicking interactive elements
         const tgt = e.target;
         if (tgt && tgt.tagName) {
           const tag = tgt.tagName.toUpperCase();
-          const interactive = ["A", "BUTTON", "INPUT", "SELECT", "TEXTAREA", "LABEL"]; 
+          const interactive = [
+            "A",
+            "BUTTON",
+            "INPUT",
+            "SELECT",
+            "TEXTAREA",
+            "LABEL",
+          ];
           if (interactive.includes(tag)) return;
         }
         setIsOpen((s) => !s);
@@ -76,8 +84,8 @@ export default function PosterCard({ imageUrl, alt, title, description, tags, me
         }
       }}
     >
-      {/* Cover image wrapper (absolute) — also rounded & overflow-hidden to avoid 1px gap */}
-      <div className="absolute inset-0 rounded-xl overflow-hidden">
+      <div className="absolute inset-0 rounded-lg overflow-hidden">
+        {/* Image — blurs and scales on hover */}
         <Image
           src={imgSrc}
           alt={alt || title || "Poster"}
@@ -85,55 +93,58 @@ export default function PosterCard({ imageUrl, alt, title, description, tags, me
           unoptimized={!isLocal}
           priority={true}
           sizes="(max-width:640px) 50vw, 260px"
-          className="object-cover block group-hover:scale-110"
-          style={{ objectPosition: "center center", willChange: "transform" }}
+          className={`object-cover block transition-all duration-300 ${
+            isOpen
+              ? "scale-105 blur-xl brightness-50"
+              : "group-hover:scale-105 group-hover:blur-xl group-hover:brightness-50 border border-zinc-300"
+          }`}
+          style={{ objectPosition: "center center" }}
         />
+        
 
-        {/* Hover overlay: badge top-left + metadata box bottom (above dim layer) */}
+        {/* Badge — left-edge label that slightly overlaps the card */}
+        {badgeLabel && (
+          <div className="absolute top-1   left-0 z-30 transform -translate-x-3">
+            <span className={`border ${badgeClass} backdrop-blur-sm md:backdrop-blur-md text-[9px] md:text-[11px] font-semibold px-3 py-0.5 rounded-r-full shadow-sm whitespace-nowrap`}>
+              {badgeLabel}
+            </span>
+          </div>
+        )}
+
+        {/* Hover overlay */}
         <div
           className={
-            "absolute inset-0 bg-black/40 z-10 transition-opacity duration-200 " +
+            "absolute inset-0 z-10 transition-opacity duration-200 " +
             (isOpen
               ? "opacity-100 pointer-events-auto"
               : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto")
           }
         >
-          {/* Badge positioned near top-left inside overlay (first tag) */}
-          {(tags && tags.length > 0) && (
-            <div className="absolute top-3 left-3 z-30 pointer-events-auto">
-              <span className="bg-pink-500 text-white text-[10px] md:text-md font-semibold px-3 py-1 rounded-full shadow">
-                {tags[0]}
-              </span>
-            </div>
-          )}
-
-          {/* Bottom metadata container */}
-          <div className="absolute left-4 right-4 bottom-4 z-30 pointer-events-auto">
-            <div className="bg-transparent py-3">
-              {/* Title */}
-              {title && (
-                <h3 className="text-white text-xs md:text-base font-bold leading-tight drop-shadow-md">
-                  {title}
-                </h3>
-              )}
-
-              {/* Description */}
-              {description && (
-                <p className="text-white/80 text-xs md:text-base leading-tight mt-1 drop-shadow-md">
-                  {description}
-                </p>
-              )}
-
-              {/* Meta (e.g. tanggal) */}
-              {meta && <p className="text-white/90 text-[11px] mt-1">{meta}</p>}
-
-              {/* CTA button */}
-              <div className="mt-3 flex justify-center">
-                <span className="z-1000 inline-block bg-gradient-to-r from-pink-500 to-orange-400 text-white text-xs font-semibold px-4 py-2 rounded-lg">
-                  {ctaText}
-                </span>
-              </div>
-            </div>
+          {/* Bottom white info panel */}
+          <div className="absolute left-0 right-0 bottom-0 z-30 bg-transparent px-3 pt-3 pb-3 space-y-3">
+            {title && (
+              <h3 className="text-zinc-100 text-[12px] md:text-base font-semibold leading-snug line-clamp-2">
+                {title}
+              </h3>
+            )}
+            {meta && (
+              <p className="text-zinc-100 text-[9px] md:text-xs mt-1 line-clamp-2">
+                {meta}
+              </p>
+            )}
+            {slug ? (
+              <Link
+                href={`/event/${slug}`}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-2 w-full block bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[9px] md:text-xs font-semibold py-1.5 rounded-md cursor-pointer text-center"
+              >
+                Lihat Detail
+              </Link>
+            ) : (
+              <button className="mt-2 w-full bg-gradient-to-r from-pink-500 to-orange-400 text-white text-[9px] md:text-xs font-semibold py-1.5 rounded-md cursor-pointer">
+                Lihat Detail
+              </button>
+            )}
           </div>
         </div>
       </div>

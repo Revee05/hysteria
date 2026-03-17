@@ -85,7 +85,7 @@ export default function HeadSection({
                   : 'max-w-[70%] sm:max-w-[360px]'}
                 `}
             >
-              <div className="relative w-full overflow-hidden rounded-lg aspect-[500/516]">
+              <div className="relative w-full overflow-hidden rounded-lg aspect-[3/4]">
                 <Image
                   src={images[0].src}
                   alt={images[0].alt}
@@ -128,9 +128,9 @@ export default function HeadSection({
 
                 return (
                   <div key={index} className={wrapperClass}>
-                    <div
-                      className={`relative w-full overflow-hidden rounded-lg ${
-                        multyImages ? 'aspect-[480/600]' : 'aspect-[500/516]'
+                      <div
+                        className={`relative w-full overflow-hidden rounded-lg ${
+                        multyImages ? 'aspect-[3/4]' : 'aspect-[500/516]'
                       }`}
                     >
                       <Image

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function EventTable() {
@@ -94,10 +95,13 @@ export default function EventTable() {
               >
                 <td className="px-4 py-3">
                   {event.poster ? (
-                    <img
+                    <Image
                       src={event.poster}
                       alt={event.title}
-                      className="w-16 h-16 object-cover rounded"
+                      width={64}
+                      height={64}
+                      className="object-cover rounded"
+                      style={{ width: "4rem", height: "4rem" }}
                     />
                   ) : (
                     <div className="w-16 h-16 flex items-center justify-center border border-black text-xs text-black">

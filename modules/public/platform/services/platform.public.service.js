@@ -12,25 +12,11 @@ import {
   findCarouselSubCategories,
   findContentById,
   findRelatedContents,
+  findPublicEventsByCategorySlug,
+  findPublicEventsByOrganizerSlug,
 } from "../repositories/platform.public.repository.js";
-
-// ─── DUMMY DATA (sementara) ───────────────────────────────────────────────────
-
-/** TODO: hapus setelah Stonen 29 Radio Show tersedia di DB */
-const STONEN_DUMMY_ITEMS = [
-  { imageUrl: "/image/bakso_bakar.webp", alt: "Episode 1",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Akan Berlangsung"],   meta: "Sabtu, 8 Maret 2026" },
-  { imageUrl: "/image/artist.webp",      alt: "Episode 2",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Sedang Berlangsung"], meta: "Sabtu, 15 Maret 2026" },
-  { imageUrl: "/image/DummyPoster.webp", alt: "Episode 3",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Telah Berakhir"],     meta: "Sabtu, 22 Maret 2026" },
-  { imageUrl: "/image/bakso_malang.jpg", alt: "Episode 4",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Akan Berlangsung"],   meta: "Sabtu, 8 Maret 2026" },
-  { imageUrl: "/image/DummyPoster.webp", alt: "Episode 5",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Sedang Berlangsung"], meta: "Sabtu, 15 Maret 2026" },
-  { imageUrl: "/image/artist.webp",      alt: "Episode 6",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Telah Berakhir"],     meta: "Sabtu, 22 Maret 2026" },
-  { imageUrl: "/image/DummyPoster.webp", alt: "Episode 7",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Akan Berlangsung"],   meta: "Sabtu, 8 Maret 2026" },
-  { imageUrl: "/image/bakso_malang.jpg", alt: "Episode 8",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Sedang Berlangsung"], meta: "Sabtu, 15 Maret 2026" },
-  { imageUrl: "/image/DummyPoster.webp", alt: "Episode 9",  title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Telah Berakhir"],     meta: "Sabtu, 22 Maret 2026" },
-  { imageUrl: "/image/artist.webp",      alt: "Episode 10", title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Akan Berlangsung"],   meta: "Sabtu, 8 Maret 2026" },
-  { imageUrl: "/image/DummyPoster.webp", alt: "Episode 11", title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Sedang Berlangsung"], meta: "Sabtu, 15 Maret 2026" },
-  { imageUrl: "/image/bakso_malang.jpg", alt: "Episode 12", title: "Di Korea Mung Pindah Turu Tok! ~Buah Tangan dari Korsel~", tags: ["Telah Berakhir"],     meta: "Sabtu, 22 Maret 2026" },
-];
+import { getEventStatus, EVENT_STATUS_LABEL } from "@/lib/event-status.js";
+// import { getEventStatus, EVENT_STATUS_LABEL } from "../../../lib/event-status.js";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -64,7 +50,7 @@ function mapToGridItem(content) {
     tags: content.tags || [],
     year: content.year ? String(content.year) : null,
     meta: content.meta ?? (content.year ? String(content.year) : null),
-    href: content.url ?? null,
+    badge: content.badge ?? (Array.isArray(content.tags) && content.tags.length ? content.tags[0] : null),
     url: content.url || content.youtube || null,
   };
 }
@@ -80,6 +66,7 @@ function mapToCarouselItem(cardType, content) {
     prevdescription: content.prevdescription ?? null,
     description: content.description ?? null,
     tags: content.tags || [],
+    badge: content.badge ?? (Array.isArray(content.tags) && content.tags.length ? content.tags[0] : null),
     url: content.url ?? null,
   };
 
@@ -91,6 +78,19 @@ function mapToCarouselItem(cardType, content) {
   }
   // poster (default)
   return { ...base, meta: content.meta ?? (content.year ? String(content.year) : null) };
+}
+
+/**
+ * Format tanggal ke format Indonesia: "Senin, 1 Januari 2026".
+ */
+function formatIndonesianDate(date) {
+  if (!date) return null;
+  return new Date(date).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 // ─── PUBLIC API ───────────────────────────────────────────────────────────────
@@ -254,21 +254,56 @@ export async function getPublicCategory(platformSlug, categorySlug) {
     };
   }
 
-  const subCategories = subs.map((sub) => {
-    if (sub.slug === "stonen-29-radio-show") {
-      return { title: sub.title, slug: sub.slug, linkUrl: sub.url || null, cardType: "poster", items: STONEN_DUMMY_ITEMS };
-    }
+  // Sub-kategori yang datanya bersumber dari model Event (bukan PlatformContent)
+  const EVENT_DRIVEN_SUBCATEGORY_SLUGS = new Set([
+    "stonen-29-radio-show",
+    "workshop-artlab",
+    "screening-film",
+    "untuk-perhatian",
+  ]);
 
-    // Ambil cardType dari meta PlatformContent pertama (bukan dari CategoryItem.meta)
-    const cardType = resolveCardType(sub.platformContents?.[0]?.meta);
-    return {
-      title: sub.title,
-      slug: sub.slug,
-      linkUrl: sub.url || null,
-      cardType,
-      items: (sub.platformContents || []).map((c) => mapToCarouselItem(cardType, c)),
-    };
-  });
+  const subCategories = await Promise.all(
+    subs.map(async (sub) => {
+      // Ambil cardType dari meta CategoryItem, fallback ke meta PlatformContent pertama
+      const cardType = resolveCardType(sub.meta) !== "poster"
+        ? resolveCardType(sub.meta)
+        : resolveCardType(sub.platformContents?.[0]?.meta);
+
+      let items;
+      if (EVENT_DRIVEN_SUBCATEGORY_SLUGS.has(sub.slug)) {
+        items = await getPublicEventItems(sub.slug);
+      } else {
+        items = (sub.platformContents || []).map((c) => mapToCarouselItem(cardType, c));
+      }
+
+      // Resolve hero image untuk sub-kategori ini.
+      // Strategi: exact match → normalized exact → semua bagian key ada di slug sub.
+      // Contoh: key "hero-stonen-radio" cocok dengan slug "stonen-29-radio-show"
+      // karena "stonen" dan "radio" keduanya ada di slug tersebut.
+      const subSlug = sub.slug || "";
+      const normalizedSubSlug = subSlug.replace(/-dan-/g, "-");
+      const subHeroImage =
+        heroImages.find((img) => img.key === `hero-${subSlug}`) ||
+        heroImages.find((img) => img.key === `hero-${normalizedSubSlug}`) ||
+        heroImages.find((img) => {
+          if (!img.key) return false;
+          const parts = img.key.replace("hero-", "").split("-").filter(Boolean);
+          return parts.length > 0 && parts.every((part) => subSlug.includes(part));
+        }) ||
+        null;
+
+      return {
+        title: sub.title,
+        slug: sub.slug,
+        linkUrl: sub.url || null,
+        cardType,
+        items,
+        heroImage: subHeroImage?.imageUrl || null,
+        heroTitle: subHeroImage?.title || null,
+        heroSubtitle: subHeroImage?.subtitle || null,
+      };
+    })
+  );
 
   return { ...base, filters: [], items: [], subCategories };
 }
@@ -328,4 +363,58 @@ export async function getPublicContentItem(id) {
     item: mapItem({ ...content, images: content.images }),
     related: related.map(mapItem),
   };
+}
+
+/**
+ * Mengambil event publik untuk sebuah sub-kategori yang datanya bersumber dari
+ * model Event (bukan PlatformContent). Contoh: stonen-29-radio-show.
+ *
+ * Returns: Array item siap pakai untuk GenericSubCategorySection / PosterCard.
+ */
+export async function getPublicEventItems(categorySlug) {
+  const events = await findPublicEventsByCategorySlug(categorySlug);
+  return events.map((event) => {
+    const status = getEventStatus(event.startAt, event.endAt);
+    // Derive sub-category tag: the eventCategories slug that is NOT the parent categorySlug
+    const subCategorySlug =
+      (event.eventCategories || [])
+        .map((ec) => ec.categoryItem?.slug)
+        .find((s) => s && s !== categorySlug) ?? null;
+    return {
+      id: event.id,
+      slug: event.slug,
+      imageUrl: event.poster ?? null,
+      alt: event.title,
+      title: event.title,
+      description: event.description ?? null,
+      badge: EVENT_STATUS_LABEL[status] ?? null,
+      meta: formatIndonesianDate(event.startAt),
+      tag: subCategorySlug,
+      tags: (event.tags || []).map((t) => t.tag?.name).filter(Boolean),
+    };
+  });
+}
+
+/**
+ * Mengambil event publik untuk kategori yang datanya bersumber dari organizer
+ * (contoh: event-ditampart → organizer slug "ditampart").
+ *
+ * Returns: Array item siap pakai untuk GridBody / PosterCard.
+ */
+export async function getPublicEventItemsByOrganizer(organizerSlug) {
+  const events = await findPublicEventsByOrganizerSlug(organizerSlug);
+  return events.map((event) => {
+    const status = getEventStatus(event.startAt, event.endAt);
+    return {
+      id: event.id,
+      slug: event.slug,
+      imageUrl: event.poster ?? null,
+      alt: event.title,
+      title: event.title,
+      description: event.description ?? null,
+      badge: EVENT_STATUS_LABEL[status] ?? null,
+      meta: formatIndonesianDate(event.startAt),
+      tags: (event.tags || []).map((t) => t.tag?.name).filter(Boolean),
+    };
+  });
 }

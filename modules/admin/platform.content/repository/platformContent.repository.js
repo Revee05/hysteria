@@ -12,9 +12,6 @@ const CONTENT_INCLUDE = {
   categoryItem: { select: { id: true, title: true, slug: true, url: true } },
 };
 
-/** Minimal include/select: bentuk respons ringkas untuk daftar (hilangkan createdAt/updatedAt).
- * Menggunakan `select` supaya field seperti `createdAt`/`updatedAt` tidak dikembalikan.
- */
 const MINIMAL_SELECT = {
   id: true,
   platformId: true,
