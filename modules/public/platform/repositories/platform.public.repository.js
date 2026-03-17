@@ -27,7 +27,6 @@ const PLATFORM_SELECT = {
     where: { isActive: true },
     orderBy: [{ order: "asc" }, { id: "asc" }],
     select: {
-      id: true,
       layout: true,
     //   description: true,
     //   filters: true,
@@ -47,7 +46,6 @@ const CONTENT_SELECT = {
   description: true,
   url: true,
   youtube: true,
-  instagram: true,
   host: true,
   guests: true,
   year: true,
@@ -71,9 +69,7 @@ export async function findActivePlatformsWithCategories() {
     where: { isActive: true },
     orderBy: { id: "asc" },
     select: {
-      id: true,
       slug: true,
-      name: true,
       headline: true,
       subHeadline: true,
       categories: {
@@ -81,7 +77,6 @@ export async function findActivePlatformsWithCategories() {
         orderBy: [{ order: "asc" }, { id: "asc" }],
         select: {
           order: true,
-          isActive: true,
           categoryItem: {
             select: { id: true, title: true, slug: true, url: true },
           },
@@ -124,6 +119,7 @@ export async function findContentById(id) {
     where: { id: Number(id), isActive: true },
     select: {
       ...CONTENT_SELECT,
+      instagram: true,
       categoryItem: {
         select: { id: true, title: true, slug: true },
       },
@@ -146,6 +142,68 @@ export async function findRelatedContents(platformId, categoryItemId, excludeId)
     orderBy: [{ order: "asc" }, { id: "asc" }],
     take: 4,
     select: CONTENT_SELECT,
+  });
+}
+
+/**
+ * Mengambil semua event publik (isPublished = true) berdasarkan slug organizer CategoryItem.
+ * Digunakan untuk kategori yang sumber datanya dari organizer (contoh: event-ditampart).
+ * @param {string} organizerSlug
+ */
+export async function findPublicEventsByOrganizerSlug(organizerSlug) {
+  return prisma.event.findMany({
+    where: {
+      isPublished: true,
+      organizers: {
+        some: { categoryItem: { slug: organizerSlug } },
+      },
+    },
+    orderBy: { startAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      poster: true,
+      description: true,
+      startAt: true,
+      endAt: true,
+      tags: {
+        include: { tag: { select: { id: true, name: true } } },
+      },
+    },
+  });
+}
+
+/**
+ * Mengambil semua event publik (isPublished = true) berdasarkan slug CategoryItem event.
+ * Digunakan oleh halaman subCategory yang kontennya bersumber dari model Event
+ * (contoh: stonen-29-radio-show, workshop-artlab, dll.).
+ * @param {string} categorySlug
+ */
+export async function findPublicEventsByCategorySlug(categorySlug) {
+  return prisma.event.findMany({
+    where: {
+      isPublished: true,
+      eventCategories: {
+        some: { categoryItem: { slug: categorySlug } },
+      },
+    },
+    orderBy: { startAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      poster: true,
+      description: true,
+      startAt: true,
+      endAt: true,
+      tags: {
+        include: { tag: { select: { id: true, name: true } } },
+      },
+      eventCategories: {
+        select: { categoryItem: { select: { slug: true } } },
+      },
+    },
   });
 }
 

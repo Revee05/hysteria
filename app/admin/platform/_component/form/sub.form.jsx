@@ -13,6 +13,7 @@ export const META_OPTIONS = [
   { value: "artist", label: "Artist Radar" },
   { value: "mockup", label: "Mockup dan Poster" },
   { value: "komik-ramuan", label: "Komik Ramuan" },
+  { value: "stonen-29-radio-show", label: "Stonen 29 Radio Show" }
 ];
 
 export default function SubForm({

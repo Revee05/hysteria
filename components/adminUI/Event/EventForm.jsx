@@ -191,17 +191,17 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
   const getPlatformSubCategories = () => {
     const subs = [];
 
+    const collectSubs = (children, source) => {
+      for (const child of children || []) {
+        if (child.isIndependent) continue;
+        subs.push({ id: child.id, title: child.title, source });
+        collectSubs(child.children, source);
+      }
+    };
+
     for (const organizer of platformTree) {
       if (!form.organizerIds.includes(Number(organizer.id))) continue;
-
-      for (const child of organizer.children || []) {
-        if (child.isIndependent) continue;
-        subs.push({
-          id: child.id,
-          title: child.title,
-          source: organizer.title,
-        });
-      }
+      collectSubs(organizer.children, organizer.title);
     }
     return subs;
   };
@@ -347,7 +347,7 @@ export default function EventForm({ initialData = null, isEdit = false, eventId 
         : new Date(`${form.startDate}T${form.startTime}`).toISOString(),
 
       endAt: form.isFlexibleTime
-        ? null
+        ? (form.endDate ? new Date(`${form.endDate}T23:59:59`).toISOString() : null)
         : form.endDate && form.endTime
           ? new Date(`${form.endDate}T${form.endTime}`).toISOString()
           : null,

@@ -8,7 +8,7 @@ export default function TimHero({ imageUrl, title, subtitle }) {
   const isLocalImage = resolvedImage.startsWith("/");
 
   return (
-    <div className="relative w-full h-[350px] md:h-[600px] bg-[#d9d9d9] flex flex-col justify-center items-center text-white overflow-hidden uppercase">
+    <div suppressHydrationWarning={true} className="relative w-full h-[350px] md:h-[600px] bg-[#d9d9d9] flex flex-col justify-center items-center text-white overflow-hidden uppercase">
       {/* Background placeholder - in production this should probably be an image */}
       <div className="absolute inset-0">
         <Image

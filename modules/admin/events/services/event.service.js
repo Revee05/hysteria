@@ -111,7 +111,7 @@ export async function updateEvent(id, body) {
   };
 
   if (body.startAt) data.startAt = new Date(body.startAt);
-  if (body.endAt) data.endAt = new Date(body.endAt);
+  data.endAt = body.endAt ? new Date(body.endAt) : null;
 
   await repo.updateEvent(eventId, data);
 

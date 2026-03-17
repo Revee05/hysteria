@@ -19,7 +19,7 @@ export default function PermissionPage() {
 
   return (
     <PermissionGate requiredPermissions={["permissions.read", "roles.permissions.read", "permission-groups.read"]}>
-    <div className="p-4 sm:p-6 bg-white border rounded-lg">
+    <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 bg-white rounded-lg">
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-zinc-900">Permissions Management</h1>
         <p className="text-xs sm:text-sm text-zinc-600 mt-1">Manage permissions and role permissions</p>

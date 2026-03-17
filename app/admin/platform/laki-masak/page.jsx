@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useRouter } from "next/navigation";
 import SelectField from "@/components/ui/SelectField";
 import SearchField from "@/components/adminUI/SearchField";
 import Button from "@mui/material/Button";
@@ -12,12 +13,10 @@ import PageFilter from "@/components/ui/PageFilter";
 import LinkForm from "../_component/link.form";
 import PlatformIndex from "../_component/index.page";
 import {
-  subKategoriLakiMasakOptions,
   statusOptions,
-  buildPlatformColumns,
-  lakiMasakDummyData,
-  filterLakiMasakData,
+  fetchLakiMasakEventData,
 } from "../_handler/data";
+import { buildEventColumns } from "../_handler/TablePlatformColom";
 
 const categories = [
   { id: 1, title: "Homecooked" },
@@ -27,9 +26,11 @@ const categories = [
 
 export default function LakiMasakPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [subKategori, setSubKategori] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
   const [perPage, setPerPage] = useState(10);
+
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -48,9 +49,68 @@ export default function LakiMasakPage() {
   });
 
   const debouncedSearch = useDebounce(searchQuery);
+  const router = useRouter();
 
-  const handleEdit = (row) => console.log("Edit:", row);
-  const handleDelete = (row) => console.log("Delete:", row);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleEdit = useCallback((row) => {
+    router.push(`/admin/events/${row.id}/edit`);
+  }, [router]);
+
+  const handleDelete = useCallback(async (row) => {
+    const confirmed = window.confirm(
+      `Yakin ingin menghapus event "${row.title}"? Tindakan ini tidak dapat dibatalkan.`
+    );
+    if (!confirmed) return;
+    try {
+      setDeletingId(row.id);
+      const res = await fetch(`/api/admin/events/${row.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal menghapus event');
+      setRows((prev) => prev.filter((e) => e.id !== row.id));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
+
+  // ── fetch event meramu dari API (cursor-based pagination) ──────────────────
+  const [nextCursor, setNextCursor] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setRows([]);
+    setNextCursor(null);
+    setLoading(true);
+    fetchLakiMasakEventData({ query: debouncedSearch, status: statusFilter, limit: perPage })
+      .then(({ data, nextCursor: nc }) => {
+        if (cancelled) return;
+        setRows(data);
+        setNextCursor(nc);
+      })
+      .catch((err) => { if (!cancelled) console.error('Gagal memuat event meramu:', err); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [debouncedSearch, statusFilter, perPage]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!nextCursor || loading) return;
+    setLoading(true);
+    try {
+      const { data, nextCursor: nc } = await fetchLakiMasakEventData({
+        query: debouncedSearch,
+        status: statusFilter,
+        limit: perPage,
+        cursor: nextCursor,
+      });
+      setRows((prev) => [...prev, ...data]);
+      setNextCursor(nc);
+    } catch (err) {
+      console.error('Gagal memuat lebih banyak event meramu:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [nextCursor, loading, debouncedSearch, statusFilter, perPage]);
 
   const openModalForCategory = async (cat) => {
     if (cat.id === 1) {
@@ -139,24 +199,14 @@ export default function LakiMasakPage() {
   };
 
   const columns = useMemo(
-    () => buildPlatformColumns({ onEdit: handleEdit, onDelete: handleDelete }),
-    [],
-  );
-
-  const rows = useMemo(
-    () =>
-      filterLakiMasakData(lakiMasakDummyData, {
-        query: debouncedSearch,
-        subKategori,
-        status: statusFilter,
-      }),
-    [debouncedSearch, subKategori, statusFilter],
+    () => buildEventColumns({ onEdit: handleEdit, onDelete: handleDelete }),
+    [handleEdit, handleDelete],
   );
 
   return (
     <div className="p-4 md:p-10 bg-white rounded-md min-h-screen">
       {/* bagian atas */}
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <header className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
             Laki Masak
@@ -201,7 +251,7 @@ export default function LakiMasakPage() {
       </div>
 
       {/* bagian bawah */}
-      <div className="max-w-6xl mx-auto mt-12">
+      <div className="max-w-5xl mx-auto mt-12">
         <div className="flex flex-col md:flex-row md:gap-0 justify-between items-start md:items-center mb-6 md:mb-0">
           <div>
             <h2 className="text-2xl md:text-3xl text-zinc-700 font-extrabold mb-1 font-poppins">
@@ -220,6 +270,7 @@ export default function LakiMasakPage() {
                 "&:hover": { backgroundColor: "#352837" },
                 textTransform: "none",
               }}
+              onClick={() => router.push("/admin/events/create")}
             >
               Tambah Event
             </Button>
@@ -243,13 +294,6 @@ export default function LakiMasakPage() {
             />
           </div>
           <SelectField
-            className="w-full md:w-auto rounded-md bg-white border border-gray-300 shadow-sm"
-            value={subKategori}
-            onChange={setSubKategori}
-            options={subKategoriLakiMasakOptions}
-            emptyOptionLabel="Semua Sub Kategori"
-          />
-          <SelectField
             className="w-[206px] md:w-auto rounded-md bg-white border border-gray-300 shadow-sm"
             value={statusFilter}
             onChange={setStatusFilter}
@@ -262,9 +306,22 @@ export default function LakiMasakPage() {
         <DataTable
           columns={columns}
           rows={rows}
-          loading={false}
+          loading={loading}
           getRowId={(r) => r.id}
         />
+        {nextCursor && (
+          <div className="flex justify-center mt-4">
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={loading}
+              onClick={handleLoadMore}
+              sx={{ textTransform: "none" }}
+            >
+              {loading ? "Memuat..." : "Muat Lebih Banyak"}
+            </Button>
+          </div>
+        )}
         {platformModal.open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div

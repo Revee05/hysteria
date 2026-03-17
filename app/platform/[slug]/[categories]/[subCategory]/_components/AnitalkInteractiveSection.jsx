@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 
 const PAGE_SIZE = 8;
@@ -8,10 +9,11 @@ const PAGE_SIZE = 8;
 export default function AnitalkInteractiveSection({ selectedSub, items = [] }) {
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("latest");
-  const [page, setPage] = useState(1);
+  const [cursor, setCursor] = useState(0);
   const [openFilter, setOpenFilter] = useState(false);
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const debouncedQuery = useDebounce(query);
+  const normalizedQuery = debouncedQuery.trim().toLowerCase();
 
   const filteredItems = useMemo(() => {
     const matched = items.filter((episode) => {
@@ -34,9 +36,13 @@ export default function AnitalkInteractiveSection({ selectedSub, items = [] }) {
     const sorted = [...matched];
 
     if (sortBy === "a-z") {
-      sorted.sort((a, b) => (a?.title || "").localeCompare(b?.title || "", "id"));
+      sorted.sort((a, b) =>
+        (a?.title || "").localeCompare(b?.title || "", "id"),
+      );
     } else if (sortBy === "z-a") {
-      sorted.sort((a, b) => (b?.title || "").localeCompare(a?.title || "", "id"));
+      sorted.sort((a, b) =>
+        (b?.title || "").localeCompare(a?.title || "", "id"),
+      );
     } else if (sortBy === "latest" || sortBy === "oldest") {
       const hasYear = sorted.some((x) => Number.isFinite(Number(x?.year)));
       if (hasYear) {
@@ -53,19 +59,21 @@ export default function AnitalkInteractiveSection({ selectedSub, items = [] }) {
     return sorted;
   }, [items, normalizedQuery, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pagedItems = filteredItems.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pagedItems = filteredItems.slice(cursor, cursor + PAGE_SIZE);
+  const hasPrev = cursor > 0;
+  const hasNext = cursor + PAGE_SIZE < filteredItems.length;
+  const currentStart = filteredItems.length === 0 ? 0 : cursor + 1;
+  const currentEnd = Math.min(cursor + PAGE_SIZE, filteredItems.length);
 
   const applySort = (value) => {
     setSortBy(value);
-    setPage(1);
+    setCursor(0);
     setOpenFilter(false);
   };
 
   const onSearchChange = (value) => {
     setQuery(value);
-    setPage(1);
+    setCursor(0);
   };
 
   return (
@@ -80,7 +88,11 @@ export default function AnitalkInteractiveSection({ selectedSub, items = [] }) {
               onChange={(e) => onSearchChange(e.target.value)}
               className="w-full bg-transparent text-sm text-gray-700 outline-none placeholder:text-[#ec3f94]/70"
             />
-            <button className="ml-4 text-[#ec3f94] transition hover:scale-110" aria-label="Search" type="button">
+            <button
+              className="ml-4 text-[#ec3f94] transition hover:scale-110"
+              aria-label="Search"
+              type="button"
+            >
               <SearchIcon />
             </button>
           </div>
@@ -97,10 +109,26 @@ export default function AnitalkInteractiveSection({ selectedSub, items = [] }) {
 
             {openFilter && (
               <div className="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg">
-                <FilterButton label="Podcast terbaru" active={sortBy === "latest"} onClick={() => applySort("latest")} />
-                <FilterButton label="Podcast terlama" active={sortBy === "oldest"} onClick={() => applySort("oldest")} />
-                <FilterButton label="A - Z" active={sortBy === "a-z"} onClick={() => applySort("a-z")} />
-                <FilterButton label="Z - A" active={sortBy === "z-a"} onClick={() => applySort("z-a")} />
+                <FilterButton
+                  label="Podcast terbaru"
+                  active={sortBy === "latest"}
+                  onClick={() => applySort("latest")}
+                />
+                <FilterButton
+                  label="Podcast terlama"
+                  active={sortBy === "oldest"}
+                  onClick={() => applySort("oldest")}
+                />
+                <FilterButton
+                  label="A - Z"
+                  active={sortBy === "a-z"}
+                  onClick={() => applySort("a-z")}
+                />
+                <FilterButton
+                  label="Z - A"
+                  active={sortBy === "z-a"}
+                  onClick={() => applySort("z-a")}
+                />
               </div>
             )}
           </div>
@@ -109,26 +137,28 @@ export default function AnitalkInteractiveSection({ selectedSub, items = [] }) {
 
       <section className="w-full max-w-480 mx-auto px-3 pb-10 sm:px-5 sm:pb-12 md:px-8 md:pb-14 lg:px-12 lg:pb-16 xl:px-24">
         {!pagedItems.length ? (
-          <p className="text-zinc-500">Tidak ada hasil sesuai pencarian/filter.</p>
+          <p className="text-zinc-500">
+            Tidak ada hasil sesuai pencarian/filter.
+          </p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
             {pagedItems.map((episode, idx) => (
-              <AnitalkEpisodeCard
-                key={`${selectedSub.slug}-${safePage}-${idx}`}
-                episode={episode}
-                index={(safePage - 1) * PAGE_SIZE + idx}
-              />
+              <LazyItem key={`${selectedSub.slug}-${cursor}-${idx}`}>
+                <AnitalkEpisodeCard episode={episode} index={cursor + idx} />
+              </LazyItem>
             ))}
           </div>
         )}
 
-        {totalPages > 1 && (
-          <AnitalkPagination
-            totalPages={totalPages}
-            currentPage={safePage}
-            onPrev={() => setPage((p) => Math.max(1, p - 1))}
-            onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
-            onPick={(p) => setPage(p)}
+        {(hasPrev || hasNext) && (
+          <CursorPagination
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={() => setCursor((c) => Math.max(0, c - PAGE_SIZE))}
+            onNext={() => setCursor((c) => c + PAGE_SIZE)}
+            currentStart={currentStart}
+            currentEnd={currentEnd}
+            total={filteredItems.length}
           />
         )}
       </section>
@@ -143,7 +173,9 @@ function FilterButton({ label, active, onClick }) {
       onClick={onClick}
       className={
         "w-full rounded-lg px-3 py-2 text-left text-sm transition " +
-        (active ? "bg-pink-100 text-pink-700" : "text-zinc-700 hover:bg-zinc-100")
+        (active
+          ? "bg-pink-100 text-pink-700"
+          : "text-zinc-700 hover:bg-zinc-100")
       }
     >
       {label}
@@ -155,14 +187,48 @@ function AnitalkEpisodeCard({ episode, index }) {
   const href = episode.youtube || episode.url || null;
   const cardClassName =
     "block w-full min-w-0 rounded-xl bg-white shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden flex flex-col";
+  // Extract YouTube thumbnail when possible, with fallback handling
+  function extractYouTubeId(url) {
+    if (typeof url !== "string") return null;
+    const patterns = [
+      /(?:youtube(?:-nocookie)?\.com\/(?:.*v=|v\/|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/,
+      /(?:youtu\.be\/)\/?([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const re of patterns) {
+      const m = url.match(re);
+      if (m?.[1]) return m[1];
+    }
+    return null;
+  }
+
+  const sourceForId = episode.youtube || episode.url || episode.imageUrl;
+  const ytId = extractYouTubeId(sourceForId);
+  const bestYtImg = ytId ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` : null;
+  const backupYtImg = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
+  const initialImgSrc = ytId ? bestYtImg : (episode.imageUrl || episode.src || "/image/video.webp");
+
+  const [imgSrc, setImgSrc] = useState(initialImgSrc);
+
+  useEffect(() => {
+    setImgSrc(initialImgSrc);
+  }, [initialImgSrc]);
+
+  const handleImageError = () => {
+    if (ytId && imgSrc === bestYtImg) {
+      setImgSrc(backupYtImg);
+    }
+  };
+
   const content = (
     <>
       <div className="aspect-video relative w-full flex-shrink-0 bg-black flex items-center justify-center">
         <Image
-          src={episode.imageUrl || episode.src || "/image/video.webp"}
+          src={imgSrc}
           alt={episode.alt || episode.title || "Episode"}
           className="object-contain object-center max-h-full max-w-full"
           fill
+          onError={handleImageError}
+          unoptimized={!(typeof imgSrc === "string" && imgSrc.startsWith("/"))}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
         />
 
@@ -186,12 +252,16 @@ function AnitalkEpisodeCard({ episode, index }) {
           <div className="flex flex-wrap gap-x-1 items-start min-w-0">
             <span className="font-semibold shrink-0">Pengisi/Host</span>
             <span className="text-gray-400 shrink-0">:</span>
-            <span className="truncate min-w-0 md:flex-1">{episode.host || "-"}</span>
+            <span className="truncate min-w-0 md:flex-1">
+              {episode.host || "-"}
+            </span>
           </div>
           <div className="flex gap-x-1 items-start min-w-0">
             <span className="font-semibold shrink-0">Podcaster</span>
             <span className="text-gray-400 shrink-0">:</span>
-            <span className="flex-1 line-clamp-2 md:line-clamp-3 break-words min-w-0">{episode.guests?.join(", ") || "-"}</span>
+            <span className="flex-1 line-clamp-2 md:line-clamp-3 break-words min-w-0">
+              {episode.guests?.join(", ") || "-"}
+            </span>
           </div>
         </div>
       </div>
@@ -199,7 +269,11 @@ function AnitalkEpisodeCard({ episode, index }) {
   );
 
   if (!href) {
-    return <article className={`${cardClassName} cursor-not-allowed opacity-80`}>{content}</article>;
+    return (
+      <article className={`${cardClassName} cursor-not-allowed opacity-80`}>
+        {content}
+      </article>
+    );
   }
 
   return (
@@ -215,41 +289,64 @@ function AnitalkEpisodeCard({ episode, index }) {
   );
 }
 
-function AnitalkPagination({ totalPages, currentPage, onPrev, onNext, onPick }) {
-  const visibleCount = Math.min(totalPages, 4);
+function LazyItem({ children }) {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   return (
+    <div
+      ref={ref}
+      className={`transition-all duration-500 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CursorPagination({
+  hasPrev,
+  hasNext,
+  onPrev,
+  onNext,
+  currentStart,
+  currentEnd,
+  total,
+}) {
+  return (
     <div className="mt-10 flex justify-center sm:mt-12">
-      <div className="flex items-center gap-2 rounded-full bg-[#ec3f94] px-4 py-2 text-white shadow-md">
+      <div className="flex items-center gap-3 rounded-full bg-[#ec3f94] px-5 py-2 text-white shadow-md">
         <button
           type="button"
           onClick={onPrev}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
+          disabled={!hasPrev}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {"<"}
         </button>
-        {Array.from({ length: visibleCount }).map((_, i) => {
-          const pageNumber = i + 1;
-          const isActive = pageNumber === currentPage;
-          return (
-            <button
-              type="button"
-              key={pageNumber}
-              onClick={() => onPick(pageNumber)}
-              className={
-                isActive
-                  ? "flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-bold text-[#ec3f94]"
-                  : "text-sm opacity-90"
-              }
-            >
-              {pageNumber}
-            </button>
-          );
-        })}
+        <span className="text-sm font-medium tabular-nums">
+          {currentStart}–{currentEnd} / {total}
+        </span>
         <button
           type="button"
           onClick={onNext}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
+          disabled={!hasNext}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {">"}
         </button>
@@ -260,7 +357,13 @@ function AnitalkPagination({ totalPages, currentPage, onPrev, onNext, onPick }) 
 
 function SearchIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <circle cx="11" cy="11" r="7" />
       <path d="M20 20l-3.5-3.5" />
     </svg>
@@ -269,7 +372,13 @@ function SearchIcon() {
 
 function FilterIcon() {
   return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M4 5h16l-6 7v5l-4 2v-7L4 5z" />
     </svg>
   );
