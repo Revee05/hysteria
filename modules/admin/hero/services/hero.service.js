@@ -1,6 +1,6 @@
 import { AppError } from '../../../../lib/response.js';
 import * as heroRepository from '../repositories/hero.repository.js';
-import { validateHeroData, createHeroSchema, updateHeroSchema } from '../validators/hero.validator.js';
+import { validateHeroData, createHeroSchema, heroBaseSchema, updateHeroSchema } from '../validators/hero.validator.js';
 import logger from '../../../../lib/logger.js';
 import Uploads from '../../../../lib/upload/uploads.js';
 import { createWithUpload, updateWithUpload } from '../../../../lib/upload/transactionalUpload.js';
@@ -116,35 +116,22 @@ export async function updateHero(id, data) {
     const hero = await heroRepository.updateHero(id, updateData);
     logger.info('Hero updated successfully', { heroId: id, updatedFields: Object.keys(updateData) });
 
-    // If the update provides a new `source` (or empties it) and the existing `source`
-    // pointed to an uploaded file managed by our Uploads implementation, attempt
-    // to delete the previous file so stale uploads aren't left on disk/S3.
+    // Cleanup old file if source changed
     try {
       const uploads = new Uploads();
+      const oldSource = existingHero?.source;
+      const newSourceProvided = !!updateData.source;
 
-      const oldSource = existingHero && existingHero.source ? String(existingHero.source) : null;
-      const newSourceProvided = Object.prototype.hasOwnProperty.call(updateData, 'source');
-
-      const looksLikeManaged = (src) => {
-        if (!src) return false;
-        // Local-managed uploads are saved under '/uploads/...' or 'uploads/...'
-        if (src.startsWith('/uploads/') || src.startsWith('uploads/') || src.includes('/uploads/')) return true;
-        // S3: compare against configured public URL, or typical s3 URL patterns
-        if (process.env.S3_PUBLIC_URL && src.startsWith(process.env.S3_PUBLIC_URL.replace(/\/$/, ''))) return true;
-        if (/s3\.amazonaws\.com/.test(src) || /s3[.-]/.test(src)) return true;
-        return false;
-      };
-
-      if (newSourceProvided && oldSource && oldSource !== String(updateData.source) && looksLikeManaged(oldSource)) {
+      if (newSourceProvided && oldSource && oldSource !== String(updateData.source)) {
         try {
           await uploads.deleteFile(oldSource);
-          logger.info('Deleted previous hero upload after source update', { heroId: id, deletedSource: oldSource });
+          logger.info('Deleted previous hero upload after update', { heroId: id, deletedSource: oldSource });
         } catch (err) {
-          logger.warn('Failed to delete previous hero upload after source update', { heroId: id, deletedSource: oldSource, error: err && err.message });
+          logger.warn('Failed to delete previous hero upload', { heroId: id, deletedSource: oldSource, error: err?.message });
         }
       }
     } catch (err) {
-      logger.warn('Could not perform uploaded-file cleanup after hero update', { heroId: id, error: err && err.message });
+      logger.warn('Could not perform cleanup after hero update', { heroId: id, error: err?.message });
     }
 
     return hero;
@@ -224,7 +211,7 @@ export async function setActiveHero(id) {
  */
 export async function createHeroWithFile(data, file) {
   // Validate input (omit source requirement since file will provide it)
-  const schema = createHeroSchema.omit({ source: true });
+  const schema = heroBaseSchema.omit({ source: true });
   let validated;
   try {
     validated = validateHeroData(data, schema);

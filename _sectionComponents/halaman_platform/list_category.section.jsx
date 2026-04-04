@@ -2,9 +2,10 @@ import React from 'react'
 import Image from 'next/image'
 
 export default function ListCategorySection({ 
-  items = [] 
+  categories = [] 
 }) {
-  if (!items || items.length === 0) return null
+  if (!categories || categories.length === 0) return null
+  const items = categories
 
   // Intrinsic image size used by next/image (keeps layout stable)
   const CARD_W = 800
@@ -20,18 +21,22 @@ export default function ListCategorySection({
           {items.map((it, idx) => (
             <a
               key={idx}
-              href={it.href}
+              href={it.url || '#'}
               className="py-3 group block bg-white overflow-hidden border-b border-zinc-400"
             >
               {/* item image: adjust visible heights per breakpoint here */}
               <div className="overflow-hidden rounded-md border border-zinc-200">
-                <Image
-                  src={it.image}
-                  alt={it.title}
-                  width={CARD_W}
-                  height={CARD_H}
-                  className="w-full max-w-full h-48 sm:h-56 lg:h-64 object-cover rounded-lg"
-                />
+                {(it.imageUrl || it.image) ? (
+                  <Image
+                    src={it.imageUrl || it.image}
+                    alt={it.title}
+                    width={CARD_W}
+                    height={CARD_H}
+                    className="w-full max-w-full h-48 sm:h-56 lg:h-64 object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="w-full h-48 sm:h-56 lg:h-64 bg-zinc-100 rounded-lg" />
+                )}
               </div>
 
               {/* kategori text */}

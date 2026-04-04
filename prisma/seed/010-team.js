@@ -13,8 +13,8 @@ module.exports = async function seed() {
 
   const categories = [
     { name: "Pengelola Hysteria", slug: "pengelola-hysteria", order: 0 },
-    { name: "Pengurus Hysteria Artlab", slug: "hysteria-artlab", order: 1 },
-    { name: "Pengurus Pekakota", slug: "pekakota", order: 2 },
+    // { name: "Pengurus Hysteria Artlab", slug: "hysteria-artlab", order: 1 },
+    // { name: "Pengurus Pekakota", slug: "pekakota", order: 2 },
   ];
 
   const members = [
@@ -27,22 +27,34 @@ module.exports = async function seed() {
     { categorySlug: "pengelola-hysteria", name: "Arif Fitra Kurniawan", role: "Divisi Riset", order: 5 },
     { categorySlug: "pengelola-hysteria", name: "Purna Cipta N.", role: "Deputi Sapu Jagad", order: 6 },
     { categorySlug: "pengelola-hysteria", name: "Istiqbalul F. Asteja", role: "Direktur Bukit Buku", order: 7 },
+    { categorySlug: "pengelola-hysteria", name: "Tyok Hari", role: "Staff Hysteria Artlab", order: 8 },
+    { categorySlug: "pengelola-hysteria", name: "Hananingsih W.", role: "Staff Hysteria Artlab", order: 9 },
+    { categorySlug: "pengelola-hysteria", name: "Humam Zidni Ahmad", role: "Staff Hysteria Artlab", order: 10 },
+    { categorySlug: "pengelola-hysteria", name: "Wan Fajar", role: "Staff Hysteria Artlab", order: 11 },
+    { categorySlug: "pengelola-hysteria", name: "Mukhammad J. F.", role: "Staff Hysteria Artlab", order: 12 },
+    { categorySlug: "pengelola-hysteria", name: "Anita Dewi", role: "Staff Hysteria Artlab", order: 13 },
+    { categorySlug: "pengelola-hysteria", name: "Dheni Fattah", role: "Staff Hysteria Artlab", order: 14 },
+    { categorySlug: "pengelola-hysteria", name: "Pujo Nugroho", role: "Staff Pekakota", order: 15 },
+    { categorySlug: "pengelola-hysteria", name: "Nella Ardiantanti S.", role: "Staff Pekakota", order: 16 },
+    { categorySlug: "pengelola-hysteria", name: "Radit Bayu Anggoro", role: "Staff Pekakota", order: 17 },
+    { categorySlug: "pengelola-hysteria", name: "Yasin Fajar", role: "Staff Pekakota", order: 18 },
+    { categorySlug: "pengelola-hysteria", name: "Salma Ibrahim", role: "Staff Pekakota", order: 19 },
 
     // Hysteria Artlab
-    { categorySlug: "hysteria-artlab", name: "Tyok Hari", role: "Staff Hysteria Artlab", order: 0 },
-    { categorySlug: "hysteria-artlab", name: "Hananingsih W.", role: "Staff Hysteria Artlab", order: 1 },
-    { categorySlug: "hysteria-artlab", name: "Humam Zidni Ahmad", role: "Staff Hysteria Artlab", order: 2 },
-    { categorySlug: "hysteria-artlab", name: "Wan Fajar", role: "Staff Hysteria Artlab", order: 3 },
-    { categorySlug: "hysteria-artlab", name: "Mukhammad J. F.", role: "Staff Hysteria Artlab", order: 4 },
-    { categorySlug: "hysteria-artlab", name: "Anita Dewi", role: "Staff Hysteria Artlab", order: 5 },
-    { categorySlug: "hysteria-artlab", name: "Dheni Fattah", role: "Staff Hysteria Artlab", order: 6 },
+    // { categorySlug: "hysteria-artlab", name: "Tyok Hari", role: "Staff Hysteria Artlab", order: 0 },
+    // { categorySlug: "hysteria-artlab", name: "Hananingsih W.", role: "Staff Hysteria Artlab", order: 1 },
+    // { categorySlug: "hysteria-artlab", name: "Humam Zidni Ahmad", role: "Staff Hysteria Artlab", order: 2 },
+    // { categorySlug: "hysteria-artlab", name: "Wan Fajar", role: "Staff Hysteria Artlab", order: 3 },
+    // { categorySlug: "hysteria-artlab", name: "Mukhammad J. F.", role: "Staff Hysteria Artlab", order: 4 },
+    // { categorySlug: "hysteria-artlab", name: "Anita Dewi", role: "Staff Hysteria Artlab", order: 5 },
+    // { categorySlug: "hysteria-artlab", name: "Dheni Fattah", role: "Staff Hysteria Artlab", order: 6 },
 
     // Pekakota
-    { categorySlug: "pekakota", name: "Pujo Nugroho", role: "Staff Pekakota", order: 0 },
-    { categorySlug: "pekakota", name: "Nella Ardiantanti S.", role: "Staff Pekakota", order: 1 },
-    { categorySlug: "pekakota", name: "Radit Bayu Anggoro", role: "Staff Pekakota", order: 2 },
-    { categorySlug: "pekakota", name: "Yasin Fajar", role: "Staff Pekakota", order: 3 },
-    { categorySlug: "pekakota", name: "Salma Ibrahim", role: "Staff Pekakota", order: 4 },
+    // { categorySlug: "pekakota", name: "Pujo Nugroho", role: "Staff Pekakota", order: 0 },
+    // { categorySlug: "pekakota", name: "Nella Ardiantanti S.", role: "Staff Pekakota", order: 1 },
+    // { categorySlug: "pekakota", name: "Radit Bayu Anggoro", role: "Staff Pekakota", order: 2 },
+    // { categorySlug: "pekakota", name: "Yasin Fajar", role: "Staff Pekakota", order: 3 },
+    // { categorySlug: "pekakota", name: "Salma Ibrahim", role: "Staff Pekakota", order: 4 },
   ];
 
   const toSlug = (value) => {

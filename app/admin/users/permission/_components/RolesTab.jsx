@@ -33,6 +33,9 @@ export default function RolesTab() {
 
   const [editing, setEditing] = useState(null); // { id, key, name, description }
 
+  const [deleteCandidate, setDeleteCandidate] = useState(null); // role object to delete
+  const [deleting, setDeleting] = useState(false);
+
   const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
@@ -80,17 +83,29 @@ export default function RolesTab() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!id) return;
+  const requestDelete = (role) => {
+    if (!role) return;
+    setDeleteCandidate(role);
+  };
+
+  const performDelete = async () => {
+    if (!deleteCandidate || !deleteCandidate.id) {
+      setDeleteCandidate(null);
+      return;
+    }
     try {
-      const res = await apiCall(`/api/admin/roles?id=${id}`, { method: 'DELETE' });
+      setDeleting(true);
+      const res = await apiCall(`/api/admin/roles?id=${deleteCandidate.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete role');
       await res.json();
-      setRoles(prev => prev.filter(r => r.id !== id));
+      setRoles(prev => prev.filter(r => r.id !== deleteCandidate.id));
       setToast({ message: 'Role deleted', type: 'info', visible: true });
     } catch (err) {
       console.error(err);
       setToast({ message: err.message || 'Delete failed', type: 'error', visible: true });
+    } finally {
+      setDeleting(false);
+      setDeleteCandidate(null);
     }
   };
 
@@ -125,7 +140,7 @@ export default function RolesTab() {
         </PermissionGate>
 
         <PermissionGate requiredPermissions={"roles.delete"} disableOnDenied>
-          <IconButton aria-label={`delete-${r.id}`} size="small" onClick={() => handleDelete(r.id)} className="text-red-600"><DeleteIcon fontSize="small" /></IconButton>
+          <IconButton aria-label={`delete-${r.id}`} size="small" onClick={() => requestDelete(r)} className="text-red-600"><DeleteIcon fontSize="small" /></IconButton>
         </PermissionGate>
       </div>
     ) },
@@ -201,6 +216,22 @@ export default function RolesTab() {
                 <button type="submit" disabled={creating} className="px-4 py-2 bg-green-600 text-white rounded-md">{creating ? 'Creating...' : 'Create'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation warning card */}
+      {deleteCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-md w-full max-w-md shadow-lg">
+            <h3 className="text-lg font-medium mb-2 text-zinc-900">Confirm Delete</h3>
+            <p className="text-sm text-zinc-700 mb-4">
+              Are you sure you want to delete the role <strong>{deleteCandidate.key}</strong>{deleteCandidate.name ? ` (${deleteCandidate.name})` : ''}? This action cannot be undone.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button onClick={() => setDeleteCandidate(null)} className="px-4 py-2 bg-zinc-200 text-zinc-900 rounded-md">Cancel</button>
+              <button onClick={performDelete} disabled={deleting} className="px-4 py-2 bg-red-600 text-white rounded-md">{deleting ? 'Deleting...' : 'Delete'}</button>
+            </div>
           </div>
         </div>
       )}

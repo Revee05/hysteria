@@ -9,44 +9,63 @@ export default function AdminTopbar({ onOpenSidebar }) {
   const [openProfile, setOpenProfile] = useState(false);
   const { user } = useAuth();
   const formatRoleLabel = (roleKey) => {
-    if (!roleKey) return '';
+    if (!roleKey) return "";
     return roleKey
-      .replace(/_/g, ' ')
+      .replace(/_/g, " ")
       .toLowerCase()
-      .split(' ')
-      .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-      .join(' ');
-  }
-  const roleLabel = user?.roles && user.roles.length > 0 ? formatRoleLabel(user.roles[0]) : null;
+      .split(" ")
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(" ");
+  };
+  const roleLabel =
+    user?.roles && user.roles.length > 0
+      ? formatRoleLabel(user.roles[0])
+      : null;
   return (
     <div className="flex w-full items-center justify-between px-6 py-4">
       <div className="flex items-center gap-4">
-        <button onClick={onOpenSidebar} className="lg:hidden p-2 rounded-md hover:bg-zinc-100" aria-label="Open menu">
+        <button
+          onClick={onOpenSidebar}
+          className="lg:hidden p-2 rounded-md hover:bg-zinc-100"
+          aria-label="Open menu"
+        >
           <IconMenu className="h-5 w-5 text-zinc-700" />
         </button>
-        <h1 className="text-lg font-semibold text-zinc-700">
+        <h1 className="text-sm md:text-lg font-semibold text-zinc-700 flex flex-wrap items-center">
           {roleLabel ? (
             <>
-              {roleLabel} Area - Hello{' '}
-              <span className="italic text-pink-600">{user?.name || ''}</span>
+              <span className="mr-1">{roleLabel} Area - Hello!!</span>
+              <span className="italic text-pink-600">{user?.name || ""}</span>
             </>
-          ) : (user?.name ? (
+          ) : user?.name ? (
             <>
-              Dashboard Panel - Hello{' '}
+              <span className="mr-1">Dashboard Panel - Hello</span>
               <span className="italic text-pink-600">{user.name}</span>
             </>
-          ) : 'Dashboard Panel')}
+          ) : (
+            "Dashboard Panel"
+          )}
         </h1>
       </div>
 
-      <button aria-label="User menu" onClick={() => setOpenProfile(true)} className="flex items-center justify-center rounded-full bg-zinc-50 h-10 w-10 hover:bg-zinc-100 focus:outline-none focus:ring-0">
+      <button
+        aria-label="User menu"
+        onClick={() => setOpenProfile(true)}
+        className="flex items-center justify-center rounded-full bg-zinc-50 h-10 w-10 hover:bg-zinc-100 focus:outline-none focus:ring-0"
+      >
         <Avatar
           className="h-10 w-10 rounded-full bg-transparent overflow-hidden"
           hoverBorderColor="#3B82F6"
           hoverBorderWidth={1}
           hoverScale={1.08}
-          src={user?.avatar || user?.photo || user?.image || user?.profilePicture || ''}
-          alt={user?.name || 'User'}
+          src={
+            user?.avatar ||
+            user?.photo ||
+            user?.image ||
+            user?.profilePicture ||
+            ""
+          }
+          alt={user?.name || "User"}
         />
       </button>
 

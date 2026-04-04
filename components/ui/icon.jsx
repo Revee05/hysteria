@@ -1,18 +1,37 @@
+"use client";
+
 import { useState, useId, useEffect } from "react";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import Groups3OutlinedIcon from "@mui/icons-material/Groups3Outlined";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Instagram, Youtube, Facebook, X as LucideX } from "lucide-react";
 
 export function IconDiversity({ className = "", size = 20 }) {
   return (
-    <Groups3OutlinedIcon
-      className={className}
-      style={{ fontSize: size }}
-    />
+    <Groups3OutlinedIcon className={className} style={{ fontSize: size }} />
   );
 }
 
-export function Logo({ className = "", size = 32, initials = "H", bgColor = "#F3F4F6", textColor = "#374151", label = "Hysteria logo" }) {
+export function IconBusiness({ className = "", size = 20 }) {
+  return (
+    <BusinessOutlinedIcon className={className} style={{ fontSize: size }} />
+  );
+}
+
+export function IconInfo({ className = "", size = 20 }) {
+  return <InfoOutlinedIcon className={className} style={{ fontSize: size }} />;
+}
+
+export function Logo({
+  className = "",
+  size = 32,
+  initials = "H",
+  bgColor = "#F3F4F6",
+  textColor = "#374151",
+  label = "Hysteria logo",
+}) {
   return (
     <svg
       width={size}
@@ -22,15 +41,9 @@ export function Logo({ className = "", size = 32, initials = "H", bgColor = "#F3
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
-      aria-label={label}>
-      <rect
-        x="6"
-        y="6"
-        width="36"
-        height="36"
-        rx="8"
-        fill={bgColor}
-      />
+      aria-label={label}
+    >
+      <rect x="6" y="6" width="36" height="36" rx="8" fill={bgColor} />
       <text
         x="24"
         y="30"
@@ -38,7 +51,8 @@ export function Logo({ className = "", size = 32, initials = "H", bgColor = "#F3
         fontFamily="Inter, system-ui, -apple-system, 'Segoe UI', Roboto"
         fontSize={18}
         fontWeight={700}
-        fill={textColor}>
+        fill={textColor}
+      >
         {initials}
       </text>
     </svg>
@@ -54,7 +68,8 @@ export function IconDashboard({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z"
         fill="currentColor"
@@ -72,7 +87,8 @@ export function IconUsers({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M17 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"
         stroke="currentColor"
@@ -102,7 +118,8 @@ export function IconSettings({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"
         stroke="currentColor"
@@ -130,7 +147,8 @@ export function IconSection({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="3"
         y="3"
@@ -166,7 +184,8 @@ export function IconPlatform({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="3"
         y="3"
@@ -220,7 +239,8 @@ export function IconEvent({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="3"
         y="5"
@@ -258,11 +278,9 @@ export function IconPost({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
-      <path
-        d="M8 6h8v2H8zM8 10h8v2H8zM8 14h5v2H8z"
-        fill="currentColor"
-      />
+      aria-hidden
+    >
+      <path d="M8 6h8v2H8zM8 10h8v2H8zM8 14h5v2H8z" fill="currentColor" />
       <rect
         x="3"
         y="4"
@@ -286,7 +304,8 @@ export function IconSocial({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <circle
         cx="6"
         cy="12"
@@ -338,7 +357,8 @@ export function IconInstagram({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="3"
         y="3"
@@ -357,42 +377,13 @@ export function IconInstagram({ className = "", size = 20 }) {
         strokeWidth="1.2"
         fill="none"
       />
-      <circle
-        cx="17.5"
-        cy="6.5"
-        r="0.9"
-        fill="currentColor"
-      />
+      <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" />
     </svg>
   );
 }
 
 export function IconFacebook({ className = "", size = 20 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden>
-      <rect
-        x="2"
-        y="2"
-        width="20"
-        height="20"
-        rx="3"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        fill="none"
-      />
-      <path
-        d="M14.5 8.5h1.9v2.2h-1.9v6H12v-6h-1.3V9.7H12V8.6c0-1.1.6-2.6 2.5-2.6h1.5v1.5h-.5c-.4 0-.9.2-.9.9v.7z"
-        fill="currentColor"
-      />
-    </svg>
-  );
+  return <Facebook className={className} size={size} />;
 }
 
 export function IconTikTok({ className = "", size = 20 }) {
@@ -404,7 +395,8 @@ export function IconTikTok({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M9 8v6.5A3.5 3.5 0 0012.5 18 3.5 3.5 0 0016 14.5V7h2.5"
         stroke="currentColor"
@@ -413,12 +405,7 @@ export function IconTikTok({ className = "", size = 20 }) {
         strokeLinejoin="round"
         fill="none"
       />
-      <circle
-        cx="12.5"
-        cy="5"
-        r="0.8"
-        fill="currentColor"
-      />
+      <circle cx="12.5" cy="5" r="0.8" fill="currentColor" />
     </svg>
   );
 }
@@ -432,7 +419,8 @@ export function IconThreads({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M12 3c4.97 0 9 3.58 9 8 0 4.42-4.03 8-9 8s-9-3.58-9-8c0-2.76 2.24-5 5-5 .9 0 1.75.25 2.45.68"
         stroke="currentColor"
@@ -441,29 +429,13 @@ export function IconThreads({ className = "", size = 20 }) {
         strokeLinejoin="round"
         fill="none"
       />
-      <circle
-        cx="12"
-        cy="8.5"
-        r="1"
-        fill="currentColor"
-      />
+      <circle cx="12" cy="8.5" r="1" fill="currentColor" />
     </svg>
   );
 }
 
 export function IconX({ className = "", size = 20 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden>
-      <path d="M18.244 2H21.552L14.325 10.26L22.5 22H15.902L10.742 14.657L4.39 22H1.08L8.815 13.112L1 2H7.764L12.43 8.709L18.244 2ZM17.094 20.13H18.93L6.78 3.78H4.81L17.094 20.13Z" />
-    </svg>
-  );
+  return <LucideX className={className} size={size} />;
 }
 
 export function IconLinkedIn({ className = "", size = 20 }) {
@@ -475,7 +447,8 @@ export function IconLinkedIn({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="2"
         y="2"
@@ -486,19 +459,8 @@ export function IconLinkedIn({ className = "", size = 20 }) {
         strokeWidth="1.2"
         fill="none"
       />
-      <rect
-        x="6"
-        y="9"
-        width="2"
-        height="7"
-        fill="currentColor"
-      />
-      <circle
-        cx="7"
-        cy="6.5"
-        r="1"
-        fill="currentColor"
-      />
+      <rect x="6" y="9" width="2" height="7" fill="currentColor" />
+      <circle cx="7" cy="6.5" r="1" fill="currentColor" />
       <path
         d="M11 9h2.2v1h.03c.31-.58 1.07-1 1.87-1 2 0 2.9 1.3 2.9 3.2V16h-2.2v-3.2c0-.76-.01-1.74-1.06-1.74-1.06 0-1.22.83-1.22 1.68V16H11V9z"
         fill="currentColor"
@@ -508,36 +470,20 @@ export function IconLinkedIn({ className = "", size = 20 }) {
 }
 
 export function IconYoutube({ className = "", size = 20 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden>
-      <rect
-        x="3"
-        y="6"
-        width="18"
-        height="12"
-        rx="3"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        fill="none"
-      />
-      <path
-        d="M10 9.5l5 2.5-5 2.5V9.5z"
-        fill="currentColor"
-      />
-    </svg>
-  );
+  return <Youtube className={className} size={size} />;
 }
 
-export function IconSpeaker({ className = "", size = 20, initialMuted = false, muted: mutedProp, onChange }) {
+export function IconSpeaker({
+  className = "",
+  size = 20,
+  initialMuted = false,
+  muted: mutedProp,
+  onChange,
+}) {
   const isControlled = typeof mutedProp !== "undefined";
-  const [internalMuted, setInternalMuted] = useState(() => (isControlled ? mutedProp : initialMuted));
+  const [internalMuted, setInternalMuted] = useState(() =>
+    isControlled ? mutedProp : initialMuted,
+  );
   const muted = isControlled ? mutedProp : internalMuted;
 
   const toggle = (e) => {
@@ -566,13 +512,25 @@ export function IconSpeaker({ className = "", size = 20, initialMuted = false, m
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-      }}>
+      }}
+    >
       <Icon style={{ width: size, height: size }} />
     </button>
   );
 }
 
-export function Avatar({ className = "", size = 32, borderColor = "#D1D5DB", borderWidth = 1, hoverBorderColor = "#9CA3AF", hoverBorderWidth = 2.5, hoverScale = 1.05, src = "", alt = "", ariaLabel = "User avatar" }) {
+export function Avatar({
+  className = "",
+  size = 32,
+  borderColor = "#D1D5DB",
+  borderWidth = 9,
+  hoverBorderColor = "#3B82F6",
+  hoverBorderWidth = 0.5,
+  hoverScale = 1.05,
+  src = "",
+  alt = "",
+  ariaLabel = "User avatar",
+}) {
   const [hover, setHover] = useState(false);
   const [imgError, setImgError] = useState(false);
   const id = useId();
@@ -601,18 +559,16 @@ export function Avatar({ className = "", size = 32, borderColor = "#D1D5DB", bor
       style={{
         transform: hover ? `scale(${hoverScale})` : "scale(1)",
         transformOrigin: "center",
-        transition: "transform 180ms cubic-bezier(.2,.9,.2,1), stroke 180ms ease, box-shadow 180ms ease",
+        transition:
+          "transform 180ms cubic-bezier(.2,.9,.2,1), stroke 180ms ease, box-shadow 180ms ease",
         boxShadow: hover ? "0 8px 20px rgba(15,23,42,0.12)" : "none",
         cursor: "pointer",
         outline: "none",
-      }}>
+      }}
+    >
       <defs>
         <clipPath id={clipId}>
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-          />
+          <circle cx="12" cy="12" r="10" />
         </clipPath>
       </defs>
 
@@ -627,12 +583,7 @@ export function Avatar({ className = "", size = 32, borderColor = "#D1D5DB", bor
 
       {showImage ? (
         <>
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-            fill="#E6E7EA"
-          />
+          <circle cx="12" cy="12" r="10" fill="#E6E7EA" />
           <image
             href={src}
             x="2"
@@ -647,12 +598,7 @@ export function Avatar({ className = "", size = 32, borderColor = "#D1D5DB", bor
         </>
       ) : (
         <>
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-            fill="#E6E7EA"
-          />
+          <circle cx="12" cy="12" r="10" fill="#E6E7EA" />
           <path
             d="M12 12c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z"
             fill="#6B7280"
@@ -676,7 +622,8 @@ export function IconTelephone({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M22 16.92v3a2 2 0 01-2.18 2A19.86 19.86 0 014.09 5.18 2 2 0 016 3h3a2 2 0 012 1.72c.12.99.38 2 .76 2.98a2 2 0 01-.45 2.11L10.91 9.09a16 16 0 006 6l1.18-1.18a2 2 0 012.11-.45c.98.38 1.99.64 2.98.76A2 2 0 0122 16.92z"
         stroke="currentColor"
@@ -698,7 +645,8 @@ export function IconMap({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M3 6l7-3 7 3 7-3v13l-7 3-7-3L3 20V6z"
         stroke="currentColor"
@@ -734,7 +682,8 @@ export function IconEnvelope({ className = "", size = 20 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="2"
         y="4"
@@ -766,7 +715,8 @@ export function IconMenu({ className = "", size = 20 }) {
       viewBox="0 0 20 20"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      aria-hidden>
+      aria-hidden
+    >
       <path
         fillRule="evenodd"
         d="M3 5h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 110-2zm0 4h14a1 1 0 010 2H3a1 1 0 110-2z"
@@ -786,7 +736,8 @@ export function IconUserManagement({ className = "", size = 16 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <circle
         cx="12"
         cy="8"
@@ -814,7 +765,8 @@ export function IconPermission({ className = "", size = 16 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4z"
         stroke="currentColor"
@@ -843,7 +795,8 @@ export function IconStatus({ className = "", size = 16 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <circle
         cx="12"
         cy="12"
@@ -852,12 +805,7 @@ export function IconStatus({ className = "", size = 16 }) {
         strokeWidth="1.5"
         fill="none"
       />
-      <circle
-        cx="12"
-        cy="12"
-        r="3"
-        fill="currentColor"
-      />
+      <circle cx="12" cy="12" r="3" fill="currentColor" />
     </svg>
   );
 }
@@ -871,7 +819,8 @@ export function IconHero({ className = "", size = 16 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <rect
         x="3"
         y="5"
@@ -882,11 +831,7 @@ export function IconHero({ className = "", size = 16 }) {
         strokeWidth="1.5"
         fill="none"
       />
-      <path
-        d="M3 9h18"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+      <path d="M3 9h18" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -900,7 +845,8 @@ export function IconCategorySmall({ className = "", size = 16 }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden>
+      aria-hidden
+    >
       <path
         d="M4 6h16M4 12h16M4 18h16"
         stroke="currentColor"
@@ -910,3 +856,20 @@ export function IconCategorySmall({ className = "", size = 16 }) {
     </svg>
   );
 }
+
+export const IconProgram = ({ className, ...props }) => (
+  <svg
+    width="23"
+    height="23"
+    viewBox="0 0 23 23"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    {...props}
+  >
+    <path
+      d="M15.8125 1.4375H7.1875C6.425 1.4375 5.69373 1.7404 5.15457 2.27957C4.6154 2.81874 4.3125 3.55 4.3125 4.3125V18.6875C4.3125 19.45 4.6154 20.1813 5.15457 20.7204C5.69373 21.2596 6.425 21.5625 7.1875 21.5625H9.34375C9.02889 21.1346 8.80886 20.6446 8.69831 20.125H7.1875C6.80625 20.125 6.44062 19.9735 6.17103 19.704C5.90145 19.4344 5.75 19.0687 5.75 18.6875V18.6832H8.625V11.9442L8.63506 11.9528C8.75437 10.3371 9.95756 9.14537 11.2585 8.42087C11.6064 8.22729 11.9782 8.05575 12.374 7.90625H7.1875C6.99688 7.90625 6.81406 7.83052 6.67927 7.69573C6.54448 7.56094 6.46875 7.37812 6.46875 7.1875V5.75C6.46875 5.55938 6.54448 5.37656 6.67927 5.24177C6.81406 5.10698 6.99688 5.03125 7.1875 5.03125H15.8125C16.0031 5.03125 16.1859 5.10698 16.3207 5.24177C16.4555 5.37656 16.5312 5.55938 16.5312 5.75V7.1875C17.2538 7.18756 17.9751 7.24814 18.6875 7.36862V4.3125C18.6875 3.55 18.3846 2.81874 17.8454 2.27957C17.3063 1.7404 16.575 1.4375 15.8125 1.4375ZM20.125 9.22875C19.6023 9.03733 19.0634 8.893 18.515 8.7975C17.86 8.68275 17.1962 8.62504 16.5312 8.625C12.9591 8.625 10.0625 10.235 10.0625 12.2188C10.0625 14.2025 12.9591 15.8125 16.5312 15.8125C20.1034 15.8125 23 14.2025 23 12.2188C23 10.9724 21.8586 9.87562 20.125 9.22875ZM21.804 16.0166C20.3809 16.8073 18.515 17.25 16.5312 17.25C14.5475 17.25 12.6802 16.8058 11.2585 16.0166C10.8298 15.78 10.4286 15.4965 10.0625 15.1714V19.4048C10.0625 21.39 12.9591 23 16.5312 23C20.1034 23 23 21.39 23 19.4062L23.0014 15.1714C22.6357 15.4981 22.234 15.7807 21.804 16.0166Z"
+      fill="currentColor"
+    />
+  </svg>
+);

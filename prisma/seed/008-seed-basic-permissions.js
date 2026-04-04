@@ -78,6 +78,24 @@ module.exports = async function seed() {
     );
     let teamGroupId = teamGroupResult.rows[0]?.id;
 
+    const tentangGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["tentang-management", "Tentang Management", "Permissions related to tentang page management"],
+    );
+    let tentangGroupId = tentangGroupResult.rows[0]?.id;
+
+    const websiteInfoGroupResult = await client.query(
+      `INSERT INTO "PermissionGroup" (key, name, description, "createdAt")
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
+       RETURNING id`,
+      ["website-info-management", "Website Info Management", "Permissions related to website information management"],
+    );
+    let websiteInfoGroupId = websiteInfoGroupResult.rows[0]?.id;
+
     // If groups not returned (already exist), fetch them
     if (!userGroupId) {
       const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["user-management"]);
@@ -106,6 +124,14 @@ module.exports = async function seed() {
     if (!teamGroupId) {
       const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["team-management"]);
       teamGroupId = existing.rows[0].id;
+    }
+    if (!tentangGroupId) {
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["tentang-management"]);
+      tentangGroupId = existing.rows[0].id;
+    }
+    if (!websiteInfoGroupId) {
+      const existing = await client.query(`SELECT id FROM "PermissionGroup" WHERE key = $1`, ["website-info-management"]);
+      websiteInfoGroupId = existing.rows[0].id;
     }
 
     // Define all permissions
@@ -332,6 +358,20 @@ module.exports = async function seed() {
         groupId: heroGroupId,
       },
 
+      // Page hero management
+      {
+        key: "team-about-hero.read",
+        name: "Read Team and About Page Hero",
+        description: "View team and about page hero settings",
+        groupId: teamGroupId,
+      },
+      {
+        key: "team-about-hero.update",
+        name: "Update Team and About Page Hero",
+        description: "Create or update team and about page hero settings",
+        groupId: teamGroupId,
+      },
+
       // Category management (general permissions only)
       {
         key: "categories.view",
@@ -382,6 +422,46 @@ module.exports = async function seed() {
         name: "Delete Team",
         description: "Delete team categories and members",
         groupId: teamGroupId,
+      },
+
+      // Tentang management
+      {
+        key: "tentang.read",
+        name: "Read Tentang",
+        description: "View tentang settings and content",
+        groupId: tentangGroupId,
+      },
+      {
+        key: "tentang.create",
+        name: "Create Tentang",
+        description: "Create tentang content",
+        groupId: tentangGroupId,
+      },
+      {
+        key: "tentang.update",
+        name: "Update Tentang",
+        description: "Update tentang content",
+        groupId: tentangGroupId,
+      },
+      {
+        key: "tentang.delete",
+        name: "Delete Tentang",
+        description: "Delete tentang content",
+        groupId: tentangGroupId,
+      },
+
+      // Website info management
+      {
+        key: "website-info.read",
+        name: "Read Website Info",
+        description: "View website information and settings",
+        groupId: websiteInfoGroupId,
+      },
+      {
+        key: "website-info.update",
+        name: "Update Website Info",
+        description: "Update website information and settings",
+        groupId: websiteInfoGroupId,
       },
     ];
 

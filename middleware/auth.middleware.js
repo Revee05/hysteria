@@ -23,22 +23,34 @@ export const matcher = ['/admin/:path*']
 
 // Handler function yang akan dipanggil oleh delegator
 export async function handle(request) {
+  const { pathname } = request.nextUrl
   const accessToken = request.cookies.get(COOKIE_NAMES.access)?.value
+  const refreshToken = request.cookies.get(COOKIE_NAMES.refresh)?.value
+
+  const isEventRoute =
+    pathname.startsWith('/admin/events') ||
+    pathname.startsWith('/api/admin/events')
 
   // Jika tidak ada access token, redirect ke login
-  if (!accessToken) {
+  if (!accessToken && !refreshToken) {
     return redirectToLogin(request)
   }
 
-  // Verifikasi access token
-  try {
-    verifyAccessToken(accessToken)
-    return NextResponse.next()
-  } catch (err) {
-    // Access token expired/invalid -> redirect ke login
-    // Client akan attempt auto-refresh saat di halaman login
-    return redirectToLogin(request)
+  // Ada access token → coba verify
+  if (accessToken) {
+    try {
+      verifyAccessToken(accessToken)
+      return NextResponse.next()
+    } catch (err) {
+      // ⚠️ expired
+      if (isEventRoute) {
+        // BIARKAN client auto-refresh
+        return NextResponse.next()
+      }
+      return redirectToLogin(request)
+    }
   }
+  return NextResponse.next()
 }
 
 /**

@@ -20,8 +20,12 @@ export async function GET(request, { params }) {
 
   } catch (error) {
     logger.error('Error fetching category:', error);
-    if (error.statusCode) {
-      return respondError({ message: error.message, status: error.statusCode });
+    if (error?.status || error?.statusCode) {
+      return respondError({
+        message: error.message,
+        status: error.status || error.statusCode,
+        code: error.code,
+      });
     }
     return respondError({ message: 'Failed to fetch category', status: 500 });
   }

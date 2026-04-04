@@ -20,8 +20,16 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 
 // Sortable Tree Node Component dengan drag handle
+/*
+  Purpose: Renders a single node in the nested menu/tree. Supports:
+  - drag handle (via dnd-kit) for reordering
+  - expand/collapse for children
+  - action buttons (add child, edit, delete)
+  Notes: This component is recursive — it will render its children
+  by reusing `SortableTreeNode` inside a nested `SortableContext`.
+*/
 function SortableTreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   
   const {
@@ -38,6 +46,12 @@ function SortableTreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
     transition,
     opacity: isDragging ? 0.5 : 1
   };
+
+  // Rendered markup is structured into logical containers:
+  // - drag handle button
+  // - expand/collapse button
+  // - item info (title, url, status)
+  // - actions (add/edit/delete)
 
   return (
     <div 
@@ -148,6 +162,14 @@ function SortableTreeNode({ item, onEdit, onDelete, onAddChild, depth = 0 }) {
 }
 
 // Modal untuk Add/Edit Category
+/*
+  CategoryModal
+  - Props: isOpen, onClose, onSave, category, mode
+  - Purpose: show a form to create or edit a navigation category.
+  - Behavior: initializes its own `formData` from `category` (if provided)
+    and calls `onSave` with the form payload when submitted.
+  - Accessibility notes: modal is positioned fixed and centered.
+*/
 function CategoryModal({ isOpen, onClose, onSave, category, mode }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -191,8 +213,10 @@ function CategoryModal({ isOpen, onClose, onSave, category, mode }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="absolute inset-0 backdrop-blur-sm bg-black/40 pointer-events-auto" />
+      {/* Modal panel (content container) */}
+      <div className="relative z-10 bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">
@@ -295,6 +319,13 @@ function CategoryModal({ isOpen, onClose, onSave, category, mode }) {
 }
 
 // Modal untuk Add/Edit Item
+/*
+  ItemModal
+  - Props: isOpen, onClose, onSave, item, categoryId, allItems
+  - Purpose: add or edit a menu item inside a selected category.
+  - Notes: uses `allItems` to populate Parent dropdown and supports
+    creating root-level items or nested children.
+*/
 function ItemModal({ isOpen, onClose, onSave, item, categoryId, allItems }) {
   const [formData, setFormData] = useState({
     title: '',
@@ -341,8 +372,10 @@ function ItemModal({ isOpen, onClose, onSave, item, categoryId, allItems }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="absolute inset-0 backdrop-blur-sm bg-black/40 pointer-events-auto" />
+      {/* Modal panel (content container) */}
+      <div className="relative z-10 bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900">
@@ -460,11 +493,21 @@ function ItemModal({ isOpen, onClose, onSave, item, categoryId, allItems }) {
   );
 }
 
+// Page component: Admin categories + items management
+/*
+  Responsibilities:
+  - fetch and render navigation categories
+  - show items tree for selected category (nested)
+  - support create/edit/delete categories and items
+  - support drag-and-drop reordering of items
+*/
 export default function CategoriesPage() {
+  // ensure user is authenticated for this admin page
   useAuth();
 
   // ============================================================================
   // STATE MANAGEMENT
+  // (keeps local UI state: selected category, modals, items, loading, drag state)
   // ============================================================================
   
   // Categories state
@@ -492,6 +535,7 @@ export default function CategoriesPage() {
 
   // ============================================================================
   // DATA FETCHING
+  // (API calls to load categories and items; keep UI in sync)
   // ============================================================================
 
   const fetchCategories = useCallback(async () => {
@@ -499,14 +543,10 @@ export default function CategoriesPage() {
       const response = await apiGet('/api/admin/categories');
       const categories = response.data?.categories || [];
       setCategories(categories);
-      
-      if (categories.length > 0 && !selectedCategory) {
-        setSelectedCategory(categories[0]);
-      }
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
-  }, [selectedCategory]);
+  }, []);
 
   const fetchCategoryItems = useCallback(async (categoryId) => {
     setLoading(true);
@@ -532,11 +572,19 @@ export default function CategoriesPage() {
 
   // ============================================================================
   // EFFECTS
+  // (side-effects: initial data load and reactions to selection changes)
   // ============================================================================
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  // When categories change, set a default selected category (if none yet).
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories, selectedCategory]);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -546,6 +594,7 @@ export default function CategoriesPage() {
 
   // ============================================================================
   // HELPER FUNCTIONS
+  // (small pure helpers used across the page, e.g. `slugify`, flatten tree)
   // ============================================================================
 
   const slugify = (text) => {
@@ -567,6 +616,7 @@ export default function CategoriesPage() {
 
   // ============================================================================
   // DRAG-N-DROP HANDLERS
+  // (helpers that compute tree paths and perform immutable moves)
   // ============================================================================
 
   const handleDragStart = (event) => {
@@ -632,6 +682,10 @@ export default function CategoriesPage() {
     const overLoc = findParentPath(items, overId);
     if (!activeLoc || !overLoc) return items;
 
+    // PERBAIKAN: Simpan info over SEBELUM removal untuk deteksi drag ke bawah
+    const sameParent = JSON.stringify(activeLoc.parentPath) === JSON.stringify(overLoc.parentPath);
+    const movingDown = sameParent && activeLoc.index < overLoc.index;
+
     // Remove active item
     const { newItems: afterRemoval, removed } = (function removeHelper(currItems, parentPath, index) {
       if (!parentPath || parentPath.length === 0) {
@@ -641,13 +695,15 @@ export default function CategoriesPage() {
       }
       const head = parentPath[0];
       const rest = parentPath.slice(1);
+      let removedItem = null;
       const newItems = currItems.map((it, i) => {
         if (i !== head) return it;
         const children = it.children ? it.children : [];
-        const { newItems: newChildren, removed } = removeHelper(children, rest, index);
-        return { ...it, children: newChildren };
+        const result = removeHelper(children, rest, index);
+        removedItem = result.removed;
+        return { ...it, children: result.newItems };
       });
-      return { newItems, removed: null };
+      return { newItems, removed: removedItem };
     })(items, activeLoc.parentPath, activeLoc.index);
 
     // If removed is null, find removed from original tree
@@ -664,7 +720,13 @@ export default function CategoriesPage() {
     if (!overLocAfter) return afterRemoval;
 
     const targetParentPath = overLocAfter.parentPath;
-    const targetIndex = overLocAfter.index;
+    // PERBAIKAN: Adjust target index jika drag ke bawah di parent yang sama
+    // Karena active item sudah dihapus, semua index di bawahnya turun 1
+    // Jadi kita perlu insert SETELAH posisi over (index + 1)
+    let targetIndex = overLocAfter.index;
+    if (movingDown) {
+      targetIndex = overLocAfter.index + 1;
+    }
 
     const result = insertAtRecursive(afterRemoval, targetParentPath, targetIndex, removedItem);
     return result;
@@ -722,6 +784,7 @@ export default function CategoriesPage() {
 
   // ============================================================================
   // CATEGORY HANDLERS
+  // (create/edit/delete category actions and modal control)
   // ============================================================================
 
   const handleCreateCategory = () => {
@@ -782,6 +845,7 @@ export default function CategoriesPage() {
 
   // ============================================================================
   // ITEM HANDLERS
+  // (create/edit/delete item actions, parent selection, saving)
   // ============================================================================
 
   const handleAddRoot = () => {
@@ -855,8 +919,8 @@ export default function CategoriesPage() {
     <div className="p-6">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Navigation Management</h1>
-        <p className="text-gray-600 mt-1">Manage navigation categories and menu items</p>
+        <h1 className="text-2xl font-bold text-gray-900">Category Management</h1>
+        <p className="text-gray-600 mt-1">Manage Categories and Menu Items</p>
       </div>
 
       {/* Category Selector */}
@@ -892,7 +956,7 @@ export default function CategoriesPage() {
                 >
                   {cat.title} ({cat.itemCount})
                 </button>
-                <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1 opacity-100 transition-opacity">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

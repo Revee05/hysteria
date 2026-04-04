@@ -12,6 +12,7 @@ export default function PasswordField({
   label = "Password",
   register,
   error,
+  className = "",
   placeholder = "••••••••",
   ...props
 }) {
@@ -21,6 +22,7 @@ export default function PasswordField({
 
   return (
     <TextField
+      className={className}
       label={label}
       type={show ? "text" : "password"}
       placeholder={placeholder}

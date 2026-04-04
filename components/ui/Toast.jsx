@@ -11,7 +11,7 @@ export default function Toast({ message = "", type = "info", visible = false, on
 
   if (!visible || !message) return null;
 
-  const bg = type === "error" ? "bg-red-600" : "bg-zinc-900";
+  const bg = type === "error" ? "bg-red-600" : type === "success" ? "bg-green-600" : "bg-zinc-900";
 
   return (
     <div aria-live="assertive" className="fixed inset-0 z-50 flex items-start justify-center pointer-events-none px-4">

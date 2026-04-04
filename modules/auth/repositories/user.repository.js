@@ -50,3 +50,26 @@ export async function updateLastLogin(id) {
 		data: { lastLoginAt: new Date() },
 	})
 }
+
+export async function updateUserById(id, data) {
+	return prisma.user.update({
+		where: { id },
+		data,
+		include: {
+			status: true,
+			roles: { 
+				include: { 
+					role: {
+						include: {
+							rolePermissions: {
+								include: {
+									permission: true
+								}
+							}
+						}
+					}
+				} 
+			},
+		},
+	})
+}

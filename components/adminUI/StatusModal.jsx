@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
 
 /**
  * StatusModal - Modal for creating or editing user statuses
@@ -39,7 +40,7 @@ export default function StatusModal({
       </DialogTitle>
       <form onSubmit={onSubmit}>
         <DialogContent>
-          <div className="space-y-4">
+          <Stack spacing={2}>
             <TextField
               fullWidth
               label="Status Key"
@@ -78,7 +79,7 @@ export default function StatusModal({
               disabled={loading}
               helperText="Optional detailed description"
             />
-          </div>
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button 

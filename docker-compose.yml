@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hysteria_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-hysteria}
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    env_file:
+      - .env
+    volumes:
+      - app_uploads:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hysteria_network
+
+
+  db:
+    image: postgres:16-alpine
+    container_name: hysteria_db
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_DB=${DB_NAME:-hysteria}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" # Pakai 5433 agar tidak bentrok jika di host ada postgres 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hysteria"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hysteria_network
+
+networks:
+  hysteria_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  app_uploads:
+
+

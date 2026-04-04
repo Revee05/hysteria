@@ -48,7 +48,6 @@ export async function PUT(request, { params }) {
     // Max upload size in bytes (adjust as needed)
     const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
 
-    // Check if multipart (has file upload)
     if (contentType.includes("multipart/form-data")) {
       const { fields, files } = await parseMultipartForm(request, {
         maxFileSize: MAX_UPLOAD_SIZE,
@@ -56,40 +55,38 @@ export async function PUT(request, { params }) {
 
       body = fields;
 
-      // Convert string boolean to actual boolean
       if (body.isActive !== undefined) {
         body.isActive = body.isActive === "true" || body.isActive === true;
       }
 
-      // If no file uploaded, proceed with normal update via service (validation included)
-      if (!files || files.length === 0) {
-        const hero = await heroService.updateHero(heroId, body);
-        logger.info('Hero updated', { heroId: hero?.id });
+      if (files && files.length > 0) {
+        const file = files[0];
+
+        // Validate MIME type
+        const allowedTypes = (process.env.UPLOAD_ALLOWED_TYPES || "image/*,video/*")
+          .split(",")
+          .map((t) => t.trim());
+
+        if (!validateFileMimeType(file, allowedTypes)) {
+          return respondError(new AppError(`Invalid file type. Allowed: ${allowedTypes.join(", ")}`, 415));
+        }
+
+        // Validate size
+        if (!validateFileSize(file, MAX_UPLOAD_SIZE)) {
+          return respondError(new AppError(`File too large. Max: ${MAX_UPLOAD_SIZE / 1024 / 1024}MB`, 413));
+        }
+
+        // Use service function for transactional update with upload
+        const hero = await heroService.updateHeroWithFile(heroId, body, file);
+        logger.info('Hero updated with file', { heroId: hero?.id, file: file.originalFilename || file.newFilename || file.name });
         return respondSuccess(hero, 200);
       }
-
-      // File uploaded: use transactional upload service
-      const file = files[0];
-
-      // Validate MIME type
-      const allowedTypes = (process.env.UPLOAD_ALLOWED_TYPES || "image/*,video/*")
-        .split(",")
-        .map((t) => t.trim());
-
-      if (!validateFileMimeType(file, allowedTypes)) {
-        return respondError(new AppError(`Invalid file type. Allowed types: ${allowedTypes.join(", ")}`, 415));
-      }
-
-      // Validate size
-      const maxSize = MAX_UPLOAD_SIZE;
-      if (!validateFileSize(file, maxSize)) {
-        return respondError(new AppError(`File too large. Maximum size: ${maxSize / 1024 / 1024}MB`, 413));
-      }
-
-      // Use service function for transactional update with upload
-      const hero = await heroService.updateHeroWithFile(heroId, body, file);
-      logger.info('Hero updated with file', { heroId: hero?.id, file: file.originalFilename || file.newFilename || file.name });
+      
+      // Multipart but no file: field-only update
+      const hero = await heroService.updateHero(heroId, body);
+      logger.info('Hero fields updated', { heroId: hero?.id });
       return respondSuccess(hero, 200);
+
     } else {
       // Regular JSON body
       try {
@@ -97,17 +94,11 @@ export async function PUT(request, { params }) {
       } catch (e) {
         return respondError(new AppError("Invalid JSON body", 400));
       }
+
+      const hero = await heroService.updateHero(heroId, body);
+      logger.info('Hero updated', { heroId: hero?.id });
+      return respondSuccess(hero, 200);
     }
-
-    // Use uploaded file URL if available, otherwise keep existing or use provided source URL
-    if (sourceUrl) {
-      body.source = sourceUrl;
-    }
-
-    const hero = await heroService.updateHero(heroId, body);
-    logger.info('Hero updated', { heroId: hero?.id });
-
-    return respondSuccess(hero, 200);
   } catch (error) {
     logger.error('Error updating hero', { error: error && (error.stack || error.message || error) });
     if (error instanceof AppError) {
